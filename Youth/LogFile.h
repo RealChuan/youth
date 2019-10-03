@@ -15,35 +15,34 @@
 #define LOGFILE_H
 
 #include <string>
-#include "YThread.h"
+
+#include "Thread.h"
+#include "Singleton.h"
 
 namespace youth
 {
 class LogFile
 {
-public:
-	LogFile();
-	virtual ~LogFile();
+    SINGLETON(LogFile)
 
-	static void setFileName(std::string);
-	static void outputFunc(const char *pMsg, int Len);
-	static void flushFunc(void);
+    public:
+        void setFileName(std::string basename_);
+    static void outputFunc(const char*, int);
+    static void flushFunc(void);
 
-	//这个方法是用来将日志写入Log文件
-	void outputLogFile(const char *pMsg, int Len);
-	void flushLogFile();
+    //这个方法是用来将日志写入Log文件
+    void outputLogFile(const char*, int);
+    void flushLogFile();
 
-	//单例模式
-	static LogFile *instance();
+private:  
+    std::string getFileName();
+    void openFile();
 
-private:
-	std::string getFileName();
-	void openFile();
-
-	std::string fileName;
-	std::string newFileName;
-	FILE* fpLog;
-	YMutex myMutex;
+    std::string basename;
+    std::string fileName;
+    std::string newFileName;
+    FILE *fpLog;
+    Mutex mutex;
 };
 }
 

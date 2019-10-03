@@ -11,23 +11,22 @@
  * Created on 2019年8月5日, 下午7:54
  */
 
-#include "YThread.h"
+#include "Thread.h"
 #include "LogOut.h"
 #include "assert.h"
-#include "YTime.h"
+#include "Time.h"
 
 using namespace youth;
 
-YThread::YThread(ThreadFunc func_, void* value_)
+Thread::Thread(ThreadFunc func_)
 	: _started(false),
 	  joined(false),
 	  pthreadId(0),
 	  func(std::move(func_))
 {
-	value = value_;
 }
 
-YThread::~YThread()
+Thread::~Thread()
 {
 	if (_started && !joined)
 	{
@@ -35,7 +34,7 @@ YThread::~YThread()
 	}
 }
 
-void YThread::start()
+void Thread::start()
 {
 	assert(!_started);
 	_started = true;
@@ -50,7 +49,7 @@ void YThread::start()
 	}
 }
 
-int YThread::join()
+int Thread::join()
 {
 	assert(_started);
 	assert(!joined);
@@ -60,46 +59,46 @@ int YThread::join()
 
 //-----------------------------------------------------------
 
-YMutex::YMutex()
+Mutex::Mutex()
 {
 	pthread_mutex_init(&mutex, nullptr);
 }
 
-YMutex::~YMutex()
+Mutex::~Mutex()
 {
 	pthread_mutex_destroy(&mutex);
 }
 
-void YMutex::lock()
+void Mutex::lock()
 {
 	pthread_mutex_lock(&mutex);
 }
 
-void YMutex::unlock()
+void Mutex::unlock()
 {
 	pthread_mutex_unlock(&mutex);
 }
 
-pthread_mutex_t* YMutex::getMutex()
+pthread_mutex_t* Mutex::getMutex()
 {
 	return &mutex;
 }
 
 //-------------------------------------------------------
 
-YMutexLock::YMutexLock(YMutex& mutex)
-	: mutex(mutex)
+MutexLock::MutexLock(Mutex& mutex_)
+	: mutex(mutex_)
 {
 	mutex.lock();
 }
 
-YMutexLock::~YMutexLock()
+MutexLock::~MutexLock()
 {
 	mutex.unlock();
 }
 //-----------------------------------------------------------
 
-Condition::Condition(YMutex& mutex)
+Condition::Condition(Mutex& mutex)
 	: mutex(mutex)
 {
 	pthread_cond_init(&cond, nullptr);

@@ -1,5 +1,5 @@
-#include "../Youth/TcpServer.h"
-#include"../Youth/LogOut.h"
+#include "../TcpServer.h"
+#include"../LogOut.h"
 
 #include "signal.h"
 

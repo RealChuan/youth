@@ -1,5 +1,5 @@
-#include "../Youth/ThreadPool.h"
-#include "../Youth/LogOut.h"
+#include "../ThreadPool.h"
+#include "../LogOut.h"
 
 using namespace std;
 using namespace youth;

@@ -11,11 +11,11 @@
  * Created on 2019年8月18日, 下午1:19
  */
 
-#include "YThreadPool.h"
+#include "ThreadPool.h"
 
 using namespace youth;
 
-YThreadPool::YThreadPool()
+ThreadPool::ThreadPool()
 	:maxTaskNum_(0)
 	,running_(false)
 	,mutex_()
@@ -24,7 +24,7 @@ YThreadPool::YThreadPool()
 {
 }
 
-YThreadPool::~YThreadPool()
+ThreadPool::~ThreadPool()
 {
 	if (running_)
 	{
@@ -32,7 +32,7 @@ YThreadPool::~YThreadPool()
 	}
 }
 
-void YThreadPool::start(int numThreads)
+void ThreadPool::start(int numThreads)
 {
 	assert(threads_.empty());
 	running_ = true;
@@ -41,8 +41,8 @@ void YThreadPool::start(int numThreads)
 	{
 		char id[32];
 		snprintf(id, sizeof id, "%d", i + 1);
-		threads_.emplace_back(new youth::YThread(
-								  std::bind(&YThreadPool::threadFunc, this), nullptr));
+		threads_.emplace_back(new youth::Thread(
+								  std::bind(&ThreadPool::threadFunc, this)));
 		threads_[static_cast<unsigned long>(i)]->start();
 	}
 	if (numThreads == 0 && threadInitCallback_)
@@ -51,10 +51,10 @@ void YThreadPool::start(int numThreads)
 	}
 }
 
-void YThreadPool::stop()
+void ThreadPool::stop()
 {
 	{
-		YMutexLock lock(mutex_);
+		MutexLock lock(mutex_);
 		running_ = false;
 		notEmpty_.notifyAll();
 	}
@@ -64,7 +64,7 @@ void YThreadPool::stop()
 	}
 }
 
-void YThreadPool::threadFunc()
+void ThreadPool::threadFunc()
 {
 	assert(running_ == true);
 
@@ -82,7 +82,7 @@ void YThreadPool::threadFunc()
 	}
 }
 
-void YThreadPool::run(Task task)
+void ThreadPool::run(Task task)
 {
 	if (threads_.empty())
 	{
@@ -90,7 +90,7 @@ void YThreadPool::run(Task task)
 	}
 	else
 	{
-		YMutexLock lock(mutex_);
+		MutexLock lock(mutex_);
 		while (isFull())
 		{
 			notFull_.wait();
@@ -102,9 +102,9 @@ void YThreadPool::run(Task task)
 	}
 }
 
-YThreadPool::Task YThreadPool::take()
+ThreadPool::Task ThreadPool::take()
 {
-	YMutexLock lock(mutex_);
+	MutexLock lock(mutex_);
 	// always use a while-loop, due to spurious wakeup
 	while (queue_.empty() && running_)
 	{

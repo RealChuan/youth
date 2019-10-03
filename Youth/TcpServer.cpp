@@ -7,27 +7,34 @@
 /* 
  * File:   TcpServer.cpp
  * Author: root
- * 
+ *
  * Created on 2019年8月24日, 下午4:21
  */
 
 #include "TcpServer.h"
-#include "YSocket.h"
+#include "Socket.h"
+#include "LogOut.h"
+#include "Epoll.h"
 
 using namespace youth;
 
-TcpServer::TcpServer(uint16_t port_)
-: port(port_)
+TcpServer::TcpServer(uint16_t port_,callBackFunc readCallBackFunc_)
+	: port(port_)
+	,readCallBackFunc(std::move(readCallBackFunc_))
 {
-    serverAddr = YSocket::addrServer(port);
-    serverFd = YSocket::socket();
-    YSocket::listenAndBindServer(serverFd, serverAddr);
-    acceptFd = YSocket::acceptServer(serverFd,serverAddr);
+	serverAddr = Socket::addrServer(port);
+	serverFd = Socket::socket();
+	Socket::listenAndBindServer(serverFd, serverAddr);
 }
 
 TcpServer::~TcpServer()
 {
-    YSocket::closeSock(acceptFd);
-    YSocket::closeSock(serverFd);
+	Socket::closeSock(serverFd);
+}
+
+void TcpServer::Loop()
+{
+	Epoll myEpoll(serverFd,readCallBackFunc);
+	myEpoll.Loop_1();
 }
 

@@ -27,16 +27,16 @@ void asyncOutput(const char* msg, int len)
 LogAsync::LogAsync(int flushInterval)
 	:refreshTime(flushInterval),
 	  running(false),
-	  myThread(std::bind(&LogAsync::threadFunc, this), nullptr),
-	  myMutex(),
-	  cond_(myMutex),
-	  currentBuffer_(new Buffer),
-	  nextBuffer_(new Buffer),
-	  buffers_()
+      thread(std::bind(&LogAsync::threadFunc, this)),
+      mutex(),
+      cond(mutex),
+      currentBuffer(new Buffer),
+      nextBuffer(new Buffer),
+      buffers()
 {
-	currentBuffer_->bzero();
-	nextBuffer_->bzero();
-	buffers_.reserve(16);
+    currentBuffer->bzero();
+    nextBuffer->bzero();
+    buffers.reserve(16);
 
 	if (g_LogAsync)
 	{
@@ -61,25 +61,25 @@ LogAsync::~LogAsync()
 
 void LogAsync::append(const char* buf, int len)
 {
-	YMutexLock lock(myMutex);
-	if (currentBuffer_->avail() > len)
+    MutexLock lock(mutex);
+    if (currentBuffer->avail() > len)
 	{
-		currentBuffer_->append(buf, len);
+        currentBuffer->append(buf, len);
 	}
 	else
 	{
-		buffers_.push_back(std::move(currentBuffer_));
+        buffers.push_back(std::move(currentBuffer));
 
-		if (nextBuffer_)
+        if (nextBuffer)
 		{
-			currentBuffer_ = std::move(nextBuffer_);
+            currentBuffer = std::move(nextBuffer);
 		}
 		else
 		{
-			currentBuffer_.reset(new Buffer); // Rarely happens
+            currentBuffer.reset(new Buffer); // Rarely happens
 		}
-		currentBuffer_->append(buf, len);
-		cond_.notify();
+        currentBuffer->append(buf, len);
+        cond.notify();
 	}
 }
 
@@ -99,20 +99,19 @@ void LogAsync::threadFunc()
 		assert(buffersToWrite.empty());
 
 		{
-			YMutexLock lock(myMutex);
-			if (buffers_.empty()) // unusual usage!
+            MutexLock lock(mutex);
+            if (buffers.empty()) // unusual usage!
 			{
-				cond_.waitForSeconds(refreshTime);
+                cond.waitForSeconds(refreshTime);
 			}
 
-			buffers_.push_back(std::move(currentBuffer_));
-			currentBuffer_ = std::move(newBuffer1);
-			buffersToWrite.swap(buffers_);
-			if (!nextBuffer_)
+            buffers.push_back(std::move(currentBuffer));
+            currentBuffer = std::move(newBuffer1);
+            buffersToWrite.swap(buffers);
+            if (!nextBuffer)
 			{
-				nextBuffer_ = std::move(newBuffer2);
+                nextBuffer = std::move(newBuffer2);
 			}
-
 		}
 		assert(!buffersToWrite.empty());
 

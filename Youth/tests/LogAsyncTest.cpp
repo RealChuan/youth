@@ -1,5 +1,5 @@
-#include "../Youth/LogAsync.h"
-#include "../Youth/LogOut.h"
+#include "../LogAsync.h"
+#include "../LogOut.h"
 
 #include <unistd.h>
 

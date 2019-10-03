@@ -21,13 +21,13 @@ using namespace youth;
 LogOut::LogOut(const char* pLevel, const char* File, int Line)
 	: line(Line)
 	, file(File)
-	, myTime()
-	, myLogStream()
+    , time()
+    , logStream()
 {
 	//在构造的时候会填充日志头(其实就是时间和报警等级)
 	//首先，输出打印日志时间到LogStream中的Buffer
 	//其次，输出日志等级
-	myLogStream << myTime.getLogTime() << processmsg::getTid() << " " << pLevel;
+    logStream << time.getLogTime() << processmsg::getTid() << " " << pLevel;
 }
 
 LogOut::~LogOut()
@@ -36,7 +36,7 @@ LogOut::~LogOut()
 
 LogStream &LogOut::getLogStream()
 {
-	return myLogStream;
+    return logStream;
 }
 
 void LogOut::finishLog()
@@ -45,17 +45,17 @@ void LogOut::finishLog()
 	//文件名即行号。这个方法是在Logger析构
 	//时候调用的，表示一条日志流的完成，可以
 	//输出到标准输出或文件中去。
-	myLogStream << " - " << file << ":" << line << "\n";
+    logStream << " - " << file << ":" << line << "\n";
 }
 
 const char *LogOut::getLogStreamBuff()
 {
-	return myLogStream.GetStreamBuff();
+    return logStream.GetStreamBuff();
 }
 
 int LogOut::getLogStreamBuffLen()
 {
-	return myLogStream.GetStreamBuffLen();
+    return logStream.GetStreamBuffLen();
 }
 //---------------------------------------------------------------------------
 
@@ -124,8 +124,8 @@ void Logging::setOutputMode(int iMode)
 	else if (g_OutputMode == LOGGER_MODE_LOGFILE)
 	{
 		//仅输出到日志文件
-		setOutputFunc(LogFile::outputFunc);
-		setFlushFunc(LogFile::flushFunc);
+        setOutputFunc(LogFile::outputFunc);
+        setFlushFunc(LogFile::flushFunc);
 	}
 	else if (g_OutputMode == (LOGGER_MODE_STDOUT | LOGGER_MODE_LOGFILE))
 	{
@@ -143,7 +143,7 @@ void Logging::setFileBaseName(const char* _basename)
 {
 	std::string baseName = processmsg::fileBaseName(_basename);
 	baseName += ".";
-	LogFile::setFileName(baseName);
+    LogFile::instance().setFileName(baseName);
 }
 
 void Logging::setOutputFunc(outputFunc Output)
@@ -158,12 +158,12 @@ void Logging::setFlushFunc(flushFunc Flush)
 
 void Logging::outputOutAndLog(const char *pMsg, int Len)
 {
-	DefauleOutout(pMsg, Len); //输出到标准输出
-	LogFile::outputFunc(pMsg, Len); //输出到日志中
+    DefauleOutout(pMsg, Len);   //输出到标准输出
+    LogFile::instance().outputLogFile(pMsg, Len);   //输出到日志中
 }
 
 void Logging::flushAll()
 {
 	DefauleFlush();
-	LogFile::flushFunc();
+    LogFile::instance().flushLogFile();
 }

@@ -1,7 +1,4 @@
-#include "../Youth/LogAsync.h"
-#include "../Youth/LogOut.h"
-
-#include <unistd.h>
+#include "../LogOut.h"
 
 using namespace std;
 using namespace youth;
@@ -10,13 +7,11 @@ using namespace youth;
 void print()
 {
 	for (int i = 0; i < 1000; i++)
-	{
 		LOG_INFO << i;
-	}
 }
 
-//线程日志
-void LogAsyncTest(const char* basename)
+//常规日志
+void LogTest(const char* basename)
 {
 	//设置日志名字
 	Logging::setFileBaseName(basename);
@@ -24,21 +19,15 @@ void LogAsyncTest(const char* basename)
 	//日志的报警等级为DEBUG
 	Logging::setLogLevel(Logging::DEBUG);
 
-	//异步模式设置
-	LogAsync m_LogAsync(3); //3秒打印一次
-
-	m_LogAsync.start();
+	//我们设置日志输出到文件和标准输出
+	Logging::setOutputMode(LOGGER_MODE_OUTANDFILE);
 
 	print();
-
-	//缓冲时间
-	sleep(2);
-
-	//m_LogAsync.stop();
 }
 
 int main(int argc, char** argv)
 {
-	LogAsyncTest(argv[0]);
+	LogTest(argv[0]);
+
 	return 0;
 }

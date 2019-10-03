@@ -15,22 +15,24 @@
 #define TCPSERVER_H
 
 #include <netinet/in.h>
+#include <boost/function.hpp>
 
 namespace youth
 {
-
 class TcpServer
 {
+	typedef std::function< void(int fd) > callBackFunc;
 public:
-	TcpServer(uint16_t port_);
+	TcpServer(uint16_t port_,callBackFunc readCallBackFunc_);
 	virtual ~TcpServer();
+	void Loop();
 
-	int acceptFd;
 private:
-	struct sockaddr_in serverAddr, clientAddr;
+	struct sockaddr_in serverAddr;
 	uint16_t port;
 	int serverFd;
 
+	callBackFunc readCallBackFunc;
 };
 }
 

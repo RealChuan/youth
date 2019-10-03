@@ -11,8 +11,8 @@
  * Created on 2019年8月5日, 下午7:54
  */
 
-#ifndef YTHREAD_H
-#define YTHREAD_H
+#ifndef THREAD_H
+#define THREAD_H
 
 #include "string"
 #include "boost/function.hpp"
@@ -28,19 +28,19 @@
 
 namespace youth
 {
-class YThread
+class Thread
 {
-	typedef std::function<void() > ThreadFunc;
+	typedef std::function< void() > ThreadFunc;
 public:
-	YThread(ThreadFunc func_, void* value_);
-	virtual ~YThread();
+	Thread(ThreadFunc func_);
+	virtual ~Thread();
 
 	void start();
 	int join(); // return pthread_join()
 	bool started() const{return _started;}
 	static void* threadFunc(void *obj)
 	{
-		YThread *pThis = static_cast<YThread *> (obj);
+		Thread *pThis = static_cast<Thread *> (obj);
 		pThis->func(); //-------------------------------
 		return 0;
 	}
@@ -52,15 +52,13 @@ private:
 	//pid_t _tid;
 	ThreadFunc func;
 	//std::string _name;
-	void *value;
-
 };
 
-class YMutex
+class Mutex
 {
 public:
-	YMutex();
-	~YMutex();
+	Mutex();
+	~Mutex();
 
 	void lock();
 	void unlock();
@@ -69,24 +67,21 @@ public:
 
 private:
 	pthread_mutex_t mutex;
-
 };
 
-class YMutexLock
-{
+class MutexLock{
 public:
-	YMutexLock(YMutex& mutex);
-	~YMutexLock();
+	MutexLock(Mutex& mutex_);
+	~MutexLock();
 
 private:
-	YMutex& mutex;
-
+	Mutex& mutex;
 };
 
 class Condition
 {
 public:
-	Condition(YMutex& mutex);
+	Condition(Mutex& mutex);
 	~Condition();
 
 	void wait();
@@ -95,9 +90,9 @@ public:
 	bool waitForSeconds(double seconds);
 
 private:
-	YMutex& mutex;
+	Mutex& mutex;
 	pthread_cond_t cond;
 };
 }
 
-#endif /* YTHREAD_H */
+#endif /* THREAD_H */

@@ -13,7 +13,7 @@
 
 #include "LogFile.h"
 #include "ProcessMsg.h"
-#include "YTime.h"
+#include "Time.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -33,51 +33,42 @@ LogFile::~LogFile()
 	}
 }
 
-std::string static basename_;
-
-void LogFile::setFileName(std::string basename)
+void LogFile::setFileName(std::string basename_)
 {
-	basename_ = basename;
+    basename = basename_;
 }
 
-void LogFile::outputFunc(const char *pMsg, int Len)
+void LogFile::outputFunc(const char *msg, int len)
 {
-	LogFile *pLogFile = instance();
-	pLogFile->outputLogFile(pMsg, Len);
+    LogFile *pLogFile = &instance();
+    pLogFile->outputLogFile(msg, len);
 }
 
 void LogFile::flushFunc()
 {
-	LogFile *pLogFile = instance();
-	pLogFile->flushLogFile();
+    LogFile *pLogFile = &instance();
+    pLogFile->flushLogFile();
 }
 
-void LogFile::outputLogFile(const char *pMsg, int Len)
+void LogFile::outputLogFile(const char *msg, int len)
 {
-	YMutexLock lock(myMutex);
+    MutexLock lock(mutex);
 	if (fpLog != nullptr)
-		::fwrite(pMsg, 1, static_cast<size_t>(Len), fpLog);
+        ::fwrite(msg, 1, static_cast<size_t>(len), fpLog);
 	else
 		printf("No File To Write!\n");
 }
 
 void LogFile::flushLogFile()
 {
-	YMutexLock lock(myMutex);
+    MutexLock lock(mutex);
 	::fflush(fpLog);
-}
-
-LogFile *LogFile::instance()
-{
-	static LogFile singleLogFile;
-
-	return &singleLogFile;
 }
 
 std::string LogFile::getFileName()
 {
 
-	YTime _time;
+	Time _time;
 
 	std::string _fileName;
 
@@ -87,12 +78,11 @@ std::string LogFile::getFileName()
 	char fileNameBuf[64];
 	memset(fileNameBuf, 0, sizeof fileNameBuf);
 	snprintf(fileNameBuf, sizeof (fileNameBuf), "%s%s%s.%s.%d%s",
-			 "Log/", basename_.c_str(), _time.getLogDay().c_str(), processmsg::hostname().c_str(), processmsg::getPid(), ".log");
+             "Log/", basename.c_str(), _time.getLogDay().c_str(), processmsg::hostname().c_str(), processmsg::getPid(), ".log");
 
 	_fileName += fileNameBuf;
 
 	return _fileName;
-
 }
 
 void LogFile::openFile()

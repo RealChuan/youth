@@ -12,7 +12,7 @@
  */
 
 #include "TcpClient.h"
-#include "YSocket.h"
+#include "Socket.h"
 
 using namespace youth;
 
@@ -20,13 +20,13 @@ TcpClient::TcpClient(const char* ip_, uint16_t port_)
 :port(port_)
 ,ip(ip_)
 {
-    serverAddr = YSocket::addrClient(ip, port);
-    clientFd = YSocket::socket();
-    YSocket::connectServer(clientFd, serverAddr);
+	serverAddr = Socket::addrClient(ip, port);
+	clientFd = Socket::socket();
+	Socket::connectServer(clientFd, serverAddr);
 }
 
 TcpClient::~TcpClient()
 {
-    YSocket::closeSock(clientFd);
+	Socket::closeSock(clientFd);
 }
 

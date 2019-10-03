@@ -11,18 +11,18 @@
  * Created on 2019年8月4日, 上午7:14
  */
 
-#ifndef YTIME_H
-#define YTIME_H
+#ifndef TIME_H
+#define TIME_H
 
 #include <string>
 
 namespace youth
 {
-class YTime
+class Time
 {
 public:
-	YTime();
-	virtual ~YTime();
+	Time();
+	virtual ~Time();
 
 	std::string getLogDay();
 	std::string getLogTime();
@@ -37,4 +37,4 @@ private:
 };
 }
 
-#endif /* YTIME_H */
+#endif /* TIME_H */

@@ -29,44 +29,44 @@ static_assert(sizeof digitsHex == 17, "wrong number of digitsHex");
 template<typename T>
 size_t convert(char buf[], T value)
 {
-	T i = value;
-	char* p = buf;
+    T i = value;
+    char* p = buf;
 
-	do
-	{
-		int lsd = static_cast<int> (i % 10);
-		i /= 10;
-		*p++ = zero[lsd];
-	}
-	while (i != 0);
+    do
+    {
+        int lsd = static_cast<int> (i % 10);
+        i /= 10;
+        *p++ = zero[lsd];
+    }
+    while (i != 0);
 
-	if (value < 0)
-	{
-		*p++ = '-';
-	}
-	*p = '\0';
-	std::reverse(buf, p);
+    if (value < 0)
+    {
+        *p++ = '-';
+    }
+    *p = '\0';
+    std::reverse(buf, p);
 
-	return static_cast<size_t>(p - buf);
+    return static_cast<size_t>(p - buf);
 }
 
 size_t convertHex(char buf[], uintptr_t value)
 {
-	uintptr_t i = value;
-	char* p = buf;
+    uintptr_t i = value;
+    char* p = buf;
 
-	do
-	{
-		int lsd = static_cast<int> (i % 16);
-		i /= 16;
-		*p++ = digitsHex[lsd];
-	}
-	while (i != 0);
+    do
+    {
+        int lsd = static_cast<int> (i % 16);
+        i /= 16;
+        *p++ = digitsHex[lsd];
+    }
+    while (i != 0);
 
-	*p = '\0';
-	std::reverse(buf, p);
+    *p = '\0';
+    std::reverse(buf, p);
 
-	return static_cast<size_t>(p - buf);
+    return static_cast<size_t>(p - buf);
 }
 
 LogStream::LogStream()
@@ -82,121 +82,128 @@ const int iDoubleMaxStrLen = 32;
 
 const char *LogStream::GetStreamBuff()
 {
-	return logBuffer.data();
+    return logBuffer.data();
 }
 
 int LogStream::GetStreamBuffLen()
 {
-	return logBuffer.length();
+    return logBuffer.length();
+}
+
+LogStream &LogStream::operator<<(bool value)
+{
+    if(value)
+        return operator<<("true");
+    return operator<<("false");
 }
 
 LogStream &LogStream::operator<<(char value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned char value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(short value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned short value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(int value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned int value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(long value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned long value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(long long value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned long long value)
 {
-	int Len = static_cast<int>(convert(logBuffer.current(), value));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(convert(logBuffer.current(), value));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(float fValue)
 {
-	int Len = static_cast<int>(snprintf(logBuffer.current(), iFloatMaxStrLen, "%f", fValue));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(snprintf(logBuffer.current(), iFloatMaxStrLen, "%f", fValue));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(double dValue)
 {
-	int Len = static_cast<int>(snprintf(logBuffer.current(), iDoubleMaxStrLen, "%lf", dValue));
-	logBuffer.appendLen(Len);
-	return *this;
+    int Len = static_cast<int>(snprintf(logBuffer.current(), iDoubleMaxStrLen, "%lf", dValue));
+    logBuffer.appendLen(Len);
+    return *this;
 }
 
 LogStream &LogStream::operator<<(char *pChar)
 {
-	logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
-	return *this;
+    logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
+    return *this;
 }
 
 LogStream &LogStream::operator<<(const char *pChar)
 {
-	logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
-	return *this;
+    logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
+    return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned char *pChar)
 {
-	return operator<<(reinterpret_cast<char *> (pChar));
+    return operator<<(reinterpret_cast<char *> (pChar));
 }
 
 LogStream &LogStream::operator<<(const unsigned char *pChar)
 {
-	return operator<<(reinterpret_cast<const char *> (pChar));
+    return operator<<(reinterpret_cast<const char *> (pChar));
 }
 
 LogStream &LogStream::operator<<(std::string strString)
 {
-	return operator<<(strString.c_str());
+    return operator<<(strString.c_str());
 }

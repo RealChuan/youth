@@ -11,7 +11,7 @@
  * Created on 2019年8月4日, 上午7:14
  */
 
-#include "YTime.h"
+#include "Time.h"
 #include "string.h"
 #include <sys/time.h>
 
@@ -20,27 +20,27 @@ using namespace youth;
 static const char *arrWeek[] = {"Sunday", "Monday", "Tuesday",
 								"Wednessday", "Thursday", "Friday", "Saturday"};
 
-YTime::YTime()
+Time::Time()
 {
 }
 
-YTime::~YTime()
+Time::~Time()
 {
 }
 
-std::string YTime::getLogDay()
+std::string Time::getLogDay()
 {
 	getTime();
 	return logDay;
 }
 
-std::string YTime::getLogTime()
+std::string Time::getLogTime()
 {
 	getTime();
 	return logTime;
 }
 
-void YTime::getTime()
+void Time::getTime()
 {
 	char Buf1[32];
 	char Buf2[32];
@@ -61,10 +61,9 @@ void YTime::getTime()
 
 	logDay = Buf1;
 	logTime = Buf2;
-
 }
 
-int32_t YTime::getAbsTimespec(struct timespec *ts, int32_t millisecond)
+int32_t Time::getAbsTimespec(struct timespec *ts, int32_t millisecond)
 {
 	if (nullptr == ts)
 		return EINVAL;

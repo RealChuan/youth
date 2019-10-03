@@ -11,26 +11,26 @@
  * Created on 2019年8月18日, 下午1:19
  */
 
-#ifndef YTHREADPOOL_H
-#define YTHREADPOOL_H
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
 
 #include <vector>
 #include <deque>
-#include "memory"
-#include "boost/function.hpp"
+#include <memory>
+#include <boost/function.hpp>
 
-#include "YThread.h"
+#include "Thread.h"
 
 namespace youth
 {
-class YThreadPool
+class ThreadPool
 {
 	typedef std::function<void () > Task;
 
 public:
-	YThreadPool();
+	ThreadPool();
 
-	virtual ~YThreadPool();
+	virtual ~ThreadPool();
 
 	void setTaskNum(int maxTaskNum)
 	{
@@ -57,7 +57,7 @@ private:
 
 	bool isFull() const REQUIRES(mutex_)
 	{
-		//YMutexLock lock(mutex_);
+		MutexLock lock(mutex_);
 		return maxTaskNum_ > 0 && queue_.size() >= maxTaskNum_;
 	}
 
@@ -67,16 +67,16 @@ private:
 	Task threadInitCallback_;
 	size_t maxTaskNum_;
 	bool running_;
-	mutable YMutex mutex_;
+	mutable Mutex mutex_;
 
 	Condition notEmpty_ GUARDED_BY(mutex_);
 	Condition notFull_ GUARDED_BY(mutex_);
 
-	std::vector<std::unique_ptr<youth::YThread>> threads_;
+	std::vector<std::unique_ptr<youth::Thread>> threads_;
 	std::deque<Task> queue_ GUARDED_BY(mutex_);
 
 };
 }
 
-#endif /* YTHREADPOOL_H */
+#endif /* THREADPOOL_H */
 
