@@ -1,5 +1,5 @@
 #include "FileUtil.h"
-#include "LogOut.h"
+//#include "LogOut.h"
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -44,8 +44,10 @@ std::string FileUtil::fileName() const
 
 bool FileUtil::open(FileUtil::OpenModel model)
 {
+    close();
     if(fileName_.empty()){
-        LOG_WARN << "FileName is empty";
+        //LOG_WARN << "FileName is empty!";
+        printf("FileName is empty!\n");
         return false;
     }
     openModel_ = model;
@@ -59,11 +61,13 @@ bool FileUtil::open(FileUtil::OpenModel model)
     default: return false;
     }
     if(fp == nullptr){
-        LOG_WARN << "FileName: " << fileName_ << " open error!";
+        //LOG_WARN << "FileName: " << fileName_ << " open error!";
+        fprintf(stderr, "FileName: %s open error!\n", fileName_.c_str());
         perror("file open error");
         return false;
     }
-    LOG_INFO << "FileName: " << fileName_ << " open succesed!";
+    //LOG_INFO << "FileName: " << fileName_ << " open succesed!";
+    printf("FileName: %s open succesed!\n", fileName_.c_str());
     return true;
 }
 
@@ -72,10 +76,13 @@ void FileUtil::close()
     if(!isOpen())
         return;
     flushFile();
-    if(::fclose(fp) == 0)
+    if(::fclose(fp) == 0){
         fp = nullptr;
-    else{
-        LOG_WARN << "FileName: " << fileName_ << "close failed";
+        //LOG_INFO << "FileName: " << fileName_ << "close succesed!";
+        printf("FileName: %s close succesed!\n", fileName_.c_str());
+    }else{
+        //LOG_WARN << "FileName: " << fileName_ << " close failed!";
+        fprintf(stderr, "FileName: %s close failed!\n", fileName_.c_str());
         perror("file close error");
     }
 }
@@ -94,7 +101,8 @@ bool FileUtil::isOpen()
 {
     if(fp != nullptr)
         return true;
-    LOG_WARN << "FileName: " << fileName_ << " is not open!";
+    //LOG_WARN << "FileName: " << fileName_ << " is not open!";
+    fprintf(stderr, "FileName: %s is not open!\n", fileName_.c_str());
     return false;
 }
 
@@ -128,13 +136,13 @@ std::string FileUtil::readAll()
 
 void FileUtil::write(const std::string &str)
 {
-    write(str.c_str());
+    write(str.c_str(), str.size());
 }
 
-void FileUtil::write(const char *ch)
+void FileUtil::write(const char *ch, int len)
 {
     if(isOpen() && checkModel(Write))
-        ::fwrite(ch, 1, strlen(ch), fp);
+        ::fwrite(ch, 1, static_cast<size_t>(len), fp);
 }
 
 void FileUtil::flushFile()
@@ -147,7 +155,8 @@ bool FileUtil::checkModel(FileUtil::OpenModel model)
 {
     bool state = ((openModel_&model) == model);
     if(!state)
-        LOG_WARN << "Wrong mode ! Current Model is : " << openModel_;
+        //LOG_WARN << "Wrong mode ! Current Model is : " << openModel_;
+      fprintf(stderr, "Wrong mode ! Current Model is %d !\n", openModel_);
     return state;
 }
 

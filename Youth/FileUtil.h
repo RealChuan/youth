@@ -45,7 +45,7 @@ public:
     std::string readAll();
 
     void write(const std::string&);
-    void write(const char*);
+    void write(const char*, int len);
 
     void flushFile();
 

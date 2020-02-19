@@ -18,6 +18,7 @@
 
 #include "Thread.h"
 #include "Singleton.h"
+#include "FileUtil.h"
 
 namespace youth
 {
@@ -41,8 +42,10 @@ private:
     std::string basename;
     std::string fileName;
     std::string newFileName;
-    FILE *fpLog;
+    //FILE *fpLog;
     Mutex mutex;
+
+    std::shared_ptr<FileUtil> file;
 };
 }
 

@@ -20,17 +20,13 @@
 using namespace youth;
 
 LogFile::LogFile()
+    :file(new FileUtil)
 {
-	openFile();
+    openFile();
 }
 
 LogFile::~LogFile()
 {
-	if (fpLog)
-	{
-		fclose(fpLog);
-		fpLog = nullptr;
-	}
 }
 
 void LogFile::setFileName(std::string basename_)
@@ -53,52 +49,44 @@ void LogFile::flushFunc()
 void LogFile::outputLogFile(const char *msg, int len)
 {
     MutexLock lock(mutex);
-	if (fpLog != nullptr)
-        ::fwrite(msg, 1, static_cast<size_t>(len), fpLog);
-	else
-		printf("No File To Write!\n");
+    file->write(msg, len);
 }
 
 void LogFile::flushLogFile()
 {
     MutexLock lock(mutex);
-	::fflush(fpLog);
+    file->flushFile();
 }
 
 std::string LogFile::getFileName()
 {
 
-	Time _time;
+    Time _time;
 
-	std::string _fileName;
+    std::string _fileName;
 
-	if (access("Log/", F_OK) == -1)
-		mkdir("Log/", 0777);
+    if (access("Log/", F_OK) == -1)
+        mkdir("Log/", 0777);
 
-	char fileNameBuf[64];
-	memset(fileNameBuf, 0, sizeof fileNameBuf);
-	snprintf(fileNameBuf, sizeof (fileNameBuf), "%s%s%s.%s.%d%s",
+    char fileNameBuf[64];
+    memset(fileNameBuf, 0, sizeof fileNameBuf);
+    snprintf(fileNameBuf, sizeof (fileNameBuf), "%s%s%s.%s.%d%s",
              "Log/", basename.c_str(), _time.getLogDay().c_str(), processmsg::hostname().c_str(), processmsg::getPid(), ".log");
 
-	_fileName += fileNameBuf;
+    _fileName += fileNameBuf;
 
-	return _fileName;
+    return _fileName;
 }
 
 void LogFile::openFile()
 {
-	newFileName = LogFile::getFileName();
-	if (newFileName != fileName)
-	{
-		if (fpLog)
-		{
-			fclose(fpLog);
-			fpLog = nullptr;
-		}
-		fileName = newFileName;
+    newFileName = LogFile::getFileName();
+    if (newFileName != fileName)
+    {
+        file.reset(new FileUtil(newFileName));
 
-		//printf("FIleName=%s\n", fileName.c_str());
-
-		fpLog = fopen(fileName.c_str(), "a");
-	}
+        fileName = newFileName;
+        file->open(FileUtil::Write);
+        //printf("FIleName=%s\n", fileName.c_str());
+    }
 }
