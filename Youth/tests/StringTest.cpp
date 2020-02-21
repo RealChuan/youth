@@ -4,7 +4,7 @@
 using namespace youth;
 
 int main(){
-    String str = "/yyy/xxx/zzz";
+    String str("/yyy/xxx/zzz.log");
     std::vector<String> strVec = str.split('/');
     for(const String& s : strVec)
         LOG_INFO << s;

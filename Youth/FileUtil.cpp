@@ -33,8 +33,7 @@ void FileUtil::setFileName(const std::string& name)
 
 void FileUtil::setFileName(const char *name)
 {
-    fileName_.clear();
-    fileName_ += name;
+    fileName_ = name;
 }
 
 std::string FileUtil::fileName() const
@@ -56,7 +55,7 @@ bool FileUtil::open(FileUtil::OpenModel model)
     {
     case Read: fp = ::fopen(fileName_.c_str(), "r");break;
     case Write: fp = ::fopen(fileName_.c_str(), "w");break;
-    case ReadAndWrite: fp = ::fopen(fileName_.c_str(), "a+");moveFilePoint(Begin);break;
+    case ReadAndWrite: fp = ::fopen(fileName_.c_str(), "a+");break;
     case Append: fp = ::fopen(fileName_.c_str(), "a+");break;
     default: return false;
     }
@@ -141,14 +140,21 @@ void FileUtil::write(const std::string &str)
 
 void FileUtil::write(const char *ch, int len)
 {
-    if(isOpen() && checkModel(Write))
+    if(isOpen() && checkModel(Write)){
         ::fwrite(ch, 1, static_cast<size_t>(len), fp);
+        writeBytes_ += len;
+    }
 }
 
 void FileUtil::flushFile()
 {
     if(isOpen())
         ::fflush(fp);
+}
+
+off_t FileUtil::writeBytes() const
+{
+    return writeBytes_;
 }
 
 bool FileUtil::checkModel(FileUtil::OpenModel model)

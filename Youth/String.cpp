@@ -13,9 +13,22 @@ String::String(const char *ch)
     swap(str);
 }
 
-String::String(std::string str)
+String::String(const std::string &str)
 {
+    std::string str_ = str;
+    swap(str_);
+}
+
+String &String::operator=(const char *ch)
+{
+    std::string str = ch;
     swap(str);
+    return *this;
+}
+
+String &String::operator=(const std::string &str)
+{
+    return operator=(str.c_str());
 }
 
 std::vector<String> String::split(const char str)
@@ -27,7 +40,9 @@ std::vector<String> String::split(const char str)
     {
         if (pos > start)
         {
-            result.push_back(substr(start, pos-start));
+            String str_;
+            str_ = substr(start, pos-start);
+            result.push_back(str_);
         }
         start = pos + 1;
         pos = find(str, start);
@@ -35,7 +50,9 @@ std::vector<String> String::split(const char str)
 
     if (start < length())
     {
-        result.push_back(substr(start));
+        String str_1;
+        str_1 = substr(start);
+        result.push_back(str_1);
     }
 
     return result;

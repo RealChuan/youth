@@ -9,9 +9,12 @@ namespace youth {
 class String : public std::string
 {
 public:
-    String();
-    String(const char*);
-    String(std::string);
+    explicit String();
+    explicit String(const char*);
+    explicit String(const std::string&);
+
+    String &operator=(const char*);
+    String &operator=(const std::string&);
 
     std::vector<String> split(const char);
 

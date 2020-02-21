@@ -27,7 +27,7 @@ LogOut::LogOut(const char* pLevel, const char* File, int Line)
 	//在构造的时候会填充日志头(其实就是时间和报警等级)
 	//首先，输出打印日志时间到LogStream中的Buffer
 	//其次，输出日志等级
-    logStream << time.getLogTime() << processmsg::getTid() << " " << pLevel;
+    logStream << time.getMSToString() << " " << processmsg::getTid() << " " << pLevel;
 }
 
 LogOut::~LogOut()
@@ -143,7 +143,7 @@ void Logging::setFileBaseName(const char* _basename)
 {
 	std::string baseName = processmsg::fileBaseName(_basename);
 	baseName += ".";
-    LogFile::instance().setFileName(baseName);
+    LogFile::instance().setBaseFileName(baseName);
 }
 
 void Logging::setOutputFunc(outputFunc Output)

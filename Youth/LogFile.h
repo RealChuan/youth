@@ -27,7 +27,8 @@ class LogFile
     SINGLETON(LogFile)
 
     public:
-        void setFileName(std::string basename_);
+        void setRollSize(off_t);
+    void setBaseFileName(const std::string&);
     static void outputFunc(const char*, int);
     static void flushFunc(void);
 
@@ -36,16 +37,15 @@ class LogFile
     void flushLogFile();
 
 private:  
-    std::string getFileName();
-    void openFile();
+    std::string getFileName(time_t*);
+    bool rollFile();
 
+    off_t rollSize_ = 1000 * 1000 *1000;    //1G
+    time_t startTime;
+    time_t lastRoll;
     std::string basename;
-    std::string fileName;
-    std::string newFileName;
-    //FILE *fpLog;
     Mutex mutex;
-
-    std::shared_ptr<FileUtil> file;
+    std::unique_ptr<FileUtil> file;
 };
 }
 

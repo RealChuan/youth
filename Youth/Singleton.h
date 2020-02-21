@@ -47,7 +47,7 @@ public:                                            \
     ~Class();                                      \
     static Class& instance() {                     \
         return Singleton<Class>::getInstance();    \
-    }                                              \
+    }
 
 }
 

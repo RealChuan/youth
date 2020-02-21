@@ -49,17 +49,21 @@ public:
 
     void flushFile();
 
+    off_t writeBytes() const;
+
+    void moveFilePoint(Seek);
+
     //int size();
 
 private:
     inline bool checkModel(OpenModel);
-    inline void moveFilePoint(Seek);
     inline void newDirectory();
     inline void mkDir(const std::string&);
 
     FILE *fp;
     String fileName_;
     OpenModel openModel_;
+    off_t writeBytes_ = 0;
 };
 
 }
