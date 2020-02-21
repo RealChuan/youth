@@ -43,7 +43,7 @@ std::string FileUtil::fileName() const
 
 bool FileUtil::open(FileUtil::OpenModel model)
 {
-    close();
+    //close();
     if(fileName_.empty()){
         //LOG_WARN << "FileName is empty!";
         printf("FileName is empty!\n");

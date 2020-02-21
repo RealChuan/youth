@@ -22,3 +22,6 @@ target_link_libraries(StringTest Youth)
 
 ADD_EXECUTABLE(FileUtilTest FileUtilTest.cpp)
 target_link_libraries(FileUtilTest Youth)
+
+ADD_EXECUTABLE(ElapsedTimeTest ElapsedTimeTest.cpp)
+target_link_libraries(ElapsedTimeTest Youth)

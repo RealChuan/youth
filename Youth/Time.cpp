@@ -1,53 +1,41 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   YTime.cpp
- * Author: root
- *
- * Created on 2019年8月4日, 上午7:14
- */
-
 #include "Time.h"
 #include "string.h"
+
 #include <sys/time.h>
 
 using namespace youth;
-
-static const int kMicroSecondsPerSecond = 1000 * 1000;
 
 //static const char *arrWeek[] = {"Sunday", "Monday", "Tuesday",
 //                                "Wednessday", "Thursday", "Friday", "Saturday"};
 
 Time::Time()
-    :microSecondsSinceEpoch_(0)
+    :mcroSecondsSinceEpoch(0)
+    ,lastSecond(0)
 {
-    now();
+    now_();
 }
 
 Time::Time(int64_t ms)
-    :microSecondsSinceEpoch_(ms)
+    :mcroSecondsSinceEpoch(ms)
+    ,lastSecond(0)
 {
 }
 
-void Time::now()
+void Time::now_()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int64_t seconds = tv.tv_sec;
-    microSecondsSinceEpoch_ = seconds * kMicroSecondsPerSecond + tv.tv_usec;
+    mcroSecondsSinceEpoch = seconds * kMicroSecondsPerSecond + tv.tv_usec;
 }
 
-//Time Time::now()
-//{
-//    struct timeval tv;
-//    gettimeofday(&tv, NULL);
-//    int64_t seconds = tv.tv_sec;
-//    return Time(seconds * kMicroSecondsPerSecond + tv.tv_usec);
-//}
+Time Time::now()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    int64_t seconds = tv.tv_sec;
+    return Time(seconds * kMicroSecondsPerSecond + tv.tv_usec);
+}
 
 std::string Time::getDayToString()
 {
@@ -64,7 +52,7 @@ std::string Time::getSecondToString()
     char buf[64] = {0};
     snprintf(buf, sizeof(buf), "%4d-%02d-%02d %02d:%02d:%02d",
              tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-             tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
+             tm_time.tm_hour + 8, tm_time.tm_min, tm_time.tm_sec);
     return buf;
 }
 
@@ -72,18 +60,22 @@ std::string Time::getMSToString()
 {
     getTime();
     char buf[64] = {0};
-    int microseconds = static_cast<int>(microSecondsSinceEpoch_ % kMicroSecondsPerSecond);
-    snprintf(buf, sizeof(buf), "%4d%02d%02d %02d:%02d:%02d.%06d",
+    int microseconds = static_cast<int>(mcroSecondsSinceEpoch % kMicroSecondsPerSecond);
+    snprintf(buf, sizeof(buf), "%4d-%02d-%02d %02d:%02d:%02d.%06d",
              tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
              tm_time.tm_hour + 8, tm_time.tm_min, tm_time.tm_sec,
              microseconds);
     return buf;
 }
 
-void Time::getTime()
+bool Time::getTime()
 {
-    time_t seconds = static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond);
+    time_t seconds = static_cast<time_t>(mcroSecondsSinceEpoch / kMicroSecondsPerSecond);
+    if(seconds == lastSecond)
+        return false;   //只格式化微秒
+    lastSecond = seconds;
     gmtime_r(&seconds, &tm_time);
+    return true;
 }
 
 int32_t Time::getAbsTimespec(struct timespec *ts, int32_t millisecond)

@@ -1,18 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   LogFile.cpp
- * Author: root
- *
- * Created on 2019年8月4日, 上午7:24
- */
-
 #include "LogFile.h"
 #include "ProcessMsg.h"
+#include "FileUtil.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -24,7 +13,7 @@ LogFile::LogFile()
     :startTime(0)
     ,lastRoll(0)
 {
-    rollFile();
+    //rollFile();
 }
 
 LogFile::~LogFile()
@@ -39,6 +28,7 @@ void LogFile::setRollSize(off_t size)
 void LogFile::setBaseFileName(const std::string &basename_)
 {
     basename = basename_;
+    rollFile();
 }
 
 void LogFile::outputFunc(const char *msg, int len)
