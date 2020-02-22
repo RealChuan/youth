@@ -119,7 +119,7 @@ void LogAsync::threadFunc()
 		{
 			char buf[256];
 			snprintf(buf, sizeof buf, "Dropped log messages at %s, %zd larger buffers\n",
-                     myTime.getMSToString().c_str(), buffersToWrite.size() - 2);
+                     myTime.getMicroSToString().c_str(), buffersToWrite.size() - 2);
 			fputs(buf, stderr);
 			LogFile::outputFunc(buf, static_cast<int> (strlen(buf)));
 

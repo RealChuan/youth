@@ -10,7 +10,7 @@ int main(int argc, char** argv){
     Logging::setOutputMode(LOGGER_MODE_LOGFILE);
     ElapsedTime timer;
     timer.start();
-    for (int i = 0; i < 1000 * 5000; i++){
+    for (int i = 0; i < 1000 * 1000; i++){
         LOG_INFO << i;
     }
     //LOG_INFO << timer.elapsed();

@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     //我们设置日志输出到文件和标准输出
     Logging::setOutputMode(LOGGER_MODE_OUTANDFILE);
 
-    for (int i = 0; i < 1000 * 100; i++){
+    for (int i = 0; i < 1000 * 1000; i++){
         LOG_INFO << i;
     }
 

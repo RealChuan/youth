@@ -14,6 +14,7 @@ class LogFile
 
     public:
         void setRollSize(off_t);
+    void setDelLogFileDays(uint);   //delete log files
     void setBaseFileName(const std::string&);
     static void outputFunc(const char*, int);
     static void flushFunc(void);
@@ -22,15 +23,18 @@ class LogFile
     void outputLogFile(const char*, int);
     void flushLogFile();
 
-    bool rollFile();
-
 private:  
-    std::string getFileName(time_t*);
+    inline bool rollFile(int);
+    inline void delLogFiles();
+    inline std::string getFileName(time_t*);
 
-    off_t rollSize_ = 1000 * 1000 *1000;    //1G
+    int count;
+    off_t rollSize = 1000 * 1000 *1000;    //1G
+    uint delLogFileDays;
+    std::string deleteCmd;
+    std::string basename;
     time_t startTime;
     time_t lastRoll;
-    std::string basename;
     Mutex mutex;
     std::unique_ptr<FileUtil> file;
 };

@@ -10,10 +10,12 @@ using namespace youth;
 const static int kRollPerSeconds_ = 60*60*24;
 
 LogFile::LogFile()
-    :startTime(0)
+    :count(0)
+    ,startTime(0)
     ,lastRoll(0)
 {
     //rollFile();
+    setDelLogFileDays(7);
 }
 
 LogFile::~LogFile()
@@ -22,13 +24,24 @@ LogFile::~LogFile()
 
 void LogFile::setRollSize(off_t size)
 {
-    rollSize_ = size;
+    rollSize = size;
+}
+
+void LogFile::setDelLogFileDays(uint days)
+{
+    delLogFileDays = days;
+    char pathBuf[64] = {0};
+    snprintf(pathBuf, sizeof pathBuf, "%s/%s", get_current_dir_name(), "Log");
+    char cmd[128] = {0};
+    sprintf(cmd, "find %s/* -mtime +%d -exec rm -rf {} \\;", pathBuf, delLogFileDays);    //删除上一次修改时间超过3天的文件
+    //printf("Record: %s.\n", cmd);
+    deleteCmd = cmd;
 }
 
 void LogFile::setBaseFileName(const std::string &basename_)
 {
     basename = basename_;
-    rollFile();
+    rollFile(0);
 }
 
 void LogFile::outputFunc(const char *msg, int len)
@@ -49,14 +62,15 @@ void LogFile::outputLogFile(const char *msg, int len)
     file->write(msg, len);
 
     //roll file
-    if (file->writeBytes() > rollSize_){
-        rollFile();
+    if (file->writeBytes() > rollSize){
+        rollFile(++count);
     }
     else{
         time_t now = ::time(NULL);
-        time_t thisPeriod_ = now / kRollPerSeconds_ * kRollPerSeconds_;
-        if (thisPeriod_ != startTime){
-            rollFile();
+        time_t thisPeriod = now / kRollPerSeconds_ * kRollPerSeconds_;
+        if (thisPeriod != startTime){
+            count = 0;
+            rollFile(0);
         }
     }
 }
@@ -83,18 +97,30 @@ std::string LogFile::getFileName(time_t *now)
     return fileName;
 }
 
-bool LogFile::rollFile()
+bool LogFile::rollFile(int count)
 {
     time_t now = 0;
     std::string fileName = getFileName(&now);
+    if(count){
+        char buf[5] = {0};
+        snprintf(buf, sizeof buf, ".%d", count);
+        fileName += buf;
+    }
     time_t start = now / kRollPerSeconds_ * kRollPerSeconds_;
     if (now > lastRoll)
     {
+        delLogFiles();
         startTime = start;
         lastRoll = now;
         file.reset(new FileUtil(fileName));
-        file->open(FileUtil::Write);
+        file->open(FileUtil::Append);
         return true;
     }
     return false;
+}
+
+void LogFile::delLogFiles()
+{
+    system(deleteCmd.c_str());
+    //perror("Delete LogFile Failed!");
 }

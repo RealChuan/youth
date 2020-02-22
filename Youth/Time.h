@@ -14,7 +14,7 @@ public:
     static Time now();
     std::string getDayToString();
     std::string getSecondToString();
-    std::string getMSToString();
+    std::string getMicroSToString();
     int32_t getAbsTimespec(struct timespec *ts, int32_t millisecond);
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
