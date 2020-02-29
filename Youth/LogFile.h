@@ -7,13 +7,13 @@
 
 namespace youth
 {
+
 class FileUtil;
 class LogFile
 {
     SINGLETON(LogFile)
-
-    public:
-        void setRollSize(off_t);
+public:
+    void setRollSize(off_t);
     void setDelLogFileDays(uint);   //delete log files
     void setBaseFileName(const std::string&);
     static void outputFunc(const char*, int);

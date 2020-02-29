@@ -1,5 +1,5 @@
 #include "ElapsedTime.h"
-#include "Time.h"
+#include "Timestamp.h"
 
 #include <sys/time.h>
 
@@ -24,16 +24,10 @@ std::string ElapsedTime::elapsed()
 {
     struct timeval tv_end;
     gettimeofday(&tv_end, NULL);
-    int t = Time::kMicroSecondsPerSecond * (tv_end.tv_sec - tv_start.tv_sec) +
+    int t = Timestamp::kMicroSecondsPerSecond * (tv_end.tv_sec - tv_start.tv_sec) +
             (tv_end.tv_usec - tv_start.tv_usec);
-    std::string str;
-    char buf[32];
-    int seconds = t / Time::kMicroSecondsPerSecond;
-    if(seconds > 0){
-        snprintf(buf, sizeof buf, "%ds ", seconds);
-        str += buf;
-    }
-    snprintf(buf, sizeof buf, "%dus", t % (1000 * 1000));
-    str += buf;
-    return str;
+    char buf[20];
+    double seconds = t * 1.0 / Timestamp::kMicroSecondsPerSecond;
+    snprintf(buf, sizeof buf, "%.6lf(S)", seconds);
+    return buf;
 }

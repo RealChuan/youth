@@ -1,21 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   LogOut.h
- * Author: root
- *
- * Created on 2019年8月4日, 上午7:50
- */
-
 #ifndef LOGOUT_H
 #define LOGOUT_H
 
 #include "LogStream.h"
-#include "Time.h"
+#include "Timestamp.h"
 
 #include <memory>
 
@@ -41,7 +28,7 @@ public:
 private:
     int line; //行号
     const char* file;
-    Time time; //Log时间类
+    Timestamp time; //Log时间类
     LogStream logStream; //LogStream类
 };
 

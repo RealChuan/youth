@@ -1,25 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   YThread.cpp
- * Author: root
- *
- * Created on 2019年8月5日, 下午7:54
- */
-
 #include "Thread.h"
 #include "LogOut.h"
 #include "assert.h"
-#include "Time.h"
+#include "Timestamp.h"
 
 using namespace youth;
 
 Thread::Thread(ThreadFunc func_)
-	: _started(false),
+    : running(false),
 	  joined(false),
 	  pthreadId(0),
 	  func(std::move(func_))
@@ -28,21 +15,16 @@ Thread::Thread(ThreadFunc func_)
 
 Thread::~Thread()
 {
-	if (_started && !joined)
-	{
+    if (running && !joined)
 		pthread_detach(pthreadId);
-	}
 }
 
 void Thread::start()
 {
-	assert(!_started);
-	_started = true;
-	// FIXME: move(func_)
-	//this?????????????????
-	if (pthread_create(&pthreadId, nullptr, threadFunc, reinterpret_cast<void*>(this)))
-	{
-		_started = false;
+    assert(!running);
+    running = true;
+	if (pthread_create(&pthreadId, nullptr, threadFunc, reinterpret_cast<void*>(this))){
+        running = false;
 		LOG_FATAL << "Failed in pthread_create";
 		perror("Failed in pthread_create");
 		exit(-1);
@@ -51,7 +33,7 @@ void Thread::start()
 
 int Thread::join()
 {
-	assert(_started);
+    assert(running);
 	assert(!joined);
 	joined = true;
 	return pthread_join(pthreadId, nullptr);

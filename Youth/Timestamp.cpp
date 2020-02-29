@@ -1,4 +1,4 @@
-#include "Time.h"
+#include "Timestamp.h"
 #include "string.h"
 
 #include <sys/time.h>
@@ -8,20 +8,20 @@ using namespace youth;
 //static const char *arrWeek[] = {"Sunday", "Monday", "Tuesday",
 //                                "Wednessday", "Thursday", "Friday", "Saturday"};
 
-Time::Time()
+Timestamp::Timestamp()
     :mcroSecondsSinceEpoch(0)
     ,lastSecond(0)
 {
     now_();
 }
 
-Time::Time(int64_t ms)
+Timestamp::Timestamp(int64_t ms)
     :mcroSecondsSinceEpoch(ms)
     ,lastSecond(0)
 {
 }
 
-void Time::now_()
+void Timestamp::now_()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -29,15 +29,15 @@ void Time::now_()
     mcroSecondsSinceEpoch = seconds * kMicroSecondsPerSecond + tv.tv_usec;
 }
 
-Time Time::now()
+Timestamp Timestamp::now()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int64_t seconds = tv.tv_sec;
-    return Time(seconds * kMicroSecondsPerSecond + tv.tv_usec);
+    return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
 }
 
-std::string Time::getDayToString()
+std::string Timestamp::getDayToString()
 {
     getTime();
     char buf[32] = {0};
@@ -46,7 +46,7 @@ std::string Time::getDayToString()
     return buf;
 }
 
-std::string Time::getSecondToString()
+std::string Timestamp::getSecondToString()
 {
     getTime();
     char buf[64] = {0};
@@ -56,7 +56,7 @@ std::string Time::getSecondToString()
     return buf;
 }
 
-std::string Time::getMicroSToString()
+std::string Timestamp::getMicroSToString()
 {
     getTime();
     char buf[64] = {0};
@@ -68,7 +68,7 @@ std::string Time::getMicroSToString()
     return buf;
 }
 
-bool Time::getTime()
+bool Timestamp::getTime()
 {
     time_t seconds = static_cast<time_t>(mcroSecondsSinceEpoch / kMicroSecondsPerSecond);
     if(seconds == lastSecond)
@@ -78,7 +78,7 @@ bool Time::getTime()
     return true;
 }
 
-int32_t Time::getAbsTimespec(struct timespec *ts, int32_t millisecond)
+int32_t Timestamp::getAbsTimespec(struct timespec *ts, int32_t millisecond)
 {
     if (nullptr == ts)
         return EINVAL;

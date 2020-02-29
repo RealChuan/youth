@@ -90,8 +90,8 @@ std::string LogFile::getFileName(time_t *now)
     *now = time(NULL);
     gmtime_r(now, &tm);
     strftime(buf, sizeof buf, "%Y-%m-%d.", &tm);
-    fileName = "Log/" + basename + buf + processmsg::hostname();
-    snprintf(buf, sizeof buf, ".%d", processmsg::getPid());
+    fileName = "Log/" + basename + buf + ProcessMsg::hostname();
+    snprintf(buf, sizeof buf, ".%d", ProcessMsg::getPid());
     fileName = fileName + buf + ".log";
 
     return fileName;

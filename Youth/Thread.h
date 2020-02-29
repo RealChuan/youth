@@ -15,70 +15,71 @@
 
 namespace youth
 {
+
 class Thread
 {
-	typedef std::function< void() > ThreadFunc;
+    typedef std::function< void() > ThreadFunc;
 public:
-	Thread(ThreadFunc func_);
-	virtual ~Thread();
+    Thread(ThreadFunc func_);
+    ~Thread();
 
-	void start();
-	int join(); // return pthread_join()
-	bool started() const{return _started;}
-	static void* threadFunc(void *obj)
-	{
-		Thread *pThis = static_cast<Thread *> (obj);
-		pThis->func(); //-------------------------------
-		return 0;
-	}
+    void start();
+    int join(); // return pthread_join()
+    bool isRunning() const { return running; }
+    pthread_t pthreadID() const {return pthreadId; }
+    static void* threadFunc(void *obj){
+        Thread *pThis = static_cast<Thread *> (obj);
+        pThis->func(); //-------------------------------
+        return 0;
+    }
 
 private:	
-	bool _started;
-	bool joined;
-	pthread_t pthreadId;
-	//pid_t _tid;
-	ThreadFunc func;
-	//std::string _name;
+    bool running;
+    bool joined;
+    pthread_t pthreadId;
+    //pid_t _tid;
+    ThreadFunc func;
+    //std::string _name;
 };
 
 class Mutex
 {
 public:
-	Mutex();
-	~Mutex();
+    Mutex();
+    ~Mutex();
 
-	void lock();
-	void unlock();
+    void lock();
+    void unlock();
 
-	pthread_mutex_t* getMutex();
+    pthread_mutex_t* getMutex();
 
 private:
-	pthread_mutex_t mutex;
+    pthread_mutex_t mutex;
 };
 
 class MutexLock{
 public:
-	MutexLock(Mutex& mutex_);
-	~MutexLock();
+    MutexLock(Mutex& mutex_);
+    ~MutexLock();
 
 private:
-	Mutex& mutex;
+    Mutex& mutex;
 };
 
 class Condition
 {
 public:
-	Condition(Mutex& mutex);
-	~Condition();
+    Condition(Mutex& mutex);
+    ~Condition();
 
-	void wait();
-	void notify();
-	void notifyAll();
-	bool waitForSeconds(double seconds);
+    void wait();
+    void notify();
+    void notifyAll();
+    bool waitForSeconds(double seconds);
 
 private:
-	Mutex& mutex;
-	pthread_cond_t cond;
+    Mutex& mutex;
+    pthread_cond_t cond;
 };
 }
 

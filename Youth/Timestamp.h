@@ -1,17 +1,17 @@
-#ifndef TIME_H
-#define TIME_H
+#ifndef TIMESTAMP_H
+#define TIMESTAMP_H
 
 #include <string>
 
 namespace youth
 {
-class Time
+class Timestamp
 {
 public:
-    explicit Time();
-    explicit Time(int64_t);
+    explicit Timestamp();
+    explicit Timestamp(int64_t);
 
-    static Time now();
+    static Timestamp now();
     std::string getDayToString();
     std::string getSecondToString();
     std::string getMicroSToString();
@@ -28,4 +28,4 @@ private:
 
 }
 
-#endif /* TIME_H */
+#endif /* TIMESTAMP_H */

@@ -1,20 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   LogOut.cpp
- * Author: root
- *
- * Created on 2019年8月4日, 上午7:50
- */
-
 #include "LogOut.h"
 #include "LogFile.h"
-#include "ProcessMsg.h"
+#include "CurrentThread.h"
 #include "LogAsync.h"
+#include "ProcessMsg.h"
 
 using namespace youth;
 
@@ -24,10 +12,11 @@ LogOut::LogOut(const char* pLevel, const char* File, int Line)
     , time()
     , logStream()
 {
+    CurrentThread::tid();
 	//在构造的时候会填充日志头(其实就是时间和报警等级)
 	//首先，输出打印日志时间到LogStream中的Buffer
 	//其次，输出日志等级
-    logStream << time.getMicroSToString() << " " << processmsg::getTid() << " " << pLevel;
+    logStream << time.getMicroSToString() << " " << CurrentThread::tidString() << " " << pLevel;
 }
 
 LogOut::~LogOut()
@@ -141,7 +130,7 @@ void Logging::setOutputMode(int iMode)
 
 void Logging::setFileBaseName(const char* _basename)
 {
-	std::string baseName = processmsg::fileBaseName(_basename);
+    std::string baseName = ProcessMsg::fileBaseName(_basename);
 	baseName += ".";
     LogFile::instance().setBaseFileName(baseName);
 }

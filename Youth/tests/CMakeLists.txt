@@ -25,3 +25,12 @@ target_link_libraries(FileUtilTest Youth)
 
 ADD_EXECUTABLE(ElapsedTimeTest ElapsedTimeTest.cpp)
 target_link_libraries(ElapsedTimeTest Youth)
+
+ADD_EXECUTABLE(CountDownLatchTest CountDownLatchTest.cpp)
+target_link_libraries(CountDownLatchTest Youth)
+
+ADD_EXECUTABLE(MutexTest MutexTest.cpp)
+target_link_libraries(MutexTest Youth)
+
+ADD_EXECUTABLE(ConditionTest ConditionTest.cpp)
+target_link_libraries(ConditionTest Youth)

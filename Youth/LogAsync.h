@@ -19,7 +19,7 @@
 #include "memory"
 #include "string"
 #include "Thread.h"
-#include "Time.h"
+#include "Timestamp.h"
 
 namespace youth
 {
@@ -48,7 +48,7 @@ public:
 
 private:
 	void threadFunc();
-	Time myTime;
+	Timestamp myTime;
 
 	typedef LogBuffer<maxBuffer> Buffer;
 	typedef std::vector<std::unique_ptr<Buffer>> BufferVector;
