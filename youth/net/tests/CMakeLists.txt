@@ -1,0 +1,8 @@
+#Target
+ADD_EXECUTABLE(TcpClientTest TcpClientTest.cpp)
+target_link_libraries(TcpClientTest youth_utils)
+target_link_libraries(TcpClientTest youth_net)
+
+ADD_EXECUTABLE(TcpServerTest TcpServerTest.cpp)
+target_link_libraries(TcpServerTest youth_net)
+target_link_libraries(TcpServerTest youth_net)

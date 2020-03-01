@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 #设定工程名
-project(Youth LANGUAGES CXX)
+project(youth LANGUAGES CXX)
 
 find_package(Boost REQUIRED)
 
@@ -26,7 +26,9 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 #LINK_DIRECTORIES(${CMAKE_BINARY_DIR}/lib)
 
 #增加子文件夹(注意我们的src路径是通过子文件夹的形式添加的，在这里面也是可以写CMakeLists.txt的)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Youth)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/youth/core)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/youth/utils)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/youth/net)
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/examples)
 
 #AUX_SOURCE_DIRECTORY(. DIR_SRCS)
