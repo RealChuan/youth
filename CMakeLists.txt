@@ -1,10 +1,14 @@
 #设定版本号
 cmake_minimum_required(VERSION 3.5)
 
+SET(CMAKE_TOOLCHAIN_FILE "/home/ubuntu64/code/vcpkg/scripts/buildsystems/vcpkg.cmake")
+
 #设定工程名
-project(youth LANGUAGES CXX)
+project(youth LANGUAGES C CXX)
 
 find_package(Boost REQUIRED)
+
+include_directories( ${Boost_INCLUDE_DIRS} )
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
