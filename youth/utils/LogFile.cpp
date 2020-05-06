@@ -1,7 +1,7 @@
 #include "LogFile.h"
-#include "../core/ProcessMsg.h"
-#include "../core/FileUtil.h"
-#include "../core/Dir.h"
+#include "youth/core/ProcessMsg.h"
+#include "youth/core/FileUtil.h"
+#include "youth/core/Dir.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ LogFile::LogFile()
     ,lastRoll(0)
 {
     //rollFile();
-    setDelLogFileDays(7);
+    //setDelLogFileDays(7);
 }
 
 LogFile::~LogFile()
@@ -28,16 +28,16 @@ void LogFile::setRollSize(off_t size)
     rollSize = size;
 }
 
-void LogFile::setDelLogFileDays(uint days)
-{
-    delLogFileDays = days;
-    char pathBuf[64] = {0};
-    snprintf(pathBuf, sizeof pathBuf, "%s/%s", Dir::currentPath().c_str(), "Log");
-    char cmd[128] = {0};
-    sprintf(cmd, "find %s/* -mtime +%d -exec rm -rf {} \\;", pathBuf, delLogFileDays);    //删除上一次修改时间超过3天的文件
-    //printf("Record: %s.\n", cmd);
-    deleteCmd = cmd;
-}
+//void LogFile::setDelLogFileDays(uint days)
+//{
+//    delLogFileDays = days;
+//    char pathBuf[64] = {0};
+//    snprintf(pathBuf, sizeof pathBuf, "%s/%s", Dir::currentPath().c_str(), "Log");
+//    char cmd[128] = {0};
+//    sprintf(cmd, "find %s/* -mtime +%d -exec rm -rf {} \\;", pathBuf, delLogFileDays);    //删除上一次修改时间超过3天的文件
+//    //printf("Record: %s.\n", cmd);
+//    deleteCmd = cmd;
+//}
 
 void LogFile::setBaseFileName(const std::string &basename_)
 {
@@ -63,20 +63,24 @@ void LogFile::flushFunc()
 void LogFile::outputLogFile(const char *msg, int len)
 {
     MutexLock lock(mutex);
-    file->write(msg, len);
 
     //roll file
-    if (file->writeBytes() > rollSize){
+    if (file->writeBytes() > rollSize)
+    {
         rollFile(++count);
     }
-    else{
+    else
+    {
         time_t now = ::time(NULL);
         time_t thisPeriod = now / kRollPerSeconds_ * kRollPerSeconds_;
-        if (thisPeriod != startTime){
+        if (thisPeriod != startTime)
+        {
             count = 0;
             rollFile(0);
         }
     }
+
+    file->write(msg, len);
 }
 
 void LogFile::flushLogFile()
@@ -105,7 +109,8 @@ bool LogFile::rollFile(int count)
 {
     time_t now = 0;
     std::string fileName = getFileName(&now);
-    if(count){
+    if(count)
+    {
         char buf[5] = {0};
         snprintf(buf, sizeof buf, ".%d", count);
         fileName += buf;
@@ -113,7 +118,7 @@ bool LogFile::rollFile(int count)
     time_t start = now / kRollPerSeconds_ * kRollPerSeconds_;
     if (now > lastRoll)
     {
-        delLogFiles();
+        //delLogFiles();
         startTime = start;
         lastRoll = now;
         file.reset(new FileUtil(fileName));
@@ -123,8 +128,8 @@ bool LogFile::rollFile(int count)
     return false;
 }
 
-void LogFile::delLogFiles()
-{
-    system(deleteCmd.c_str());
-    //perror("Delete LogFile Failed!");
-}
+//void LogFile::delLogFiles()
+//{
+//    system(deleteCmd.c_str());
+//    //perror("Delete LogFile Failed!");
+//}

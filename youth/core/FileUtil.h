@@ -2,26 +2,24 @@
 #define FILEUTIL_H
 
 #include "String.h"
+#include "Object.h"
 
 namespace youth {
 
 //  thread not safe
 
-class FileUtil
+class FileUtil : public noncopyable
 {
 public:
-    enum OpenModel{
+    enum OpenModel
+    {
         Read = 0x01,
         Write = 0x02,
         ReadAndWrite = Read|Write,
         Append = 0x04|ReadAndWrite
     };
 
-    enum Seek{
-        Begin,
-        Current,
-        End
-    };
+    enum Seek{ Begin, Current, End };
 
     FileUtil();
     FileUtil(const std::string&);

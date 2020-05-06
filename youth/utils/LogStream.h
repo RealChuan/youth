@@ -16,11 +16,12 @@
 
 #include <string>
 #include "LogBuffer.h"
+#include "youth/core/Object.h"
 
 namespace youth
 {
 
-class LogStream
+class LogStream : public noncopyable
 {
 public:
     LogStream();
@@ -47,10 +48,11 @@ public:
     LogStream &operator<<(unsigned char *pChar);
     LogStream &operator<<(const unsigned char *pChar);
     LogStream &operator<<(std::string strString);
+    LogStream &operator<<(const void*);
 
 private:
     typedef LogBuffer<normalBuffer> buffer;
-    buffer logBuffer; //这个就是具体的Buffer
+    buffer m_logBuffer; //这个就是具体的Buffer
 
 };
 }

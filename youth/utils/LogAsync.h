@@ -6,12 +6,13 @@
 #include "memory"
 #include "string"
 #include "Thread.h"
-#include "../core/Timestamp.h"
+#include "youth/core/Timestamp.h"
+#include "youth/core/Object.h"
 
 namespace youth
 {
 
-class LogAsync
+class LogAsync : public noncopyable
 {
 public:
     LogAsync(int flushInterval);

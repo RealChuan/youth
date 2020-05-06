@@ -2,10 +2,13 @@
 #define COUNTDOWNLATCH_H
 
 #include "Thread.h"
+#include "youth/core/Object.h"
 
-namespace youth {
 
-class CountDownLatch
+namespace youth
+{
+
+class CountDownLatch : public noncopyable
 {
 public:
     CountDownLatch(int count_);

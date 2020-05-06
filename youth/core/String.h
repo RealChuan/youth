@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 
-namespace youth {
+namespace youth
+{
 
-namespace string {
+namespace string
+{
 
 std::vector<std::string> split(std::string, const char);
 

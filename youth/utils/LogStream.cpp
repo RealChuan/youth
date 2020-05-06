@@ -82,12 +82,12 @@ const int iDoubleMaxStrLen = 32;
 
 const char *LogStream::GetStreamBuff()
 {
-    return logBuffer.data();
+    return m_logBuffer.data();
 }
 
 int LogStream::GetStreamBuffLen()
 {
-    return logBuffer.length();
+    return m_logBuffer.length();
 }
 
 LogStream &LogStream::operator<<(bool value)
@@ -99,97 +99,97 @@ LogStream &LogStream::operator<<(bool value)
 
 LogStream &LogStream::operator<<(char value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned char value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(short value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned short value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(int value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned int value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(long value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned long value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(long long value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(unsigned long long value)
 {
-    int Len = static_cast<int>(convert(logBuffer.current(), value));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(convert(m_logBuffer.current(), value));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(float fValue)
 {
-    int Len = static_cast<int>(snprintf(logBuffer.current(), iFloatMaxStrLen, "%f", fValue));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(snprintf(m_logBuffer.current(), iFloatMaxStrLen, "%f", fValue));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(double dValue)
 {
-    int Len = static_cast<int>(snprintf(logBuffer.current(), iDoubleMaxStrLen, "%lf", dValue));
-    logBuffer.appendLen(Len);
+    int Len = static_cast<int>(snprintf(m_logBuffer.current(), iDoubleMaxStrLen, "%lf", dValue));
+    m_logBuffer.appendLen(Len);
     return *this;
 }
 
 LogStream &LogStream::operator<<(char *pChar)
 {
-    logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
+    m_logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
     return *this;
 }
 
 LogStream &LogStream::operator<<(const char *pChar)
 {
-    logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
+    m_logBuffer.appendString(pChar, static_cast<int>(strlen(pChar)));
     return *this;
 }
 
@@ -206,4 +206,15 @@ LogStream &LogStream::operator<<(const unsigned char *pChar)
 LogStream &LogStream::operator<<(std::string strString)
 {
     return operator<<(strString.c_str());
+}
+
+LogStream &LogStream::operator<<(const void *p)
+{
+    uintptr_t v = reinterpret_cast<uintptr_t>(p);
+    char* buf = m_logBuffer.current();
+    buf[0] = '0';
+    buf[1] = 'x';
+    size_t len = convertHex(buf+2, v);
+    m_logBuffer.appendLen(len+2);
+    return *this;
 }

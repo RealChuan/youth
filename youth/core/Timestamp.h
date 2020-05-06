@@ -3,9 +3,11 @@
 
 #include <string>
 
+#include "Object.h"
+
 namespace youth
 {
-class Timestamp
+class Timestamp : public copyable
 {
 public:
     explicit Timestamp();

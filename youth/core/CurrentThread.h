@@ -4,9 +4,11 @@
 #include <unistd.h>
 #include <stdint.h>
 
-namespace youth {
+namespace youth
+{
 
-namespace CurrentThread{
+namespace CurrentThread
+{
 // internal
 extern __thread int tidCache;
 extern __thread char tidString_[32];
@@ -14,7 +16,8 @@ extern __thread int tidStringLength_;
 
 void cacheTid();
 
-inline int tid(){
+inline int tid()
+{
     if (__builtin_expect(tidCache == 0, 0))
         cacheTid();
     return tidCache;

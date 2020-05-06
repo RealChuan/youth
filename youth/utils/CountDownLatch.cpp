@@ -20,7 +20,8 @@ void CountDownLatch::countDown()
 {
     MutexLock lock(mutex);
     count--;
-    if(count == 0){
+    if(count == 0)
+    {
         condition.notifyAll();
     }
 }

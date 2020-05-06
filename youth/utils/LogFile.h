@@ -3,7 +3,6 @@
 
 #include "Thread.h"
 #include "Singleton.h"
-//#include "FileUtil.h"
 
 namespace youth
 {
@@ -14,7 +13,7 @@ class LogFile
     SINGLETON(LogFile)
 public:
     void setRollSize(off_t);
-    void setDelLogFileDays(uint);   //delete log files
+    //void setDelLogFileDays(uint);   //delete log files
     void setBaseFileName(const std::string&);
     static void outputFunc(const char*, int);
     static void flushFunc(void);
@@ -25,7 +24,7 @@ public:
 
 private:  
     inline bool rollFile(int);
-    inline void delLogFiles();
+    //inline void delLogFiles();
     inline std::string getFileName(time_t*);
 
     int count;

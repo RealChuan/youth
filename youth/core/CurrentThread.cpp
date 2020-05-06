@@ -13,7 +13,8 @@ static_assert(std::is_same<int, pid_t>::value, "pid_t should be int");
 
 void cacheTid()
 {
-    if (tidCache == 0){
+    if (tidCache == 0)
+    {
         tidCache = ProcessMsg::getTid();
         tidStringLength_ = snprintf(tidString_, sizeof tidString_, "%5d ", tidCache);
     }

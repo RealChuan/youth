@@ -11,14 +11,12 @@ using namespace youth;
 FileUtil::FileUtil()
     :fp()
 {
-
 }
 
 FileUtil::FileUtil(const std::string& filename)
     :fp()
     ,fileName_(filename)
 {
-
 }
 
 FileUtil::~FileUtil()
@@ -58,7 +56,8 @@ bool FileUtil::open(FileUtil::OpenModel model)
     case Append: fp = ::fopen(fileName_.c_str(), "a+");break;
     default: return false;
     }
-    if(fp == nullptr){
+    if(fp == nullptr)
+    {
         fprintf(stderr, "FileName: %s open error!\n", fileName_.c_str());
         perror("file open error");
         return false;
@@ -72,10 +71,13 @@ void FileUtil::close()
     if(!isOpen())
         return;
     flushFile();
-    if(::fclose(fp) == 0){
+    if(::fclose(fp) == 0)
+    {
         fp = nullptr;
         printf("FileName: %s close succesed!\n", fileName_.c_str());
-    }else{
+    }
+    else
+    {
         fprintf(stderr, "FileName: %s close failed!\n", fileName_.c_str());
         perror("file close error");
     }
@@ -102,12 +104,14 @@ bool FileUtil::isOpen()
 std::string FileUtil::readLine()
 {
     std::string str;
-    if(!isOpen() || !checkModel(Read)){
+    if(!isOpen() || !checkModel(Read))
+    {
         return str;
     }
     char buf[MAX_LINE];
     //int len;    /*行字符个数*/
-    if(fgets(buf, MAX_LINE, fp) != nullptr){
+    if(fgets(buf, MAX_LINE, fp) != nullptr)
+    {
         //len = strlen(buf);
         //buf[len-1] = '\0';  /*去掉换行符*/
         str = buf;
@@ -134,7 +138,8 @@ void FileUtil::write(const std::string &str)
 
 void FileUtil::write(const char *ch, int len)
 {
-    if(isOpen() && checkModel(Write)){
+    if(isOpen() && checkModel(Write))
+    {
         ::fwrite(ch, 1, static_cast<size_t>(len), fp);
         writeBytes_ += len;
     }
@@ -155,7 +160,7 @@ bool FileUtil::checkModel(FileUtil::OpenModel model)
 {
     bool state = ((openModel_&model) == model);
     if(!state)
-      fprintf(stderr, "Wrong mode ! Current Model is %d !\n", openModel_);
+        fprintf(stderr, "Wrong mode ! Current Model is %d !\n", openModel_);
     return state;
 }
 
@@ -163,7 +168,8 @@ void FileUtil::moveFilePoint(FileUtil::Seek seek)
 {
     if(!isOpen())
         return;
-    switch (seek) {
+    switch (seek)
+    {
     case Begin : fseek(fp, 0, SEEK_SET);break;
     case Current : fseek(fp, 0, SEEK_CUR);break;
     case End : fseek(fp, 0, SEEK_END);break;

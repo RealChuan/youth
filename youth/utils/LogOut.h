@@ -2,14 +2,15 @@
 #define LOGOUT_H
 
 #include "LogStream.h"
-#include "../core/Timestamp.h"
+#include "youth/core/Timestamp.h"
+#include "youth/core/Object.h"
 
 #include <memory>
 
 namespace youth
 {
 
-class LogOut
+class LogOut : public noncopyable
 {
 public:
     LogOut(const char* pLevel, const char* File, int Line);

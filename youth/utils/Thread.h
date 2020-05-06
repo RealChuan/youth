@@ -3,6 +3,7 @@
 
 #include "string"
 #include "boost/function.hpp"
+#include "youth/core/Object.h"
 
 #if defined(__clang__) && (!defined(SWIG))
 #define THREAD_ANNOTATION_ATTRIBUTE__(x)   __attribute__((x))
@@ -16,7 +17,7 @@
 namespace youth
 {
 
-class Thread
+class Thread : public noncopyable
 {
     typedef std::function< void() > ThreadFunc;
 public:
@@ -42,7 +43,7 @@ private:
     //std::string _name;
 };
 
-class Mutex
+class Mutex : public noncopyable
 {
 public:
     Mutex();
@@ -57,7 +58,8 @@ private:
     pthread_mutex_t mutex;
 };
 
-class MutexLock{
+class MutexLock : public noncopyable
+{
 public:
     MutexLock(Mutex& mutex_);
     ~MutexLock();
@@ -66,7 +68,7 @@ private:
     Mutex& mutex;
 };
 
-class Condition
+class Condition : public noncopyable
 {
 public:
     Condition(Mutex& mutex);

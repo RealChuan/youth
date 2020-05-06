@@ -20,10 +20,11 @@
 #include <boost/function.hpp>
 
 #include "Thread.h"
+#include "youth/core/Object.h"
 
 namespace youth
 {
-class ThreadPool
+class ThreadPool : public noncopyable
 {
 	typedef std::function<void () > Task;
 
