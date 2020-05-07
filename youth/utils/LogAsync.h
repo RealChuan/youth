@@ -42,7 +42,7 @@ public:
 
 private:
     void threadFunc();
-    Timestamp timestamp;
+    Timestamp m_timestamp;
 
     typedef LogBuffer<maxBuffer> Buffer;
     typedef std::vector<std::unique_ptr<Buffer>> BufferVector;

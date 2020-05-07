@@ -10,14 +10,14 @@ using namespace youth;
 LogOut::LogOut(const char* pLevel, const char* File, int Line)
 	: line(Line)
 	, file(File)
-    , time()
+    , m_timestamp(Timestamp::currentTimestamp())
     , logStream()
 {
     CurrentThread::tid();
 	//在构造的时候会填充日志头(其实就是时间和报警等级)
 	//首先，输出打印日志时间到LogStream中的Buffer
 	//其次，输出日志等级
-    logStream << time.getMicroSToString() << " " << CurrentThread::tidString() << " " << pLevel;
+    logStream << m_timestamp.getMicroSToString() << " " << CurrentThread::tidString() << " " << pLevel;
 }
 
 LogOut::~LogOut()

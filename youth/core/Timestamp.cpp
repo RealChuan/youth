@@ -12,7 +12,6 @@ Timestamp::Timestamp()
     :mcroSecondsSinceEpoch(0)
     ,lastSecond(0)
 {
-    now_();
 }
 
 Timestamp::Timestamp(int64_t ms)
@@ -21,15 +20,7 @@ Timestamp::Timestamp(int64_t ms)
 {
 }
 
-void Timestamp::now_()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    int64_t seconds = tv.tv_sec;
-    mcroSecondsSinceEpoch = seconds * kMicroSecondsPerSecond + tv.tv_usec;
-}
-
-Timestamp Timestamp::now()
+Timestamp Timestamp::currentTimestamp()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);

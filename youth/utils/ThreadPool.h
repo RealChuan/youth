@@ -17,7 +17,7 @@
 #include <vector>
 #include <deque>
 #include <memory>
-#include <boost/function.hpp>
+#include <functional>
 
 #include "Thread.h"
 #include "youth/core/Object.h"

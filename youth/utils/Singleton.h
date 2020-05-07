@@ -2,6 +2,7 @@
 #define SINGLETON_H
 
 #include <assert.h>
+#include <memory>
 
 #include "Thread.h"
 
@@ -22,12 +23,12 @@ private:
             instance.reset(new T());
     }
     static pthread_once_t ponce_;
-    static std::shared_ptr<T> instance;
+    static std::unique_ptr<T> instance;
     static Mutex mutex;
 };
 
 template <typename T> pthread_once_t Singleton<T>::ponce_;
-template <typename T> std::shared_ptr<T> Singleton<T>::instance;
+template <typename T> std::unique_ptr<T> Singleton<T>::instance;
 template <typename T> Mutex Singleton<T>::mutex;
 template <typename T>
 T& Singleton<T>::getInstance() {

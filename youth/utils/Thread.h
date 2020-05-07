@@ -2,8 +2,9 @@
 #define THREAD_H
 
 #include "string"
-#include "boost/function.hpp"
 #include "youth/core/Object.h"
+
+#include <functional>
 
 #if defined(__clang__) && (!defined(SWIG))
 #define THREAD_ANNOTATION_ATTRIBUTE__(x)   __attribute__((x))
@@ -19,7 +20,7 @@ namespace youth
 
 class Thread : public noncopyable
 {
-    typedef std::function< void() > ThreadFunc;
+    typedef std::function<void()> ThreadFunc;
 public:
     Thread(ThreadFunc func_);
     ~Thread();

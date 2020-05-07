@@ -29,7 +29,7 @@ public:
 private:
     int line; //行号
     const char* file;
-    Timestamp time; //Log时间类
+    Timestamp m_timestamp; //Log时间类
     LogStream logStream; //LogStream类
 };
 

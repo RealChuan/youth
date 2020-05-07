@@ -13,6 +13,8 @@
 
 #include "ThreadPool.h"
 
+#include <assert.h>
+
 using namespace youth;
 
 ThreadPool::ThreadPool()

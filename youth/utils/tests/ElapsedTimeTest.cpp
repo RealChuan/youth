@@ -1,5 +1,5 @@
-#include "../ElapsedTime.h"
-#include "../LogOut.h"
+#include "youth/utils/ElapsedTime.h"
+#include "youth/utils/LogOut.h"
 
 #include <unistd.h>
 
@@ -11,7 +11,7 @@ int main(int argc, char** argv){
     ElapsedTime timer;
     timer.start();
     for (int i = 0; i < 1000 * 1000; i++)
-        LOG_INFO << i;
+        LOG_INFO << "1234567890qwertyuiopasdfghjklzxcvbnm" << i;
     printf("%s\n", timer.elapsed().c_str());
     return 0;
 }

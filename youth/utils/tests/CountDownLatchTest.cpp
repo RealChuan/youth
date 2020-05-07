@@ -1,6 +1,8 @@
-#include "../CountDownLatch.h"
-#include "../Thread.h"
-#include "iostream"
+#include "youth/utils/CountDownLatch.h"
+#include "youth/utils/Thread.h"
+
+#include <iostream>
+#include <memory>
 
 using namespace youth;
 
@@ -21,7 +23,7 @@ void printThird(CountDownLatch *latch){
 
 int main()
 {
-    std::shared_ptr<CountDownLatch> latch(new CountDownLatch(1));
+    std::unique_ptr<CountDownLatch> latch(new CountDownLatch(1));
     Thread t1(std::bind(printFirst, latch.get()));
     Thread t2(std::bind(printSecond, latch.get()));
     Thread t3(std::bind(printThird, latch.get()));

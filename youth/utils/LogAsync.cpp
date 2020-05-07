@@ -12,7 +12,8 @@ void asyncOutput(const char* msg, int len)
 }
 
 LogAsync::LogAsync(int flushInterval)
-    :refreshTime(flushInterval),
+    : m_timestamp(Timestamp::currentTimestamp()),
+      refreshTime(flushInterval),
       running(false),
       thread(std::bind(&LogAsync::threadFunc, this)),
       mutex(),
@@ -106,7 +107,7 @@ void LogAsync::threadFunc()
         {
             char buf[256];
             snprintf(buf, sizeof buf, "Dropped log messages at %s, %zd larger buffers\n",
-                     timestamp.getMicroSToString().c_str(), buffersToWrite.size() - 2);
+                     m_timestamp.getMicroSToString().c_str(), buffersToWrite.size() - 2);
             fputs(buf, stderr);
             LogFile::outputFunc(buf, static_cast<int> (strlen(buf)));
             buffersToWrite.erase(buffersToWrite.begin() + 2, buffersToWrite.end());

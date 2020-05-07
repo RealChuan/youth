@@ -1,35 +1,27 @@
 #ifndef EPOLL_H
 #define EPOLL_H
 
-#include <sys/epoll.h>
-#include <boost/function.hpp>
+#include <vector>
 
-#define MAX_EVENTS 256
+#include "youth/core/Object.h"
+#include "youth/core/Timestamp.h"
+
+struct epoll_event;
 
 namespace youth
 {
-class Epoll
+class Epoll : public noncopyable
 {
-	typedef std::function< void(int fd) > callBackFunc;
 public:
-	Epoll(int serverFd,callBackFunc readCallBackFunc_);
-	~Epoll();
+    Epoll();
+    ~Epoll();
 
-	//单线程
-	void Loop_1();
+    Timestamp poll(int timeoutMs);
 
 private:
-	int serverFd;
-	int acceptFd;
-	// epoll 初始化
-	int epollfd;
-	int timeout;
-
-	struct epoll_event event;
-	//事件数组
-	struct epoll_event eventList[MAX_EVENTS];
-
-	callBackFunc readCallBackFunc;
+    typedef std::vector<struct epoll_event> EventVec;
+    EventVec m_events;
+    int m_epollfd;
 };
 }
 #endif // EPOLL_H

@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     logAsync.start();
 
     for (int i = 0; i < 1000 * 1000; i++)
-        LOG_INFO << i;
+        LOG_INFO << "1234567890qwertyuiopasdfghjklzxcvbnm" << i;
 
     logAsync.stop();
     return 0;

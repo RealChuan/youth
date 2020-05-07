@@ -17,8 +17,6 @@
 #include <string>
 #include <netinet/in.h>
 
-#include <boost/implicit_cast.hpp>
-
 namespace youth
 {
 	namespace Socket

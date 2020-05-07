@@ -57,7 +57,7 @@ bool EventLoop::isInLoopThread() const
 void EventLoop::abortNotInLoopThread()
 {
     LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop " << this
-              << " was created in threadId_ = " << m_threadID
+              << " was created in thread id = " << m_threadID
               << ", current thread id = " <<  CurrentThread::tid();
 }
 

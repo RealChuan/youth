@@ -13,7 +13,7 @@ public:
     explicit Timestamp();
     explicit Timestamp(int64_t);
 
-    static Timestamp now();
+    static Timestamp currentTimestamp();
     std::string getDayToString();
     std::string getSecondToString();
     std::string getMicroSToString();
@@ -21,7 +21,6 @@ public:
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
 private:
-    inline void now_();
     inline bool getTime();
     int64_t mcroSecondsSinceEpoch;
     struct tm tm_time;
