@@ -73,8 +73,7 @@ private:
     static void outputOutAndLog(const char *pMsg, int Len);
     static void flushAll();
 
-    //使用Pimpl机制,解开类的使用接口和实现的耦合
-    std::shared_ptr<LogOut> m_LogOut; //使用智能指针来管理
+    std::unique_ptr<LogOut> m_LogOut;
     LogLevel logLevel;
 };
 

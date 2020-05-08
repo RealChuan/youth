@@ -17,8 +17,9 @@ public:
     void loop();
     void quit();
 
-private:
     bool isInLoopThread() const;
+
+private:
     void abortNotInLoopThread();
     void assertInLoopThread();
 
