@@ -33,4 +33,6 @@
 
 #others
 bin/
+build/
 CMakeLists.txt.*
+.vscode/
