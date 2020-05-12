@@ -9,8 +9,9 @@
 
 using namespace youth;
 
-Epoll::Epoll()
-    : m_events(kInitEventListSize)
+Epoll::Epoll(EventLoop* eventLoop)
+    : m_ownerLoop(eventLoop)
+    , m_events(kInitEventListSize)
     , m_epollfd(::epoll_create(EPOLL_CLOEXEC))
 {
 
@@ -21,7 +22,7 @@ Epoll::~Epoll()
     ::close(m_epollfd);
 }
 
-Timestamp Epoll::poll(int timeoutMs)
+Timestamp Epoll::poll(int timeoutMs, ChannelList* activeChannels)
 {
     int numEvents = ::epoll_wait(m_epollfd, &*m_events.begin(),
                                  static_cast<int>(m_events.size()),
@@ -31,7 +32,7 @@ Timestamp Epoll::poll(int timeoutMs)
     if (numEvents > 0)
     {
         LOG_DEBUG << numEvents << " events happened";
-        //fillActiveChannels(numEvents, activeChannels);
+        fillActiveChannels(numEvents, activeChannels);
     }
     else if (numEvents == 0)
     {

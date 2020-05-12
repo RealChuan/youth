@@ -14,6 +14,6 @@ TcpClient::TcpClient(const char* ip_, uint16_t port_)
 
 TcpClient::~TcpClient()
 {
-	Socket::closeSock(clientFd);
+	Socket::closeSockfd(clientFd);
 }
 

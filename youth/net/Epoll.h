@@ -12,20 +12,23 @@ struct epoll_event;
 namespace youth
 {
 
+class EventLoop;
 class Channel;
 class Epoll : public noncopyable
 {
     typedef std::vector<Channel*> ChannelList;
 public:
-    Epoll();
+    Epoll(EventLoop* eventLoop);
     ~Epoll();
 
-    Timestamp poll(int timeoutMs);
+    Timestamp poll(int timeoutMs, ChannelList* activeChannels);
 
 private:
     void fillActiveChannels(int numEvents, ChannelList* activeChannels) const;
 
     static const int kInitEventListSize = 16;
+
+    EventLoop* m_ownerLoop;
 
     typedef std::map<int, Channel*> ChannelMap;
     ChannelMap channelMap;
