@@ -14,6 +14,7 @@ Channel::Channel(EventLoop *loop, int fd)
     , m_events(0)
     , m_revents(0)
     , m_logHup(true)
+    , m_eventHandling(false)
 {
 
 }
@@ -73,6 +74,7 @@ void Channel::setRevents(int revents)
 
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
+    m_eventHandling = true;
     LOG_DEBUG << reventsToString();
     if ((m_revents & POLLHUP) && !(m_revents & POLLIN))
     {
@@ -100,6 +102,7 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
     {
         if (m_writeCallback) m_writeCallback();
     }
+    m_eventHandling = false;
 }
 
 std::string Channel::eventsToString(int fd, int events)
