@@ -26,11 +26,7 @@ int createEventfd()
 }
 
 EventLoop::EventLoop()
-    : m_threadID(CurrentThread::tid())
-    , m_looping(false), m_quit(false)
-    , m_callingPendingFunctors(false), m_eventHandling(false), m_index(0)
-    , m_epoll(new Epoll(this))
-    , m_wakeupFd(createEventfd())
+    : m_threadID(CurrentThread::tid()), m_looping(false), m_quit(false), m_callingPendingFunctors(false), m_eventHandling(false), m_index(0), m_epoll(new Epoll(this)), m_wakeupFd(createEventfd()), m_wakeupChannel(new Channel(this, m_wakeupFd))
 {
     LOG_DEBUG << "EventLoop created " << this << " in thread " << m_threadID;
     if (g_loopInThisThread)
@@ -42,6 +38,8 @@ EventLoop::EventLoop()
     {
         g_loopInThisThread = this;
     }
+    m_wakeupChannel->setReadCallback(std::bind(&EventLoop::handleRead, this));
+    m_wakeupChannel->enableReading();
 }
 
 EventLoop::~EventLoop()
@@ -74,7 +72,7 @@ void EventLoop::loop()
         }
         m_currentActiveChannel = NULL;
         m_eventHandling = false;
-
+        doPendingFunctors();
         // Todo loop
     }
 
@@ -127,16 +125,40 @@ void EventLoop::wakeup()
     }
 }
 
-void updateChannel(Channel *channel)
+void EventLoop::handleRead()
 {
+    uint64_t one = 1;
+    ssize_t n = Socket::read(m_wakeupFd, &one, sizeof one);
+    if (n != sizeof one)
+    {
+        LOG_ERROR << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
+    }
 }
 
-void removeChannel(Channel *channel)
+void EventLoop::updateChannel(Channel *channel)
 {
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    m_epoll->updateChannel(channel);
 }
 
-bool hasChannel(Channel *channel)
+void EventLoop::removeChannel(Channel *channel)
 {
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    if (m_eventHandling)
+    {
+        assert(m_currentActiveChannel == channel ||
+               std::find(m_activeChannels.begin(), m_activeChannels.end(), channel) == m_activeChannels.end());
+    }
+    m_epoll->removeChannel(channel);
+}
+
+bool EventLoop::hasChannel(Channel *channel)
+{
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    return m_epoll->hasChannel(channel);
 }
 
 bool EventLoop::isInLoopThread() const

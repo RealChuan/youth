@@ -6,15 +6,17 @@
 
 #include <functional>
 
-namespace youth {
+namespace youth
+{
 
 class EventLoop;
 class Channel : public noncopyable
 {
     typedef std::function<void()> EventCallback;
     typedef std::function<void(Timestamp)> ReadEventCallback;
+
 public:
-    Channel(EventLoop* loop, int fd);
+    Channel(EventLoop *loop, int fd);
     ~Channel();
 
     void handleEvent(Timestamp receiveTime);
@@ -24,23 +26,51 @@ public:
     void setCloseCallback(EventCallback cb);
     void setErrorCallback(EventCallback cb);
 
+    void enableReading();
+    void disableReading();
+    void enableWriting();
+    void disableWriting();
+    void disableAll();
+    bool isWriting() const;
+    bool isReading() const;
+
+    bool isNoneEvent() const;
+
+    // for EPoll
+    int index() const;
+    void setIndex(int idx);
+
+    void remove();
+
+    EventLoop *ownerLoop() const;
+
     // for debug
     std::string eventsToString() const;
     std::string reventsToString() const;
 
     int fd() const;
+    int events() const;
     void setRevents(int revents); // used by pollers
 
 private:
+    void update();
     void handleEventWithGuard(Timestamp receiveTime);
 
     static std::string eventsToString(int fd, int events);
 
-    EventLoop* m_loop;
-    const int  m_fd;
+    static const int kNoneEvent;
+    static const int kReadEvent;
+    static const int kWriteEvent;
+
+    EventLoop *m_loop;
+
+    int m_index; // used by Poller. 索引
+    const int m_fd;
     int m_events;
     int m_revents; // it's the received event types of epoll or poll
     bool m_logHup;
+    bool m_eventHandling;
+    bool m_addedToLoop;
 
     ReadEventCallback m_readCallback;
     EventCallback m_writeCallback;
@@ -48,6 +78,6 @@ private:
     EventCallback m_errorCallback;
 };
 
-}
+} // namespace youth
 
 #endif // CHANNEL_H

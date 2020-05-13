@@ -4,26 +4,30 @@
 
 #include <assert.h>
 #include <sstream>
+#include <sys/epoll.h>
 #include <poll.h>
 
 using namespace youth;
 
-Channel::Channel(EventLoop *loop, int fd)
-    : m_loop(loop)
-    , m_fd(fd)
-    , m_events(0)
-    , m_revents(0)
-    , m_logHup(true)
-    , m_eventHandling(false)
-{
+const int Channel::kNoneEvent = 0;
+const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
+const int Channel::kWriteEvent = EPOLLOUT;
 
+Channel::Channel(EventLoop *loop, int fd)
+    : m_loop(loop), m_index(-1) //epoll knew
+      ,
+      m_fd(fd), m_events(0),
+      m_revents(0), m_logHup(true), m_eventHandling(false), m_addedToLoop(false)
+{
 }
 
 Channel::~Channel()
 {
-    if(m_loop->isInLoopThread())
+    assert(!m_eventHandling);
+    assert(!m_addedToLoop);
+    if (m_loop->isInLoopThread())
     {
-
+        assert(!m_loop->hasChannel(this));
     }
 }
 
@@ -52,6 +56,79 @@ void Channel::setErrorCallback(Channel::EventCallback cb)
     m_errorCallback = std::move(cb);
 }
 
+void Channel::enableReading()
+{
+    m_events |= kReadEvent;
+    update();
+}
+
+void Channel::disableReading()
+{
+    m_events &= ~kReadEvent;
+    update();
+}
+
+void Channel::enableWriting()
+{
+    m_events |= kWriteEvent;
+    update();
+}
+
+void Channel::disableWriting()
+{
+    m_events &= ~kWriteEvent;
+    update();
+}
+
+void Channel::disableAll()
+{
+    m_events = kNoneEvent;
+    update();
+}
+
+void Channel::update()
+{
+    m_addedToLoop = true;
+    m_loop->updateChannel(this);
+}
+
+void Channel::remove()
+{
+    assert(isNoneEvent());
+    m_addedToLoop = false;
+    m_loop->removeChannel(this);
+}
+
+bool Channel::isWriting() const
+{
+    return m_events & kWriteEvent;
+}
+
+bool Channel::isReading() const
+{
+    return m_events & kReadEvent;
+}
+
+bool Channel::isNoneEvent() const
+{
+    return m_events == kNoneEvent;
+}
+
+int Channel::index() const
+{
+    return m_index;
+}
+
+void Channel::setIndex(int idx)
+{
+    m_index = idx;
+}
+
+EventLoop *Channel::ownerLoop() const
+{
+    return m_loop;
+}
+
 std::string Channel::eventsToString() const
 {
     return eventsToString(m_fd, m_events);
@@ -72,17 +149,23 @@ void Channel::setRevents(int revents)
     m_revents = revents;
 }
 
+int Channel::events() const
+{
+    return m_events;
+}
+
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
     m_eventHandling = true;
     LOG_DEBUG << reventsToString();
-    if ((m_revents & POLLHUP) && !(m_revents & POLLIN))
+    if ((m_revents & EPOLLHUP) && !(m_revents & EPOLLIN))
     {
         if (m_logHup)
         {
             LOG_WARN << "fd = " << m_fd << " Channel::handle_event() POLLHUP";
         }
-        if (m_closeCallback) m_closeCallback();
+        if (m_closeCallback)
+            m_closeCallback();
     }
 
     if (m_revents & POLLNVAL)
@@ -90,17 +173,20 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
         LOG_WARN << "fd = " << m_fd << " Channel::handle_event() POLLNVAL";
     }
 
-    if (m_revents & (POLLERR | POLLNVAL))
+    if (m_revents & (EPOLLERR | POLLNVAL))
     {
-        if (m_errorCallback) m_errorCallback();
+        if (m_errorCallback)
+            m_errorCallback();
     }
-    if (m_revents & (POLLIN | POLLPRI | POLLRDHUP))
+    if (m_revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP))
     {
-        if (m_readCallback) m_readCallback(receiveTime);
+        if (m_readCallback)
+            m_readCallback(receiveTime);
     }
-    if (m_revents & POLLOUT)
+    if (m_revents & EPOLLOUT)
     {
-        if (m_writeCallback) m_writeCallback();
+        if (m_writeCallback)
+            m_writeCallback();
     }
     m_eventHandling = false;
 }
@@ -109,14 +195,20 @@ std::string Channel::eventsToString(int fd, int events)
 {
     std::ostringstream oss;
     oss << fd << ": ";
-    if (events & POLLIN) oss << "IN ";
-    if (events & POLLPRI) oss << "PRI ";
-    if (events & POLLOUT) oss << "OUT ";
-    if (events & POLLHUP) oss << "HUP ";
-    if (events & POLLRDHUP) oss << "RDHUP ";
-    if (events & POLLERR) oss << "ERR ";
-    if (events & POLLNVAL) oss << "NVAL ";
+    if (events & EPOLLIN)
+        oss << "IN ";
+    if (events & EPOLLPRI)
+        oss << "PRI ";
+    if (events & EPOLLOUT)
+        oss << "OUT ";
+    if (events & EPOLLHUP)
+        oss << "HUP ";
+    if (events & EPOLLRDHUP)
+        oss << "RDHUP ";
+    if (events & EPOLLERR)
+        oss << "ERR ";
+    if (events & POLLNVAL)
+        oss << "NVAL ";
 
     return oss.str();
 }
-

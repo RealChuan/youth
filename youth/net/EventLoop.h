@@ -44,10 +44,12 @@ public:
     bool hasChannel(Channel *channel);
 
     bool isInLoopThread() const;
+    void assertInLoopThread();
 
 private:
     void abortNotInLoopThread();
-    void assertInLoopThread();
+
+    void handleRead();  // waked up
 
     void doPendingFunctors();
 
@@ -66,6 +68,8 @@ private:
     std::unique_ptr<Epoll> m_epoll;
 
     int m_wakeupFd;
+
+    std::unique_ptr<Channel> m_wakeupChannel;
 
     // scratch variables
     ChannelList m_activeChannels;
