@@ -1,52 +1,92 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   YSocket.h
- * Author: root
- *
- * Created on 2019年8月20日, 下午8:56
- */
-
-#ifndef SOCKET_H
+﻿#ifndef SOCKET_H
 #define SOCKET_H
 
-#include <string>
+#include <youth/core/Object.h>
+
 #include <netinet/in.h>
+#include <string>
+
+struct tcp_info;
 
 namespace youth
 {
-namespace Socket
+
+class TcpAddressInfo : copyable
 {
+public:
+    explicit TcpAddressInfo(uint16_t port = 0, bool loopbackOnly = false,
+                            bool ipv6 = false);
 
-ssize_t read(int sockfd, void *buf, size_t count);
-ssize_t readv(int sockfd, const struct iovec *iov, int iovcnt);
-ssize_t write(int sockfd, const void *buf, size_t count);
+    TcpAddressInfo(const char* ip, uint16_t port = 0, bool ipv6 = false);
 
-struct sockaddr_in addrServer(uint16_t port);
+    const struct sockaddr* getSockAddr() const;
+    sa_family_t family() const;
+    std::string ip() const;
+    uint16_t port() const;
 
-int socket();
+    void setSockAddrInet6(const struct sockaddr_in6& addr6);
 
-void listenAndBindServer(int serverfd, struct sockaddr_in serverAddr);
+    // resolve hostname to IP address, not changing port or sin_family
+    // return true on success.
+    // thread safe
+    static bool resolve(std::string hostname, TcpAddressInfo* result);
 
-int acceptServer(int serverfd);
+private:
+    union
+    {
+        struct sockaddr_in m_serveraddr;
+        struct sockaddr_in6 m_serveraddr6;
+    };
+};
 
-struct sockaddr_in addrClient(const char *ip, uint16_t port);
+class Socket : noncopyable
+{
+public:
+    Socket(int sockfd);
+    ~Socket();
 
-void connectServer(int sockfd, struct sockaddr_in serverAddr_);
+    int fd() const;
 
-void shutdownWrite(int sockfd);
+    bool getTcpInfo(struct tcp_info*) const;
+    bool getTcpInfoString(char* buf, int len) const;
 
-void closeSockfd(int sockfd);
+    void bindAddress(const TcpAddressInfo&);
 
-std::string getIpAndPort(struct sockaddr_in addr);
+    void listen(const TcpAddressInfo&);
 
-std::string getLocalIpAndPort(int sockfd);
+    /// On success, returns a non-negative integer that is
+    /// a descriptor for the accepted socket, which has been
+    /// set to non-blocking and close-on-exec. *peeraddr is assigned.
+    /// On error, -1 is returned, and *peeraddr is untouched.
+    int accept(TcpAddressInfo* peeraddr);
 
-}; // namespace Socket
+    void shutdownWrite();
+
+    // setsockopt
+    ///
+    /// Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm).
+    ///
+    void setTcpNoDelay(bool on);
+
+    ///
+    /// Enable/disable SO_REUSEADDR
+    ///
+    void setReuseAddr(bool on);
+
+    ///
+    /// Enable/disable SO_REUSEPORT
+    ///
+    void setReusePort(bool on);
+
+    ///
+    /// Enable/disable SO_KEEPALIVE
+    ///
+    void setKeepAlive(bool on);
+
+private:
+    int m_sockfd;
+};
+
 } // namespace youth
 
 #endif /* SOCKET_H */

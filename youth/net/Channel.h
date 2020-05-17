@@ -10,7 +10,7 @@ namespace youth
 {
 
 class EventLoop;
-class Channel : public noncopyable
+class Channel : noncopyable
 {
     typedef std::function<void()> EventCallback;
     typedef std::function<void(Timestamp)> ReadEventCallback;

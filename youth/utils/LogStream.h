@@ -21,7 +21,7 @@
 namespace youth
 {
 
-class LogStream : public noncopyable
+class LogStream : noncopyable
 {
 public:
     LogStream();

@@ -8,7 +8,7 @@
 namespace youth
 {
 
-class CountDownLatch : public noncopyable
+class CountDownLatch : noncopyable
 {
 public:
     CountDownLatch(int count_);

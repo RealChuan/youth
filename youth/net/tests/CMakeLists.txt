@@ -1,4 +1,3 @@
 #Target
-ADD_EXECUTABLE(TcpClientTest TcpClientTest.cpp)
-target_link_libraries(TcpClientTest youth_utils)
-target_link_libraries(TcpClientTest youth_net)
+ADD_EXECUTABLE(EventLoopTest EventLoopTest.cpp)
+target_link_libraries(EventLoopTest youth_net)

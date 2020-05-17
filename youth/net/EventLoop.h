@@ -8,13 +8,14 @@
 #include <sys/types.h>
 #include <vector>
 #include <memory>
+#include <atomic>
 
 namespace youth
 {
 
 class Channel;
 class Epoll;
-class EventLoop : public noncopyable
+class EventLoop : noncopyable
 {
     typedef std::function<void()> Functor;
 
@@ -48,18 +49,15 @@ public:
 
 private:
     void abortNotInLoopThread();
-
     void handleRead();  // waked up
-
     void doPendingFunctors();
-
     void printActiveChannels() const; // DEBUG
 
     typedef std::vector<Channel *> ChannelList;
 
     const pid_t m_threadID;
-    volatile bool m_looping; /* atomic */
-    volatile bool m_quit;
+    std::atomic<bool> m_looping; /* atomic */
+    std::atomic<bool> m_quit;
 
     volatile bool m_callingPendingFunctors; /* atomic */
     volatile bool m_eventHandling;          /* atomic */

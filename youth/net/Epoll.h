@@ -14,7 +14,7 @@ namespace youth
 
 class EventLoop;
 class Channel;
-class Epoll : public noncopyable
+class Epoll : noncopyable
 {
     typedef std::vector<Channel *> ChannelList;
 

@@ -14,10 +14,14 @@ const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent = EPOLLOUT;
 
 Channel::Channel(EventLoop *loop, int fd)
-    : m_loop(loop), m_index(-1) //epoll knew
-      ,
-      m_fd(fd), m_events(0),
-      m_revents(0), m_logHup(true), m_eventHandling(false), m_addedToLoop(false)
+    : m_loop(loop)
+    , m_index(-1) //epoll knew
+    , m_fd(fd)
+    , m_events(0)
+    , m_revents(0)
+    , m_logHup(true)
+    , m_eventHandling(false)
+    , m_addedToLoop(false)
 {
 }
 

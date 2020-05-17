@@ -2,8 +2,10 @@
 #include "Epoll.h"
 #include "Channel.h"
 #include "Socket.h"
-#include "youth/utils/LogOut.h"
-#include "youth/core/CurrentThread.h"
+#include "SocketFunc.h"
+
+#include <youth/utils/LogOut.h>
+#include <youth/core/CurrentThread.h>
 
 #include <assert.h>
 #include <sys/eventfd.h>
@@ -26,7 +28,14 @@ int createEventfd()
 }
 
 EventLoop::EventLoop()
-    : m_threadID(CurrentThread::tid()), m_looping(false), m_quit(false), m_callingPendingFunctors(false), m_eventHandling(false), m_index(0), m_epoll(new Epoll(this)), m_wakeupFd(createEventfd()), m_wakeupChannel(new Channel(this, m_wakeupFd))
+    : m_threadID(CurrentThread::tid())
+    , m_looping(false), m_quit(false)
+    , m_callingPendingFunctors(false)
+    , m_eventHandling(false)
+    , m_index(0)
+    , m_epoll(new Epoll(this))
+    , m_wakeupFd(createEventfd())
+    , m_wakeupChannel(new Channel(this, m_wakeupFd))
 {
     LOG_DEBUG << "EventLoop created " << this << " in thread " << m_threadID;
     if (g_loopInThisThread)
@@ -118,7 +127,7 @@ size_t EventLoop::queueSize() const
 void EventLoop::wakeup()
 {
     uint64_t one = 1;
-    ssize_t n = Socket::write(m_wakeupFd, &one, sizeof one);
+    ssize_t n = SocketFunc::write(m_wakeupFd, &one, sizeof one);
     if (n != sizeof one)
     {
         LOG_ERROR << "EventLoop::wakeup() writes " << n << " bytes instead of 8";
@@ -128,7 +137,7 @@ void EventLoop::wakeup()
 void EventLoop::handleRead()
 {
     uint64_t one = 1;
-    ssize_t n = Socket::read(m_wakeupFd, &one, sizeof one);
+    ssize_t n = SocketFunc::read(m_wakeupFd, &one, sizeof one);
     if (n != sizeof one)
     {
         LOG_ERROR << "EventLoop::handleRead() reads " << n << " bytes instead of 8";

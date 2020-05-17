@@ -1,182 +1,200 @@
 #include "Socket.h"
-#include "youth/utils/LogOut.h"
+#include "SocketFunc.h"
 
-#include <iostream>
-#include <unistd.h>
-#include <arpa/inet.h>
-//#include <sys/socket.h>
+#include <youth/utils/LogOut.h>
+
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <assert.h>
+#include <netdb.h>
+#include <sys/socket.h>
 
 using namespace youth;
 
-ssize_t read(int sockfd, void *buf, size_t count)
+TcpAddressInfo::TcpAddressInfo(uint16_t port, bool loopbackOnly, bool ipv6)
 {
-	return ::read(sockfd, buf, count);
+    if(ipv6)
+        SocketFunc::setServerAddress(port, &m_serveraddr6, loopbackOnly);
+    else
+        SocketFunc::setServerAddress(port, &m_serveraddr, loopbackOnly);
 }
 
-ssize_t readv(int sockfd, const struct iovec *iov, int iovcnt)
+TcpAddressInfo::TcpAddressInfo(const char *ip, uint16_t port, bool ipv6)
 {
-	return ::readv(sockfd, iov, iovcnt);
+    if(ipv6)
+        SocketFunc::setServerAddress(ip, port, &m_serveraddr6);
+    else
+        SocketFunc::setServerAddress(ip, port, &m_serveraddr);
 }
 
-ssize_t write(int sockfd, const void *buf, size_t count)
+const sockaddr *TcpAddressInfo::getSockAddr() const
 {
-	return ::write(sockfd, buf, count);
+    return reinterpret_cast<const sockaddr*>(&m_serveraddr);
 }
 
-struct sockaddr_in Socket::addrServer(uint16_t port)
+sa_family_t TcpAddressInfo::family() const
 {
-	struct sockaddr_in serverAddr;
-	memset(&serverAddr, 0, sizeof(struct sockaddr_in));
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(port);
-	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	return serverAddr;
+    return m_serveraddr.sin_family;
 }
 
-int Socket::socket()
+std::string TcpAddressInfo::ip() const
 {
-	int fd = 0;
-	//fd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
-	fd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (fd < 0)
-	{
-		LOG_FATAL << "socket Server error:" << errno;
-	}
-	return fd;
+    return SocketFunc::getIp(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
 }
 
-void Socket::listenAndBindServer(int serverfd, struct sockaddr_in serverAddr)
+uint16_t TcpAddressInfo::port() const
 {
-	//bind
-	int ret = ::bind(serverfd, reinterpret_cast<struct sockaddr *>(&serverAddr),
-					 static_cast<socklen_t>(sizeof(struct sockaddr_in)));
-	if (ret < 0)
-	{
-		LOG_FATAL << "bind error:" << errno;
-		return;
-	}
-
-	//listen
-	int ret_ = ::listen(serverfd, SOMAXCONN);
-	if (ret_ < 0)
-	{
-		LOG_FATAL << "listen error:" << errno;
-		return;
-	}
-
-	std::cout << "Server: " << Socket::getIpAndPort(serverAddr) << "Listen..." << std::endl;
+    return SocketFunc::getPort(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
 }
 
-int Socket::acceptServer(int serverfd)
+void TcpAddressInfo::setSockAddrInet6(const sockaddr_in6 &addr6)
 {
-	struct sockaddr_in clientAddr;
-	LOG_INFO << "Wait Client Cconnect...";
-	socklen_t addrlen = static_cast<socklen_t>(sizeof clientAddr);
-	int connfd = ::accept4(serverfd, reinterpret_cast<struct sockaddr *>(&clientAddr),
-						   &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC);
-	if (connfd < 0)
-	{
-		int savedErrno = errno;
-		LOG_FATAL << "Socket::accept";
-		switch (savedErrno)
-		{
-		case EAGAIN:
-		case ECONNABORTED:
-		case EINTR:
-		case EPROTO: // ???
-		case EPERM:
-		case EMFILE: // per-process lmit of open file desctiptor ???
-			// expected errors
-			errno = savedErrno;
-			break;
-		case EBADF:
-		case EFAULT:
-		case EINVAL:
-		case ENFILE:
-		case ENOBUFS:
-		case ENOMEM:
-		case ENOTSOCK:
-		case EOPNOTSUPP:
-			// unexpected errors
-			LOG_FATAL << "unexpected error of ::accept " << savedErrno;
-			break;
-		default:
-			LOG_FATAL << "unknown error of ::accept " << savedErrno;
-			break;
-		}
-		return -1;
-	}
-	LOG_INFO << "Client Online: " << Socket::getIpAndPort(clientAddr);
-	return connfd;
+    m_serveraddr6 = addr6;
 }
 
-struct sockaddr_in Socket::addrClient(const char *ip, uint16_t port)
+static __thread char t_resolveBuf[64 * 1024];
+
+bool TcpAddressInfo::resolve(std::string hostname, TcpAddressInfo *out)
 {
-	struct sockaddr_in serverAddr_;
-	memset(&serverAddr_, 0, sizeof(struct sockaddr_in));
-	//设置服务器的地址
-	serverAddr_.sin_family = AF_INET;
-	serverAddr_.sin_port = htons(port);
-	serverAddr_.sin_addr.s_addr = inet_addr(ip);
-	//inet_pton(AF_INET, ip, &clientsock.sin_addr.s_addr);
+    assert(out != NULL);
+    struct hostent hent;
+    struct hostent* he = NULL;
+    int herrno = 0;
+    memset(&hent, 0, sizeof(hent));
 
-	LOG_DEBUG << "Server parameters: " << Socket::getIpAndPort(serverAddr_);
-
-	return serverAddr_;
+    int ret = gethostbyname_r(hostname.c_str(), &hent, t_resolveBuf,
+                              sizeof t_resolveBuf, &he, &herrno);
+    if (ret == 0 && he != NULL)
+    {
+        assert(he->h_addrtype == AF_INET && he->h_length == sizeof(uint32_t));
+        out->m_serveraddr.sin_addr = *reinterpret_cast<struct in_addr*>(he->h_addr);
+        return true;
+    }
+    else
+    {
+        if (ret)
+        {
+            LOG_ERROR << "TcpAddressInfo::resolve";
+        }
+        return false;
+    }
 }
 
-void Socket::connectServer(int sockfd, struct sockaddr_in serverAddr_)
-{
-	int ret = connect(sockfd, reinterpret_cast<struct sockaddr *>(&serverAddr_),
-					  static_cast<socklen_t>(sizeof serverAddr_));
-	if (ret < 0)
-	{
-		perror("error:");
-		LOG_FATAL << "connect Server error:" << errno;
-		Socket::closeSockfd(sockfd);
-		return;
-	}
+/*
+ *
+ * */
 
-	LOG_INFO << "Local Client: " << Socket::getLocalIpAndPort(sockfd);
-	LOG_INFO << "Successfully connected to the server: " << Socket::getIpAndPort(serverAddr_);
+Socket::Socket(int sockfd) : m_sockfd(sockfd)
+{
+
 }
 
-void Socket::shutdownWrite(int sockfd)
+Socket::~Socket()
 {
-	if (::shutdown(sockfd, SHUT_WR) < 0)
-	{
-		LOG_ERROR << "sockets::shutdownWrite";
-	}
+    SocketFunc::closeSockfd(m_sockfd);
 }
 
-void Socket::closeSockfd(int sockfd)
+int Socket::fd() const
 {
-	if (sockfd > 0)
-	{
-		if (::close(sockfd) < 0)
-		{
-			LOG_ERROR << "sockets::close";
-		}
-	}
+    return m_sockfd;
 }
 
-std::string Socket::getIpAndPort(struct sockaddr_in addr)
+bool Socket::getTcpInfo(tcp_info *tcpi) const
 {
-	char buf[256];
-	snprintf(buf, 256, "%s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-	return buf;
+    socklen_t len = sizeof(*tcpi);
+    memset(tcpi, 0, len);
+    return ::getsockopt(m_sockfd, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
 }
 
-std::string Socket::getLocalIpAndPort(int sockfd)
+bool Socket::getTcpInfoString(char *buf, int len) const
 {
-	struct sockaddr_in addr;
-	socklen_t addrlen = static_cast<socklen_t>(sizeof addr);
-	int ret = getsockname(sockfd, reinterpret_cast<struct sockaddr *>(&addr), &addrlen);
-	if (ret == 0)
-	{
-		return Socket::getIpAndPort(addr);
-	}
-	char buf[10];
-	memset(buf, 0, sizeof buf);
-	return buf;
+    struct tcp_info tcpi;
+    bool ok = getTcpInfo(&tcpi);
+    if (ok)
+    {
+        snprintf(buf, len, "unrecovered=%u "
+                           "rto=%u ato=%u snd_mss=%u rcv_mss=%u "
+                           "lost=%u retrans=%u rtt=%u rttvar=%u "
+                           "sshthresh=%u cwnd=%u total_retrans=%u",
+                 tcpi.tcpi_retransmits,  // Number of unrecovered [RTO] timeouts
+                 tcpi.tcpi_rto,          // Retransmit timeout in usec
+                 tcpi.tcpi_ato,          // Predicted tick of soft clock in usec
+                 tcpi.tcpi_snd_mss,
+                 tcpi.tcpi_rcv_mss,
+                 tcpi.tcpi_lost,         // Lost packets
+                 tcpi.tcpi_retrans,      // Retransmitted packets out
+                 tcpi.tcpi_rtt,          // Smoothed round trip time in usec
+                 tcpi.tcpi_rttvar,       // Medium deviation
+                 tcpi.tcpi_snd_ssthresh,
+                 tcpi.tcpi_snd_cwnd,
+                 tcpi.tcpi_total_retrans);  // Total retransmits for entire connection
+    }
+    return ok;
 }
+
+void Socket::bindAddress(const TcpAddressInfo &addrInfo)
+{
+    SocketFunc::bind(m_sockfd, addrInfo.getSockAddr());
+}
+
+void Socket::listen(const TcpAddressInfo &addrInfo)
+{
+    SocketFunc::listen(m_sockfd, addrInfo.getSockAddr());
+}
+
+int Socket::accept(TcpAddressInfo *peeraddr)
+{
+    struct sockaddr_in6 addr;
+    memset(&addr, 0, sizeof addr);
+    int connfd = SocketFunc::accept(m_sockfd, &addr);
+    if(connfd > 0)
+    {
+        peeraddr->setSockAddrInet6(addr);
+    }
+    return connfd;
+}
+
+void Socket::shutdownWrite()
+{
+    SocketFunc::shutdownWrite(m_sockfd);
+}
+
+void Socket::setTcpNoDelay(bool on)
+{
+    int optval = on ? 1 : 0;
+    ::setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY,
+                 &optval, static_cast<socklen_t>(sizeof optval));
+}
+
+void Socket::setReuseAddr(bool on)
+{
+    int optval = on ? 1 : 0;
+    ::setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR,
+                 &optval, static_cast<socklen_t>(sizeof optval));
+}
+
+void Socket::setReusePort(bool on)
+{
+#ifdef SO_REUSEPORT
+    int optval = on ? 1 : 0;
+    int ret = ::setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEPORT,
+                           &optval, static_cast<socklen_t>(sizeof optval));
+    if (ret < 0 && on)
+    {
+        LOG_ERROR << "SO_REUSEPORT failed.";
+    }
+#else
+    if (on)
+    {
+        LOG_ERROR << "SO_REUSEPORT is not supported.";
+    }
+#endif
+}
+
+void Socket::setKeepAlive(bool on)
+{
+    int optval = on ? 1 : 0;
+    ::setsockopt(m_sockfd, SOL_SOCKET, SO_KEEPALIVE,
+                 &optval, static_cast<socklen_t>(sizeof optval));
+}
+

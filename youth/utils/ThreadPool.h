@@ -1,16 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   YThreadPool.h
- * Author: root
- *
- * Created on 2019年8月18日, 下午1:19
- */
-
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
@@ -24,7 +11,8 @@
 
 namespace youth
 {
-class ThreadPool : public noncopyable
+
+class ThreadPool : noncopyable
 {
 	typedef std::function<void () > Task;
 
@@ -77,7 +65,7 @@ private:
 	std::deque<Task> queue_ GUARDED_BY(mutex_);
 
 };
+
 }
 
 #endif /* THREADPOOL_H */
-

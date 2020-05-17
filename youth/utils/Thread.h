@@ -18,7 +18,7 @@
 namespace youth
 {
 
-class Thread : public noncopyable
+class Thread : noncopyable
 {
     typedef std::function<void()> ThreadFunc;
 public:
@@ -44,7 +44,7 @@ private:
     //std::string _name;
 };
 
-class Mutex : public noncopyable
+class Mutex : noncopyable
 {
 public:
     Mutex();
@@ -59,7 +59,7 @@ private:
     pthread_mutex_t mutex;
 };
 
-class MutexLock : public noncopyable
+class MutexLock : noncopyable
 {
 public:
     MutexLock(Mutex& mutex_);
@@ -69,7 +69,7 @@ private:
     Mutex& mutex;
 };
 
-class Condition : public noncopyable
+class Condition : noncopyable
 {
 public:
     Condition(Mutex& mutex);

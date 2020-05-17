@@ -2,12 +2,13 @@
 #define ELAPSEDTIME_H
 
 #include <string>
+
 #include "youth/core/Object.h"
 
 namespace  youth
 {
 
-class ElapsedTime
+class ElapsedTime : noncopyable
 {
 public:
     ElapsedTime();

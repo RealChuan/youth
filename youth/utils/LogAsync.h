@@ -12,7 +12,7 @@
 namespace youth
 {
 
-class LogAsync : public noncopyable
+class LogAsync : noncopyable
 {
 public:
     LogAsync(int flushInterval);

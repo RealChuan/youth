@@ -8,7 +8,7 @@ namespace youth {
 
 //  thread not safe
 
-class FileUtil : public noncopyable
+class FileUtil : noncopyable
 {
 public:
     enum OpenModel

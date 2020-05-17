@@ -15,7 +15,9 @@ const int kAdded = 1;
 const int kDeleted = 2;
 
 Epoll::Epoll(EventLoop *eventLoop)
-    : m_ownerLoop(eventLoop), m_events(kInitEventListSize), m_epollfd(::epoll_create(EPOLL_CLOEXEC))
+    : m_ownerLoop(eventLoop)
+    , m_events(kInitEventListSize)
+    , m_epollfd(::epoll_create(EPOLL_CLOEXEC))
 {
     if (m_epollfd < 0)
     {
@@ -50,7 +52,7 @@ Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
         if (savedErrno != EINTR)
         {
             errno = savedErrno;
-            LOG_ERROR << "EPoll::poll()" << errno;
+            LOG_ERROR << "EPoll::poll()";
         }
     }
     return timestamp;

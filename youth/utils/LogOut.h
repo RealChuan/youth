@@ -10,10 +10,10 @@
 namespace youth
 {
 
-class LogOut : public noncopyable
+class LogOut : noncopyable
 {
 public:
-    LogOut(const char* pLevel, const char* File, int Line);
+    LogOut(const char* level, const char* m_file, int m_line, bool outError = false);
     virtual ~LogOut();
     LogStream &getLogStream();
 
@@ -27,10 +27,10 @@ public:
     int getLogStreamBuffLen();
 
 private:
-    int line; //行号
-    const char* file;
+    int m_line; //行号
+    const char* m_file;
     Timestamp m_timestamp; //Log时间类
-    LogStream logStream; //LogStream类
+    LogStream m_logStream; //LogStream类
 };
 
 class LogFile;
@@ -45,10 +45,7 @@ public:
     //当我们定义了日志的优先级之后，应用程序中比设置的优先级别低的
     //都会被输出。
 
-    enum LogLevel
-    {
-        DEBUG, INFO, WARN, ERROR, FATAL
-    };
+    enum LogLevel { DEBUG, INFO, WARN, ERROR, FATAL };
 
     typedef void(*outputFunc)(const char *pMsg, int Len);
     typedef void(*flushFunc)(void);
@@ -60,7 +57,7 @@ public:
     static void setOutputMode(int iMode);
     static void setFileBaseName(const char*);
 
-    Logging(LogLevel Level, const char* _File, int Line);
+    Logging(LogLevel level, const char* file, int line, bool outError = false);
     ~Logging();
 
     LogStream &getLogStream();
@@ -74,7 +71,7 @@ private:
     static void flushAll();
 
     std::unique_ptr<LogOut> m_LogOut;
-    LogLevel logLevel;
+    LogLevel m_logLevel;
 };
 
 //这几个宏是用来设置输出模式的：输出到标准输出 输出到log文件 输出到标准输出和log文件
@@ -83,7 +80,7 @@ private:
 #define LOGGER_MODE_OUTANDFILE (LOGGER_MODE_STDOUT | LOGGER_MODE_LOGFILE)
 
 #define LOG_DEBUG if (Logging::getLogLevel() <= Logging::DEBUG) \
-    Logging(Logging::DEBUG, __FILE__,__LINE__).getLogStream()
+    Logging(Logging::DEBUG, __FILE__,__LINE__).getLogStream() \
 
 #define LOG_INFO if (Logging::getLogLevel() <= Logging::INFO) \
     Logging(Logging::INFO, __FILE__,__LINE__).getLogStream()
@@ -91,9 +88,9 @@ private:
 #define LOG_WARN if (Logging::getLogLevel() <= Logging::WARN) \
     Logging(Logging::WARN,__FILE__, __LINE__).getLogStream()
 
-#define LOG_ERROR  Logging(Logging::ERROR, __FILE__,__LINE__).getLogStream()
+#define LOG_ERROR Logging(Logging::ERROR, __FILE__,__LINE__, true).getLogStream()
 
-#define LOG_FATAL  Logging(Logging::FATAL,__FILE__, __LINE__).getLogStream()
+#define LOG_FATAL Logging(Logging::FATAL,__FILE__, __LINE__, true).getLogStream()
 
 }
 

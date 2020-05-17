@@ -7,7 +7,7 @@
 
 namespace youth
 {
-class Timestamp : public copyable
+class Timestamp : copyable
 {
 public:
     explicit Timestamp();
