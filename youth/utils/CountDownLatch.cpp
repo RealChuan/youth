@@ -2,32 +2,32 @@
 
 using namespace youth;
 
-CountDownLatch::CountDownLatch(int count_)
-    :mutex()
-    ,condition(mutex)
-    ,count(count_)
+CountDownLatch::CountDownLatch(int count)
+    :m_mutex()
+    ,m_condition(m_mutex)
+    ,m_count(count)
 {
 }
 
 void CountDownLatch::wait()
 {
-    MutexLock lock(mutex);
-    while(count > 0)
-        condition.wait();
+    MutexLock lock(m_mutex);
+    while(m_count > 0)
+        m_condition.wait();
 }
 
 void CountDownLatch::countDown()
 {
-    MutexLock lock(mutex);
-    count--;
-    if(count == 0)
+    MutexLock lock(m_mutex);
+    m_count--;
+    if(m_count == 0)
     {
-        condition.notifyAll();
+        m_condition.notifyAll();
     }
 }
 
 int CountDownLatch::getCount() const
 {
-    MutexLock lock(mutex);
-    return count;
+    MutexLock lock(m_mutex);
+    return m_count;
 }

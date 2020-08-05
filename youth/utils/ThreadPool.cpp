@@ -1,16 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   YThreadPool.cpp
- * Author: root
- *
- * Created on 2019年8月18日, 下午1:19
- */
-
 #include "ThreadPool.h"
 
 #include <assert.h>
@@ -18,109 +5,125 @@
 using namespace youth;
 
 ThreadPool::ThreadPool()
-	:maxTaskNum_(0)
-	,running_(false)
-	,mutex_()
-	,notEmpty_(mutex_)
-	,notFull_(mutex_)
+    :m_maxTaskNum(0)
+    ,m_running(false)
+    ,m_mutex()
+    ,m_notEmpty(m_mutex)
+    ,m_notFull(m_mutex)
 {
 }
 
 ThreadPool::~ThreadPool()
 {
-	if (running_)
-	{
-		stop();
-	}
+    if (m_running)
+    {
+        stop();
+    }
+}
+
+void ThreadPool::setTaskNum(int maxTaskNum)
+{
+    m_maxTaskNum = maxTaskNum;
+}
+
+void ThreadPool::setThreadInitCallback(const ThreadPool::Task &cb)
+{
+    m_threadInitCallback = cb;
 }
 
 void ThreadPool::start(int numThreads)
 {
-	assert(threads_.empty());
-	running_ = true;
-	threads_.reserve(static_cast<unsigned long>(numThreads));
-	for (int i = 0; i < numThreads; ++i)
-	{
-		char id[32];
-		snprintf(id, sizeof id, "%d", i + 1);
-		threads_.emplace_back(new youth::Thread(
-								  std::bind(&ThreadPool::threadFunc, this)));
-		threads_[static_cast<unsigned long>(i)]->start();
-	}
-	if (numThreads == 0 && threadInitCallback_)
-	{
-		threadInitCallback_();
-	}
+    assert(m_threadVec.empty());
+    m_running = true;
+    m_threadVec.reserve(static_cast<unsigned long>(numThreads));
+    for (int i = 0; i < numThreads; ++i)
+    {
+        char id[32];
+        snprintf(id, sizeof id, "%d", i + 1);
+        m_threadVec.emplace_back(new youth::Thread(
+                                     std::bind(&ThreadPool::threadFunc, this)));
+        m_threadVec[static_cast<unsigned long>(i)]->start();
+    }
+    if (numThreads == 0 && m_threadInitCallback)
+    {
+        m_threadInitCallback();
+    }
 }
 
 void ThreadPool::stop()
 {
-	{
-		MutexLock lock(mutex_);
-		running_ = false;
-		notEmpty_.notifyAll();
-	}
-	for (auto& thr : threads_)
-	{
-		thr->join();
-	}
+    {
+        MutexLock lock(m_mutex);
+        m_running = false;
+        m_notEmpty.notifyAll();
+    }
+    for (auto& thr : m_threadVec)
+    {
+        thr->join();
+    }
+}
+
+size_t ThreadPool::queueSize() const
+{
+    //YMutexLock lock(mutex_);
+    return m_queue.size();
 }
 
 void ThreadPool::threadFunc()
 {
-	assert(running_ == true);
+    assert(m_running == true);
 
-	if (threadInitCallback_)
-	{
-		threadInitCallback_();
-	}
-	while (running_)
-	{
-		Task task(take());
-		if (task)
-		{
-			task();
-		}
-	}
+    if (m_threadInitCallback)
+    {
+        m_threadInitCallback();
+    }
+    while (m_running)
+    {
+        Task task(take());
+        if (task)
+        {
+            task();
+        }
+    }
 }
 
 void ThreadPool::run(Task task)
 {
-	if (threads_.empty())
-	{
-		task();
-	}
-	else
-	{
-		MutexLock lock(mutex_);
-		while (isFull())
-		{
-			notFull_.wait();
-		}
-		assert(!isFull());
+    if (m_threadVec.empty())
+    {
+        task();
+    }
+    else
+    {
+        MutexLock lock(m_mutex);
+        while (isFull())
+        {
+            m_notFull.wait();
+        }
+        assert(!isFull());
 
-		queue_.push_back(std::move(task));
-		notEmpty_.notify();
-	}
+        m_queue.push_back(std::move(task));
+        m_notEmpty.notify();
+    }
 }
 
 ThreadPool::Task ThreadPool::take()
 {
-	MutexLock lock(mutex_);
-	// always use a while-loop, due to spurious wakeup
-	while (queue_.empty() && running_)
-	{
-		notEmpty_.wait();
-	}
-	Task task;
-	if (!queue_.empty())
-	{
-		task = queue_.front();
-		queue_.pop_front();
-		if (maxTaskNum_ > 0)
-		{
-			notFull_.notify();
-		}
-	}
-	return task;
+    MutexLock lock(m_mutex);
+    // always use a while-loop, due to spurious wakeup
+    while (m_queue.empty() && m_running)
+    {
+        m_notEmpty.wait();
+    }
+    Task task;
+    if (!m_queue.empty())
+    {
+        task = m_queue.front();
+        m_queue.pop_front();
+        if (m_maxTaskNum > 0)
+        {
+            m_notFull.notify();
+        }
+    }
+    return task;
 }

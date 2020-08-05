@@ -1,7 +1,7 @@
 #include "LogFile.h"
-#include "youth/core/ProcessMsg.h"
-#include "youth/core/FileUtil.h"
-#include "youth/core/Dir.h"
+#include <youth/core/ProcessMsg.h>
+#include <youth/core/FileUtil.h>
+#include <youth/core/Dir.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -11,9 +11,9 @@ using namespace youth;
 const static int kRollPerSeconds_ = 60*60*24;
 
 LogFile::LogFile()
-    :count(0)
-    ,startTime(0)
-    ,lastRoll(0)
+    :m_count(0)
+    ,m_startTime(0)
+    ,m_lastRoll(0)
 {
     //rollFile();
     //setDelLogFileDays(7);
@@ -23,9 +23,18 @@ LogFile::~LogFile()
 {
 }
 
+static Mutex g_logFileMutex;
+
+LogFile *LogFile::instance()
+{
+    MutexLock lock(g_logFileMutex);
+    static LogFile logFile;
+    return &logFile;
+}
+
 void LogFile::setRollSize(off_t size)
 {
-    rollSize = size;
+    m_rollSize = size;
 }
 
 //void LogFile::setDelLogFileDays(uint days)
@@ -42,51 +51,51 @@ void LogFile::setRollSize(off_t size)
 void LogFile::setBaseFileName(const std::string &basename_)
 {
     if(basename_.empty())
-        basename = Dir::currentPath().c_str();
+        m_basename = Dir::currentPath().c_str();
     else
-        basename = basename_;
+        m_basename = basename_;
     rollFile(0);
 }
 
 void LogFile::outputFunc(const char *msg, int len)
 {
-    LogFile *pLogFile = &instance();
-    pLogFile->outputLogFile(msg, len);
+    LogFile *logFile = LogFile::instance();
+    logFile->outputLogFile(msg, len);
 }
 
 void LogFile::flushFunc()
 {
-    LogFile *pLogFile = &instance();
-    pLogFile->flushLogFile();
+    LogFile *logFile = LogFile::instance();
+    logFile->flushLogFile();
 }
 
 void LogFile::outputLogFile(const char *msg, int len)
 {
-    MutexLock lock(mutex);
+    MutexLock lock(m_mutex);
 
     //roll file
-    if (file->writeBytes() > rollSize)
+    if (m_filePtr->writeBytes() > m_rollSize)
     {
-        rollFile(++count);
+        rollFile(++m_count);
     }
     else
     {
         time_t now = ::time(NULL);
         time_t thisPeriod = now / kRollPerSeconds_ * kRollPerSeconds_;
-        if (thisPeriod != startTime)
+        if (thisPeriod != m_startTime)
         {
-            count = 0;
+            m_count = 0;
             rollFile(0);
         }
     }
 
-    file->write(msg, len);
+    m_filePtr->write(msg, len);
 }
 
 void LogFile::flushLogFile()
 {
-    MutexLock lock(mutex);
-    file->flushFile();
+    MutexLock lock(m_mutex);
+    m_filePtr->flushFile();
 }
 
 std::string LogFile::getFileName(time_t *now)
@@ -98,7 +107,7 @@ std::string LogFile::getFileName(time_t *now)
     *now = time(NULL);
     gmtime_r(now, &tm);
     strftime(buf, sizeof buf, "%Y-%m-%d.", &tm);
-    fileName = "Log/" + basename + buf + ProcessMsg::hostname();
+    fileName = "Log/" + m_basename + buf + ProcessMsg::hostname();
     snprintf(buf, sizeof buf, ".%d", ProcessMsg::getPid());
     fileName = fileName + buf + ".log";
 
@@ -116,13 +125,13 @@ bool LogFile::rollFile(int count)
         fileName += buf;
     }
     time_t start = now / kRollPerSeconds_ * kRollPerSeconds_;
-    if (now > lastRoll)
+    if (now > m_lastRoll)
     {
         //delLogFiles();
-        startTime = start;
-        lastRoll = now;
-        file.reset(new FileUtil(fileName));
-        file->open(FileUtil::Append);
+        m_startTime = start;
+        m_lastRoll = now;
+        m_filePtr.reset(new FileUtil(fileName));
+        m_filePtr->open(FileUtil::Append);
         return true;
     }
     return false;

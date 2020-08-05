@@ -215,6 +215,6 @@ LogStream &LogStream::operator<<(const void *p)
     buf[0] = '0';
     buf[1] = 'x';
     size_t len = convertHex(buf+2, v);
-    m_logBuffer.appendLen(len+2);
+    m_logBuffer.appendLen(int(len + 2));
     return *this;
 }

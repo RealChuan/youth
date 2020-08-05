@@ -5,6 +5,7 @@
 #include <youth/core/Timestamp.h>
 
 #include <functional>
+#include <memory>
 
 namespace youth
 {
@@ -25,6 +26,8 @@ public:
     void setWriteCallback(EventCallback cb);
     void setCloseCallback(EventCallback cb);
     void setErrorCallback(EventCallback cb);
+
+    void tie(const std::shared_ptr<void>&);
 
     void enableReading();
     void disableReading();
@@ -62,7 +65,7 @@ private:
     static const int kReadEvent;
     static const int kWriteEvent;
 
-    EventLoop *m_loop;
+    EventLoop *m_eventLoop;
 
     int m_index; // used by Poller. 索引
     const int m_fd;
@@ -71,6 +74,8 @@ private:
     bool m_logHup;
     bool m_eventHandling;
     bool m_addedToLoop;
+    std::weak_ptr<void> m_tie;
+    bool m_tied;
 
     ReadEventCallback m_readCallback;
     EventCallback m_writeCallback;

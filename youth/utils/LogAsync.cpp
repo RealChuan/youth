@@ -4,101 +4,123 @@
 
 using namespace youth;
 
-static LogAsync* g_LogAsync = nullptr;
-
 void asyncOutput(const char* msg, int len)
 {
-    g_LogAsync->append(msg, len);
+    LogAsync* logAsync = LogAsync::instance();
+    logAsync->append(msg, len);
 }
 
 LogAsync::LogAsync(int flushInterval)
     : m_timestamp(Timestamp::currentTimestamp()),
-      refreshTime(flushInterval),
-      running(false),
-      thread(std::bind(&LogAsync::threadFunc, this)),
-      mutex(),
-      cond(mutex),
-      currentBuffer(new Buffer),
-      nextBuffer(new Buffer),
-      buffers()
+      m_refreshTime(flushInterval),
+      m_running(false),
+      m_thread(std::bind(&LogAsync::threadFunc, this)),
+      m_mutex(),
+      m_cond(m_mutex),
+      m_currentBuffer(new Buffer),
+      m_nextBuffer(new Buffer),
+      m_buffers()
 {
-    currentBuffer->bzero();
-    nextBuffer->bzero();
-    buffers.reserve(16);
-
-    if (g_LogAsync)
-    {
-        delete g_LogAsync;
-        g_LogAsync = this;
-    }
-    else
-    {
-        g_LogAsync = this;
-    }
+    m_currentBuffer->bzero();
+    m_nextBuffer->bzero();
+    m_buffers.reserve(16);
     Logging::setOutputFunc(asyncOutput);
 }
 
 LogAsync::~LogAsync()
 {
-    g_LogAsync = nullptr;
-    if (running)
+    if(m_running)
     {
         stop();
     }
 }
 
+static Mutex g_logAsyncMutex;
+
+LogAsync *LogAsync::instance()
+{
+    MutexLock lock(g_logAsyncMutex);
+    static LogAsync logAsync;
+    return &logAsync;
+}
+
+void LogAsync::setFlushInterval(int flushInterval)
+{
+    m_refreshTime = flushInterval;
+}
+
 void LogAsync::append(const char* buf, int len)
 {
-    MutexLock lock(mutex);
-    if (currentBuffer->avail() > len)
+    MutexLock lock(m_mutex);
+    if (m_currentBuffer->avail() > len)
     {
-        currentBuffer->append(buf, len);
+        m_currentBuffer->append(buf, len);
     }
     else
     {
-        buffers.push_back(std::move(currentBuffer));
+        m_buffers.push_back(std::move(m_currentBuffer));
 
-        if (nextBuffer)
+        if (m_nextBuffer)
         {
-            currentBuffer = std::move(nextBuffer);
+            m_currentBuffer = std::move(m_nextBuffer);
         }
         else
         {
-            currentBuffer.reset(new Buffer); // Rarely happens
+            m_currentBuffer.reset(new Buffer); // Rarely happens
         }
-        currentBuffer->append(buf, len);
-        cond.notify();
+        m_currentBuffer->append(buf, len);
+        m_cond.notify();
     }
+}
+
+void LogAsync::start()
+{
+    m_running = true;
+    m_thread.start();
+    printf("日志线程开始\n");
+}
+
+void LogAsync::stop()
+{
+    m_running = false;
+    m_cond.notify();
+    //保证日志全部输出
+    {
+        MutexLock lock(m_mutex);
+        m_cond.wait();
+    }
+    m_thread.join();
+    printf("日志线程结束\n");
 }
 
 void LogAsync::threadFunc()
 {
-    assert(running == true);
+    assert(m_running == true);
     BufferPtr newBuffer1(new Buffer);
     BufferPtr newBuffer2(new Buffer);
     newBuffer1->bzero();
     newBuffer2->bzero();
     BufferVector buffersToWrite;
     buffersToWrite.reserve(16);
-    while (running)
+    while (m_running)
     {
         assert(newBuffer1 && newBuffer1->length() == 0);
         assert(newBuffer2 && newBuffer2->length() == 0);
         assert(buffersToWrite.empty());
 
         {
-            MutexLock lock(mutex);
-            if (buffers.empty()) // unusual usage!
+            MutexLock lock(m_mutex);
+            if (m_buffers.empty()) // unusual usage!
             {
-                cond.waitForSeconds(refreshTime);
+                m_cond.waitForSeconds(m_refreshTime);
             }
 
-            buffers.push_back(std::move(currentBuffer));
-            currentBuffer = std::move(newBuffer1);
-            buffersToWrite.swap(buffers);
-            if (!nextBuffer)
+            m_buffers.push_back(std::move(m_currentBuffer));
+            m_currentBuffer = std::move(newBuffer1);
+            buffersToWrite.swap(m_buffers);
+            if (!m_nextBuffer)
             {
-                nextBuffer = std::move(newBuffer2);
+                m_nextBuffer = std::move(newBuffer2);
             }
         }
         assert(!buffersToWrite.empty());
@@ -145,5 +167,5 @@ void LogAsync::threadFunc()
         LogFile::flushFunc();
     }
     LogFile::flushFunc();
-    cond.notify();
+    m_cond.notify();
 }

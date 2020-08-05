@@ -11,15 +11,15 @@ namespace youth
 class CountDownLatch : noncopyable
 {
 public:
-    CountDownLatch(int count_);
+    CountDownLatch(int count);
     void wait();
     void countDown();
     int getCount() const;
 
 private:
-    mutable Mutex mutex;
-    Condition condition GUARDED_BY(mutex);
-    int count GUARDED_BY(mutex);
+    mutable Mutex m_mutex;
+    Condition m_condition GUARDED_BY(m_mutex);
+    int m_count GUARDED_BY(m_mutex);
 };
 
 }

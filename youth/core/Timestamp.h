@@ -22,9 +22,10 @@ public:
     static const int kMicroSecondsPerSecond = 1000 * 1000;
 private:
     inline bool getTime();
-    int64_t mcroSecondsSinceEpoch;
-    struct tm tm_time;
-    time_t lastSecond;
+
+    int64_t m_mcroSecondsSinceEpoch;
+    struct tm m_tmTime;
+    time_t m_lastSecond;
 };
 
 }

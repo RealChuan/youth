@@ -23,6 +23,7 @@ public:
     sa_family_t family() const;
     std::string ip() const;
     uint16_t port() const;
+    std::string ipAndPort() const;
 
     void setSockAddrInet6(const struct sockaddr_in6& addr6);
 

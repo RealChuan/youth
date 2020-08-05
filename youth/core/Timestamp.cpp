@@ -9,14 +9,14 @@ using namespace youth;
 //                                "Wednessday", "Thursday", "Friday", "Saturday"};
 
 Timestamp::Timestamp()
-    :mcroSecondsSinceEpoch(0)
-    ,lastSecond(0)
+    :m_mcroSecondsSinceEpoch(0)
+    ,m_lastSecond(0)
 {
 }
 
 Timestamp::Timestamp(int64_t ms)
-    :mcroSecondsSinceEpoch(ms)
-    ,lastSecond(0)
+    :m_mcroSecondsSinceEpoch(ms)
+    ,m_lastSecond(0)
 {
 }
 
@@ -33,7 +33,7 @@ std::string Timestamp::getDayToString()
     getTime();
     char buf[32] = {0};
     snprintf(buf, sizeof(buf), "%4d-%02d-%02d",
-             tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday);
+             m_tmTime.tm_year + 1900, m_tmTime.tm_mon + 1, m_tmTime.tm_mday);
     return buf;
 }
 
@@ -42,8 +42,8 @@ std::string Timestamp::getSecondToString()
     getTime();
     char buf[64] = {0};
     snprintf(buf, sizeof(buf), "%4d-%02d-%02d %02d:%02d:%02d",
-             tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-             tm_time.tm_hour + 8, tm_time.tm_min, tm_time.tm_sec);
+             m_tmTime.tm_year + 1900, m_tmTime.tm_mon + 1, m_tmTime.tm_mday,
+             m_tmTime.tm_hour + 8, m_tmTime.tm_min, m_tmTime.tm_sec);
     return buf;
 }
 
@@ -51,21 +51,21 @@ std::string Timestamp::getMicroSToString()
 {
     getTime();
     char buf[64] = {0};
-    int microseconds = static_cast<int>(mcroSecondsSinceEpoch % kMicroSecondsPerSecond);
+    int microseconds = static_cast<int>(m_mcroSecondsSinceEpoch % kMicroSecondsPerSecond);
     snprintf(buf, sizeof buf, "%4d-%02d-%02d %02d:%02d:%02d.%06d",
-             tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-             tm_time.tm_hour + 8, tm_time.tm_min, tm_time.tm_sec,
+             m_tmTime.tm_year + 1900, m_tmTime.tm_mon + 1, m_tmTime.tm_mday,
+             m_tmTime.tm_hour + 8, m_tmTime.tm_min, m_tmTime.tm_sec,
              microseconds);
     return buf;
 }
 
 bool Timestamp::getTime()
 {
-    time_t seconds = static_cast<time_t>(mcroSecondsSinceEpoch / kMicroSecondsPerSecond);
-    if(seconds == lastSecond)
+    time_t seconds = static_cast<time_t>(m_mcroSecondsSinceEpoch / kMicroSecondsPerSecond);
+    if(seconds == m_lastSecond)
         return false;   //只格式化微秒
-    lastSecond = seconds;
-    gmtime_r(&seconds, &tm_time);
+    m_lastSecond = seconds;
+    gmtime_r(&seconds, &m_tmTime);
     return true;
 }
 

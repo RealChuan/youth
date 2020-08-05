@@ -34,13 +34,10 @@ private:
 
     static const int kInitEventListSize = 16;
 
-    EventLoop *m_ownerLoop;
-
+    EventLoop *m_eventLoop;
     typedef std::map<int, Channel *> ChannelMap;
-    ChannelMap channelMap;
-
-    typedef std::vector<struct epoll_event> EventVec;
-    EventVec m_events;
+    ChannelMap m_channelMap;
+    std::vector<struct epoll_event> m_eventVec;
     int m_epollfd;
 };
 } // namespace youth

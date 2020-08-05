@@ -14,7 +14,7 @@ const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent = EPOLLOUT;
 
 Channel::Channel(EventLoop *loop, int fd)
-    : m_loop(loop)
+    : m_eventLoop(loop)
     , m_index(-1) //epoll knew
     , m_fd(fd)
     , m_events(0)
@@ -22,6 +22,7 @@ Channel::Channel(EventLoop *loop, int fd)
     , m_logHup(true)
     , m_eventHandling(false)
     , m_addedToLoop(false)
+    , m_tied(false)
 {
 }
 
@@ -29,15 +30,27 @@ Channel::~Channel()
 {
     assert(!m_eventHandling);
     assert(!m_addedToLoop);
-    if (m_loop->isInLoopThread())
+    if (m_eventLoop->isInLoopThread())
     {
-        assert(!m_loop->hasChannel(this));
+        assert(!m_eventLoop->hasChannel(this));
     }
 }
 
 void Channel::handleEvent(Timestamp receiveTime)
 {
-    handleEventWithGuard(receiveTime);
+    std::shared_ptr<void> guard;
+    if (m_tied)
+    {
+        guard = m_tie.lock();
+        if (guard)
+        {
+            handleEventWithGuard(receiveTime);
+        }
+    }
+    else
+    {
+        handleEventWithGuard(receiveTime);
+    }
 }
 
 void youth::Channel::setReadCallback(ReadEventCallback cb)
@@ -58,6 +71,12 @@ void Channel::setCloseCallback(Channel::EventCallback cb)
 void Channel::setErrorCallback(Channel::EventCallback cb)
 {
     m_errorCallback = std::move(cb);
+}
+
+void Channel::tie(const std::shared_ptr<void> &obj)
+{
+    m_tie = obj;
+    m_tied = true;
 }
 
 void Channel::enableReading()
@@ -93,14 +112,14 @@ void Channel::disableAll()
 void Channel::update()
 {
     m_addedToLoop = true;
-    m_loop->updateChannel(this);
+    m_eventLoop->updateChannel(this);
 }
 
 void Channel::remove()
 {
     assert(isNoneEvent());
     m_addedToLoop = false;
-    m_loop->removeChannel(this);
+    m_eventLoop->removeChannel(this);
 }
 
 bool Channel::isWriting() const
@@ -130,7 +149,7 @@ void Channel::setIndex(int idx)
 
 EventLoop *Channel::ownerLoop() const
 {
-    return m_loop;
+    return m_eventLoop;
 }
 
 std::string Channel::eventsToString() const

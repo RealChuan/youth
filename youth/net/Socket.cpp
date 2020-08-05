@@ -47,6 +47,11 @@ uint16_t TcpAddressInfo::port() const
     return SocketFunc::getPort(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
 }
 
+std::string TcpAddressInfo::ipAndPort() const
+{
+    return SocketFunc::getIpAndPort(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
+}
+
 void TcpAddressInfo::setSockAddrInet6(const sockaddr_in6 &addr6)
 {
     m_serveraddr6 = addr6;
@@ -82,16 +87,17 @@ bool TcpAddressInfo::resolve(std::string hostname, TcpAddressInfo *out)
 
 /*
  *
- * */
+ */
 
-Socket::Socket(int sockfd) : m_sockfd(sockfd)
+Socket::Socket(int sockfd)
+    : m_sockfd(sockfd)
 {
 
 }
 
 Socket::~Socket()
 {
-    SocketFunc::closeSockfd(m_sockfd);
+    SocketFunc::close(m_sockfd);
 }
 
 int Socket::fd() const
@@ -197,4 +203,3 @@ void Socket::setKeepAlive(bool on)
     ::setsockopt(m_sockfd, SOL_SOCKET, SO_KEEPALIVE,
                  &optval, static_cast<socklen_t>(sizeof optval));
 }
-

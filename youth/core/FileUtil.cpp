@@ -9,13 +9,13 @@
 using namespace youth;
 
 FileUtil::FileUtil()
-    :fp()
+    :m_filePtr()
 {
 }
 
 FileUtil::FileUtil(const std::string& filename)
-    :fp()
-    ,fileName_(filename)
+    :m_filePtr()
+    ,m_fileName(filename)
 {
 }
 
@@ -26,43 +26,43 @@ FileUtil::~FileUtil()
 
 void FileUtil::setFileName(const std::string& name)
 {
-    fileName_ = name;
+    m_fileName = name;
 }
 
 void FileUtil::setFileName(const char *name)
 {
-    fileName_ = name;
+    m_fileName = name;
 }
 
 std::string FileUtil::fileName() const
 {
-    return fileName_;
+    return m_fileName;
 }
 
 bool FileUtil::open(FileUtil::OpenModel model)
 {
     //close();
-    if(fileName_.empty()){
+    if(m_fileName.empty()){
         printf("FileName is empty!\n");
         return false;
     }
-    openModel_ = model;
-    Dir::newDirectory(fileName_);
+    m_openModel = model;
+    Dir::newDirectory(m_fileName);
     switch (model)
     {
-    case Read: fp = ::fopen(fileName_.c_str(), "r");break;
-    case Write: fp = ::fopen(fileName_.c_str(), "w");break;
-    case ReadAndWrite: fp = ::fopen(fileName_.c_str(), "a+");break;
-    case Append: fp = ::fopen(fileName_.c_str(), "a+");break;
+    case Read: m_filePtr = ::fopen(m_fileName.c_str(), "r");break;
+    case Write: m_filePtr = ::fopen(m_fileName.c_str(), "w");break;
+    case ReadAndWrite: m_filePtr = ::fopen(m_fileName.c_str(), "a+");break;
+    case Append: m_filePtr = ::fopen(m_fileName.c_str(), "a+");break;
     default: return false;
     }
-    if(fp == nullptr)
+    if(m_filePtr == nullptr)
     {
-        fprintf(stderr, "FileName: %s open error!\n", fileName_.c_str());
+        fprintf(stderr, "FileName: %s open error!\n", m_fileName.c_str());
         perror("file open error");
         return false;
     }
-    printf("FileName: %s open succesed!\n", fileName_.c_str());
+    printf("FileName: %s open succesed!\n", m_fileName.c_str());
     return true;
 }
 
@@ -71,33 +71,33 @@ void FileUtil::close()
     if(!isOpen())
         return;
     flushFile();
-    if(::fclose(fp) == 0)
+    if(::fclose(m_filePtr) == 0)
     {
-        fp = nullptr;
-        printf("FileName: %s close succesed!\n", fileName_.c_str());
+        m_filePtr = nullptr;
+        printf("FileName: %s close succesed!\n", m_fileName.c_str());
     }
     else
     {
-        fprintf(stderr, "FileName: %s close failed!\n", fileName_.c_str());
+        fprintf(stderr, "FileName: %s close failed!\n", m_fileName.c_str());
         perror("file close error");
     }
 }
 
 void FileUtil::setOpenModel(OpenModel model)
 {
-    openModel_ = model;
+    m_openModel = model;
 }
 
 FileUtil::OpenModel FileUtil::openModel() const
 {
-    return openModel_;
+    return m_openModel;
 }
 
 bool FileUtil::isOpen()
 {
-    if(fp != nullptr)
+    if(m_filePtr != nullptr)
         return true;
-    fprintf(stderr, "FileName: %s is not open!\n", fileName_.c_str());
+    fprintf(stderr, "FileName: %s is not open!\n", m_fileName.c_str());
     return false;
 }
 
@@ -110,7 +110,7 @@ std::string FileUtil::readLine()
     }
     char buf[MAX_LINE];
     //int len;    /*行字符个数*/
-    if(fgets(buf, MAX_LINE, fp) != nullptr)
+    if(fgets(buf, MAX_LINE, m_filePtr) != nullptr)
     {
         //len = strlen(buf);
         //buf[len-1] = '\0';  /*去掉换行符*/
@@ -133,34 +133,34 @@ std::string FileUtil::readAll()
 
 void FileUtil::write(const std::string &str)
 {
-    write(str.c_str(), str.size());
+    write(str.c_str(), int(str.size()));
 }
 
 void FileUtil::write(const char *ch, int len)
 {
     if(isOpen() && checkModel(Write))
     {
-        ::fwrite(ch, 1, static_cast<size_t>(len), fp);
-        writeBytes_ += len;
+        ::fwrite(ch, 1, static_cast<size_t>(len), m_filePtr);
+        m_writeBytes += len;
     }
 }
 
 void FileUtil::flushFile()
 {
     if(isOpen())
-        ::fflush(fp);
+        ::fflush(m_filePtr);
 }
 
 off_t FileUtil::writeBytes() const
 {
-    return writeBytes_;
+    return m_writeBytes;
 }
 
 bool FileUtil::checkModel(FileUtil::OpenModel model)
 {
-    bool state = ((openModel_&model) == model);
+    bool state = ((m_openModel&model) == model);
     if(!state)
-        fprintf(stderr, "Wrong mode ! Current Model is %d !\n", openModel_);
+        fprintf(stderr, "Wrong mode ! Current Model is %d !\n", m_openModel);
     return state;
 }
 
@@ -170,9 +170,9 @@ void FileUtil::moveFilePoint(FileUtil::Seek seek)
         return;
     switch (seek)
     {
-    case Begin : fseek(fp, 0, SEEK_SET);break;
-    case Current : fseek(fp, 0, SEEK_CUR);break;
-    case End : fseek(fp, 0, SEEK_END);break;
+    case Begin : fseek(m_filePtr, 0, SEEK_SET);break;
+    case Current : fseek(m_filePtr, 0, SEEK_CUR);break;
+    case End : fseek(m_filePtr, 0, SEEK_END);break;
     default : break;
     }
 }

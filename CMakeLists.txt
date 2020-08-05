@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 #SET(CMAKE_TOOLCHAIN_FILE "/home/ubuntu64/code/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 #设定工程名
-project(youth LANGUAGES C CXX)
+project(youth C CXX)
 
 #find_package(Boost REQUIRED)
 
@@ -18,12 +18,26 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 #设置编译选项
 set(CXX_FLAGS
     -g
+    # -DVALGRIND
     -DCHECK_PTHREAD_RETURN_VALUE
     -D_FILE_OFFSET_BITS=64
-    -std=c++11
+    -Wall
+    -Wextra
+    -Werror
+    -Wconversion
+    -Wno-unused-parameter
+    -Wold-style-cast
+    -Woverloaded-virtual
+    -Wpointer-arith
+    -Wshadow
+    -Wwrite-strings
     -march=native
-#    -O3
+    # -MMD
+    -std=c++17
+    -rdynamic
     )
+
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 #设定可执行二进制文件的目录
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)  #源文件目录

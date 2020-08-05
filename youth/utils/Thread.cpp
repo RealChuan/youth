@@ -7,25 +7,25 @@
 using namespace youth;
 
 Thread::Thread(ThreadFunc func_)
-    : running(false),
-	  joined(false),
-	  pthreadId(0),
-	  func(std::move(func_))
+    : m_running(false),
+	  m_joined(false),
+	  m_pthreadId(0),
+	  m_func(std::move(func_))
 {
 }
 
 Thread::~Thread()
 {
-    if (running && !joined)
-		pthread_detach(pthreadId);
+    if (m_running && !m_joined)
+		pthread_detach(m_pthreadId);
 }
 
 void Thread::start()
 {
-    assert(!running);
-    running = true;
-	if (pthread_create(&pthreadId, nullptr, threadFunc, reinterpret_cast<void*>(this))){
-        running = false;
+    assert(!m_running);
+    m_running = true;
+	if (pthread_create(&m_pthreadId, nullptr, threadFunc, reinterpret_cast<void*>(this))){
+        m_running = false;
 		LOG_FATAL << "Failed in pthread_create";
 		perror("Failed in pthread_create");
 		exit(-1);
@@ -34,77 +34,77 @@ void Thread::start()
 
 int Thread::join()
 {
-    assert(running);
-	assert(!joined);
-	joined = true;
-	return pthread_join(pthreadId, nullptr);
+    assert(m_running);
+	assert(!m_joined);
+	m_joined = true;
+	return pthread_join(m_pthreadId, nullptr);
 }
 
 //-----------------------------------------------------------
 
 Mutex::Mutex()
 {
-	pthread_mutex_init(&mutex, nullptr);
+	pthread_mutex_init(&m_mutex, nullptr);
 }
 
 Mutex::~Mutex()
 {
-	pthread_mutex_destroy(&mutex);
+	pthread_mutex_destroy(&m_mutex);
 }
 
 void Mutex::lock()
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&m_mutex);
 }
 
 void Mutex::unlock()
 {
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&m_mutex);
 }
 
 pthread_mutex_t* Mutex::getMutex()
 {
-	return &mutex;
+	return &m_mutex;
 }
 
 //-------------------------------------------------------
 
 MutexLock::MutexLock(Mutex& mutex_)
-	: mutex(mutex_)
+	: m_mutex(mutex_)
 {
-	mutex.lock();
+	m_mutex.lock();
 }
 
 MutexLock::~MutexLock()
 {
-	mutex.unlock();
+	m_mutex.unlock();
 }
 //-----------------------------------------------------------
 
 Condition::Condition(Mutex& mutex)
-	: mutex(mutex)
+    : m_mutex(mutex)
 {
-	pthread_cond_init(&cond, nullptr);
+    pthread_cond_init(&m_cond, nullptr);
 }
 
 Condition::~Condition()
 {
-	pthread_cond_destroy(&cond);
+    pthread_cond_destroy(&m_cond);
 }
 
 void Condition::wait()
 {
-	pthread_cond_wait(&cond, mutex.getMutex());
+    pthread_cond_wait(&m_cond, m_mutex.getMutex());
 }
 
 void Condition::notify()
 {
-	pthread_cond_signal(&cond);
+    pthread_cond_signal(&m_cond);
 }
 
 void Condition::notifyAll()
 {
-	pthread_cond_broadcast(&cond);
+    pthread_cond_broadcast(&m_cond);
 }
 
 bool Condition::waitForSeconds(double seconds)
@@ -119,5 +119,5 @@ bool Condition::waitForSeconds(double seconds)
 	abstime.tv_sec += static_cast<time_t> ((abstime.tv_nsec + nanoseconds) / kNanoSecondsPerSecond);
 	abstime.tv_nsec = static_cast<long> ((abstime.tv_nsec + nanoseconds) % kNanoSecondsPerSecond);
 
-	return ETIMEDOUT == pthread_cond_timedwait(&cond, mutex.getMutex(), &abstime);
+    return ETIMEDOUT == pthread_cond_timedwait(&m_cond, m_mutex.getMutex(), &abstime);
 }

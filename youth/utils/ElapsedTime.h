@@ -18,7 +18,7 @@ public:
     std::string elapsed();
 
 private:
-    struct timeval tv_start;
+    struct timeval m_tvStart;
 };
 
 }

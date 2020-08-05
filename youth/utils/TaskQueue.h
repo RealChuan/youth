@@ -12,37 +12,37 @@ class TaskQueue
 {
 public:
     TaskQueue()
-        :mutex()
-        ,queue(){
+        :m_mutex()
+        ,m_queue(){
     }
 
     void append(const T& t){
-        MutexLock lock(mutex);
-        queue.push_back(t);
+        MutexLock lock(m_mutex);
+        m_queue.push_back(t);
     }
 
     void append(const T&& t){
-        MutexLock lock(mutex);
-        queue.push_back(std::move(t));
+        MutexLock lock(m_mutex);
+        m_queue.push_back(std::move(t));
     }
 
     T take(){
-        MutexLock lock(mutex);
-        if(queue.empty())
+        MutexLock lock(m_mutex);
+        if(m_queue.empty())
             return T();
-        T t(std::move(queue.front()));
-        queue.pop_front();
+        T t(std::move(m_queue.front()));
+        m_queue.pop_front();
         return t;
     }
 
     size_t size() const{
-        MutexLock lock(mutex);
-        return queue.size();
+        MutexLock lock(m_mutex);
+        return m_queue.size();
     }
 
 private:
-    mutable Mutex mutex;
-    std::deque<T> queue GUARDED_BY(mutex);
+    mutable Mutex m_mutex;
+    std::deque<T> m_queue GUARDED_BY(m_mutex);
 };
 
 }

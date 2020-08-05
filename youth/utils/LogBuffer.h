@@ -32,9 +32,9 @@ class LogBuffer
 {
 public:
 	LogBuffer()
-        : p_data(data_)
+        : m_dataP(m_data)
 	{
-        memset(data_, 0, SIZE);
+        memset(m_data, 0, SIZE);
 	}
 
 	~LogBuffer()
@@ -44,70 +44,70 @@ public:
 
 	void reset()
 	{
-        p_data = data_;
+        m_dataP = m_data;
 	}
 
 	void bzero()
 	{
-        memset(data_, 0, sizeof data_);
+        memset(m_data, 0, sizeof m_data);
 	}
 
 	void append(const char *pData, int Len)
 	{
-        char *pEndBuffer = &data_[SIZE - 1];
-        if (static_cast<int> (pEndBuffer - p_data) > Len)
+        char *pEndBuffer = &m_data[SIZE - 1];
+        if (static_cast<int> (pEndBuffer - m_dataP) > Len)
 		{
-            memcpy(p_data, pData, Len);
-            p_data += Len;
+            memcpy(m_dataP, pData, Len);
+            m_dataP += Len;
 		}
 	}
 
 	//这个方法是用来获取buffer数据
 	const char *data()
 	{
-        return data_;
+        return m_data;
 	}
 
 	//这个方法是用来获取buffer的长度
 	int length()
 	{
-        return static_cast<int> (p_data - data_);
+        return static_cast<int> (m_dataP - m_data);
 	}
 
 	//这个方法是用来将某字符串追加到buffer中
 	void appendString(const char *pString, int Len)
 	{
-        memcpy(p_data, pString, Len);
-        p_data += Len;
+        memcpy(m_dataP, pString, Len);
+        m_dataP += Len;
 	}
 
 	//获取剩余可写长度
 	int avail() const
 	{
-        return static_cast<int> (end() - p_data);
+        return static_cast<int> (end() - m_dataP);
 	}
 
 	//这个方法是用来返回buffer当前的指针位置，
 	//以便外部能直接操作buffer，提高效率
 	char *current(void)
 	{
-        return p_data;
+        return m_dataP;
 	}
 
 	//这个方法与current配套使用
 	void appendLen(int Len)
 	{
-        p_data += Len;
+        m_dataP += Len;
 	}
 
 private:
 	const char* end() const
 	{
-        return data_ + sizeof data_;
+        return m_data + sizeof m_data;
 	}
 
-    char data_[SIZE];
-    char *p_data;
+    char m_data[SIZE];
+    char *m_dataP;
 };
 
 template class LogBuffer<normalBuffer>;

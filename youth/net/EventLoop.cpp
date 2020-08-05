@@ -35,7 +35,7 @@ EventLoop::EventLoop()
     , m_index(0)
     , m_epoll(new Epoll(this))
     , m_wakeupFd(createEventfd())
-    , m_wakeupChannel(new Channel(this, m_wakeupFd))
+    , m_channelPtr(new Channel(this, m_wakeupFd))
 {
     LOG_DEBUG << "EventLoop created " << this << " in thread " << m_threadID;
     if (g_loopInThisThread)
@@ -47,8 +47,8 @@ EventLoop::EventLoop()
     {
         g_loopInThisThread = this;
     }
-    m_wakeupChannel->setReadCallback(std::bind(&EventLoop::handleRead, this));
-    m_wakeupChannel->enableReading();
+    m_channelPtr->setReadCallback(std::bind(&EventLoop::handleRead, this));
+    m_channelPtr->enableReading();
 }
 
 EventLoop::~EventLoop()

@@ -27,20 +27,20 @@ public:
 
     void start();
     int join(); // return pthread_join()
-    bool isRunning() const { return running; }
-    pthread_t pthreadID() const {return pthreadId; }
+    bool isRunning() const { return m_running; }
+    pthread_t pthreadID() const {return m_pthreadId; }
     static void* threadFunc(void *obj){
         Thread *pThis = static_cast<Thread *> (obj);
-        pThis->func(); //-------------------------------
+        pThis->m_func(); //-------------------------------
         return 0;
     }
 
 private:	
-    bool running;
-    bool joined;
-    pthread_t pthreadId;
+    bool m_running;
+    bool m_joined;
+    pthread_t m_pthreadId;
     //pid_t _tid;
-    ThreadFunc func;
+    ThreadFunc m_func;
     //std::string _name;
 };
 
@@ -56,7 +56,7 @@ public:
     pthread_mutex_t* getMutex();
 
 private:
-    pthread_mutex_t mutex;
+    pthread_mutex_t m_mutex;
 };
 
 class MutexLock : noncopyable
@@ -66,13 +66,13 @@ public:
     ~MutexLock();
 
 private:
-    Mutex& mutex;
+    Mutex& m_mutex;
 };
 
 class Condition : noncopyable
 {
 public:
-    Condition(Mutex& mutex);
+    Condition(Mutex& m_mutex);
     ~Condition();
 
     void wait();
@@ -81,8 +81,8 @@ public:
     bool waitForSeconds(double seconds);
 
 private:
-    Mutex& mutex;
-    pthread_cond_t cond;
+    Mutex& m_mutex;
+    pthread_cond_t m_cond;
 };
 }
 

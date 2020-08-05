@@ -12,22 +12,22 @@ ElapsedTime::ElapsedTime()
 
 void ElapsedTime::start()
 {
-    gettimeofday(&tv_start, NULL);
+    gettimeofday(&m_tvStart, NULL);
 }
 
 void ElapsedTime::reStart()
 {
-    gettimeofday(&tv_start, NULL);
+    gettimeofday(&m_tvStart, NULL);
 }
 
 std::string ElapsedTime::elapsed()
 {
     struct timeval tv_end;
     gettimeofday(&tv_end, NULL);
-    int t = Timestamp::kMicroSecondsPerSecond * (tv_end.tv_sec - tv_start.tv_sec) +
-            (tv_end.tv_usec - tv_start.tv_usec);
+    long int t = Timestamp::kMicroSecondsPerSecond * (tv_end.tv_sec - m_tvStart.tv_sec)
+            + (tv_end.tv_usec - m_tvStart.tv_usec);
     char buf[20];
-    double seconds = t * 1.0 / Timestamp::kMicroSecondsPerSecond;
+    double seconds = double(t) / Timestamp::kMicroSecondsPerSecond;
     snprintf(buf, sizeof buf, "%.6lf(S)", seconds);
     return buf;
 }

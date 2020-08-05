@@ -53,24 +53,22 @@ private:
     void doPendingFunctors();
     void printActiveChannels() const; // DEBUG
 
-    typedef std::vector<Channel *> ChannelList;
-
     const pid_t m_threadID;
     std::atomic<bool> m_looping; /* atomic */
     std::atomic<bool> m_quit;
 
-    volatile bool m_callingPendingFunctors; /* atomic */
-    volatile bool m_eventHandling;          /* atomic */
+    std::atomic<bool> m_callingPendingFunctors; /* atomic */
+    std::atomic<bool> m_eventHandling;          /* atomic */
     int64_t m_index;
     Timestamp m_pollReturnTime;
     std::unique_ptr<Epoll> m_epoll;
 
     int m_wakeupFd;
 
-    std::unique_ptr<Channel> m_wakeupChannel;
+    std::unique_ptr<Channel> m_channelPtr;
 
     // scratch variables
-    ChannelList m_activeChannels;
+    std::vector<Channel *> m_activeChannels;
     Channel *m_currentActiveChannel;
 
     mutable Mutex m_mutex;

@@ -2,8 +2,8 @@
 #define LOGOUT_H
 
 #include "LogStream.h"
-#include "youth/core/Timestamp.h"
-#include "youth/core/Object.h"
+#include <youth/core/Timestamp.h>
+#include <youth/core/Object.h>
 
 #include <memory>
 
@@ -70,7 +70,7 @@ private:
     static void outputOutAndLog(const char *pMsg, int Len);
     static void flushAll();
 
-    std::unique_ptr<LogOut> m_LogOut;
+    std::unique_ptr<LogOut> m_logOutPtr;
     LogLevel m_logLevel;
 };
 
@@ -91,6 +91,27 @@ private:
 #define LOG_ERROR Logging(Logging::ERROR, __FILE__,__LINE__, true).getLogStream()
 
 #define LOG_FATAL Logging(Logging::FATAL,__FILE__, __LINE__, true).getLogStream()
+
+const char* strerror_tl(int savedErrno);
+
+// Taken from glog/logging.h
+//
+// Check that the input is non NULL.  This very useful in constructor
+// initializer lists.
+
+#define CHECK_NOTNULL(val) \
+    ::youth::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
+
+// A small helper for CHECK_NOTNULL().
+template <typename T>
+T* CheckNotNull(const char *file, int line, const char *names, T* ptr)
+{
+    if (ptr == NULL)
+    {
+        Logging(Logging::FATAL, file, line, true).getLogStream() << names;
+    }
+    return ptr;
+}
 
 }
 

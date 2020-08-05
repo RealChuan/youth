@@ -54,10 +54,10 @@ public:
 private:
     inline bool checkModel(OpenModel);
 
-    FILE *fp;
-    std::string fileName_;
-    OpenModel openModel_;
-    off_t writeBytes_ = 0;
+    FILE *m_filePtr;
+    std::string m_fileName;
+    OpenModel m_openModel;
+    off_t m_writeBytes = 0;
 };
 
 }

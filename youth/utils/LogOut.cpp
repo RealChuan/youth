@@ -73,7 +73,7 @@ Logging::outputFunc static g_OutputFunc = DefauleOutout; //默认的日志输出
 Logging::flushFunc static g_FlushFunc = DefauleFlush;
 
 Logging::Logging(LogLevel level, const char* file, int line, bool outError)
-    : m_LogOut(new LogOut(arrLevel[level], file, line, outError))
+    : m_logOutPtr(new LogOut(arrLevel[level], file, line, outError))
     , m_logLevel(level)
 {
 }
@@ -81,8 +81,8 @@ Logging::Logging(LogLevel level, const char* file, int line, bool outError)
 Logging::~Logging()
 {
     //当调用析构的时候，日志流填充下文件名和行号，就是完整的一条日志了
-    m_LogOut->finishLog();
-    g_OutputFunc(m_LogOut->getLogStreamBuff(), m_LogOut->getLogStreamBuffLen());
+    m_logOutPtr->finishLog();
+    g_OutputFunc(m_logOutPtr->getLogStreamBuff(), m_logOutPtr->getLogStreamBuffLen());
     if (m_logLevel == FATAL)
     {
         //如果发生了FATAL错误，那么就终止程序。
@@ -94,7 +94,7 @@ Logging::~Logging()
 
 LogStream &Logging::getLogStream()
 {
-    return m_LogOut->getLogStream();
+    return m_logOutPtr->getLogStream();
 }
 
 Logging::LogLevel Logging::getLogLevel()
@@ -138,7 +138,7 @@ void Logging::setFileBaseName(const char* _basename)
 {
     std::string baseName = ProcessMsg::fileBaseName(_basename);
     baseName += ".";
-    LogFile::instance().setBaseFileName(baseName);
+    LogFile::instance()->setBaseFileName(baseName);
 }
 
 void Logging::setOutputFunc(outputFunc Output)
@@ -154,11 +154,18 @@ void Logging::setFlushFunc(flushFunc Flush)
 void Logging::outputOutAndLog(const char *pMsg, int Len)
 {
     DefauleOutout(pMsg, Len);   //输出到标准输出
-    LogFile::instance().outputLogFile(pMsg, Len);   //输出到日志中
+    LogFile::instance()->outputLogFile(pMsg, Len);   //输出到日志中
 }
 
 void Logging::flushAll()
 {
     DefauleFlush();
-    LogFile::instance().flushLogFile();
+    LogFile::instance()->flushLogFile();
+}
+
+__thread char t_errnobuf[512];
+
+const char *strerror_tl(int savedErrno)
+{
+    return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
 }

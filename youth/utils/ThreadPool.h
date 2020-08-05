@@ -14,56 +14,44 @@ namespace youth
 
 class ThreadPool : noncopyable
 {
-	typedef std::function<void () > Task;
+    typedef std::function<void ()> Task;
 
 public:
-	ThreadPool();
+    ThreadPool();
 
-	virtual ~ThreadPool();
+    virtual ~ThreadPool();
 
-	void setTaskNum(int maxTaskNum)
-	{
-		maxTaskNum_ = maxTaskNum;
-	}
+    void setTaskNum(int maxTaskNum);
+    void setThreadInitCallback(const Task& cb);
 
-	void setThreadInitCallback(const Task& cb)
-	{
-		threadInitCallback_ = cb;
-	}
+    void start(int numThreads);
+    void stop();
 
-	void start(int numThreads);
-	void stop();
+    size_t queueSize() const;
 
-	size_t queueSize() const
-	{
-		//YMutexLock lock(mutex_);
-		return queue_.size();
-	}
-
-	void run(Task f);
+    void run(Task f);
 
 private:
 
-	bool isFull() const REQUIRES(mutex_)
-	{
-		MutexLock lock(mutex_);
-		return maxTaskNum_ > 0 && queue_.size() >= maxTaskNum_;
-	}
+    bool isFull() const REQUIRES(m_mutex)
+    {
+        MutexLock lock(m_mutex);
+        return m_maxTaskNum > 0 && m_queue.size() >= m_maxTaskNum;
+    }
 
-	void threadFunc();
-	Task take();
+    void threadFunc();
+    Task take();
 
-	Task threadInitCallback_;
-	size_t maxTaskNum_;
-	bool running_;
-	mutable Mutex mutex_;
+    Task m_threadInitCallback;
+    size_t m_maxTaskNum;
+    bool m_running;
+    mutable Mutex m_mutex;
 
-	Condition notEmpty_ GUARDED_BY(mutex_);
-	Condition notFull_ GUARDED_BY(mutex_);
+    Condition m_notEmpty GUARDED_BY(m_mutex);
+    Condition m_notFull GUARDED_BY(m_mutex);
 
-	std::vector<std::unique_ptr<youth::Thread>> threads_;
-	std::deque<Task> queue_ GUARDED_BY(mutex_);
-
+    std::vector<std::unique_ptr<youth::Thread>> m_threadVec;
+    std::deque<Task> m_queue GUARDED_BY(m_mutex);
 };
 
 }
