@@ -1,22 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   ProcessMsg.cpp
- * Author: root
- *
- * Created on 2019年8月4日, 上午9:07
- */
-
 #include "ProcessMsg.h"
+
 #include <unistd.h>
 #include <string.h>
 #include <sys/syscall.h> 
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 pid_t ProcessMsg::getTid()
 {
@@ -54,4 +46,8 @@ std::string ProcessMsg::fileBaseName(const char* basename)
         //Len = static_cast<int> (strlen(_basename));
     }
     return _basename;
+}
+
+}
+
 }

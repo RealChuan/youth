@@ -6,6 +6,9 @@
 namespace youth
 {
 
+namespace core
+{
+
 namespace ProcessMsg
 {
 
@@ -13,6 +16,8 @@ pid_t getTid();
 pid_t getPid();
 std::string hostname();
 std::string fileBaseName(const char*);
+
+}
 
 }
 

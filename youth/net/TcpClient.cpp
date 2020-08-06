@@ -1,6 +1,10 @@
 #include "TcpClient.h"
 
-using namespace youth;
+namespace youth
+{
+
+namespace net
+{
 
 TcpClient::TcpClient(EventLoop *loop,
                      const TcpAddressInfo &serverAddr,
@@ -26,5 +30,9 @@ void TcpClient::disconnect()
 
 void TcpClient::stop()
 {
+
+}
+
+}
 
 }

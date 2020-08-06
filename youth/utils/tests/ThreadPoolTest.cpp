@@ -1,8 +1,7 @@
-#include "../ThreadPool.h"
-#include "../LogOut.h"
+#include <youth/utils/ThreadPool.h>
+#include <youth/utils/LogOut.h>
 
-using namespace std;
-using namespace youth;
+using namespace youth::utils;
 
 //打印带参数
 void printBuf(char* buf)

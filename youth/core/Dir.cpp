@@ -4,7 +4,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 int currentPathLength;
 char currentPath_[32];
@@ -44,4 +48,8 @@ std::string Dir::currentPath()
     if(currentPathLength == 0)
         getCurrenPath();
     return currentPath_;
+}
+
+}
+
 }

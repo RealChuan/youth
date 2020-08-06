@@ -7,6 +7,9 @@
 namespace youth
 {
 
+namespace core
+{
+
 namespace CurrentThread
 {
 // internal
@@ -33,9 +36,11 @@ inline int tidStringLength() // for logging
     return tidStringLength_;
 }
 
-bool isMainThread();
+inline bool isMainThread();
 
-void sleepUsec(int64_t usec);  // for testing
+inline void sleepUsec(int64_t usec);  // for testing
+
+}
 
 }
 

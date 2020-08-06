@@ -2,20 +2,24 @@
 #define LOGOUT_H
 
 #include "LogStream.h"
+
 #include <youth/core/Timestamp.h>
-#include <youth/core/Object.h>
 
 #include <memory>
 
 namespace youth
 {
 
+namespace utils
+{
+
 class LogOut : noncopyable
 {
 public:
     LogOut(const char* level, const char* m_file, int m_line, bool outError = false);
-    virtual ~LogOut();
-    LogStream &getLogStream();
+    ~LogOut();
+
+    LogStream& stream();
 
     //这个方法是在完成日志流的输出后填充文件名和行号的
     void finishLog();
@@ -34,7 +38,7 @@ private:
 };
 
 class LogFile;
-class Logging
+class Logging : noncopyable
 {
 public:
     //DEBUG Level:指出细粒度信息事件对调试应用程序是非常有帮助的。
@@ -60,7 +64,7 @@ public:
     Logging(LogLevel level, const char* file, int line, bool outError = false);
     ~Logging();
 
-    LogStream &getLogStream();
+    LogStream& stream();
 
     static void setOutputFunc(outputFunc Func);
 
@@ -80,17 +84,17 @@ private:
 #define LOGGER_MODE_OUTANDFILE (LOGGER_MODE_STDOUT | LOGGER_MODE_LOGFILE)
 
 #define LOG_DEBUG if (Logging::getLogLevel() <= Logging::DEBUG) \
-    Logging(Logging::DEBUG, __FILE__,__LINE__).getLogStream() \
+    Logging(Logging::DEBUG, __FILE__,__LINE__).stream() \
 
 #define LOG_INFO if (Logging::getLogLevel() <= Logging::INFO) \
-    Logging(Logging::INFO, __FILE__,__LINE__).getLogStream()
+    Logging(Logging::INFO, __FILE__,__LINE__).stream()
 
 #define LOG_WARN if (Logging::getLogLevel() <= Logging::WARN) \
-    Logging(Logging::WARN,__FILE__, __LINE__).getLogStream()
+    Logging(Logging::WARN,__FILE__, __LINE__).stream()
 
-#define LOG_ERROR Logging(Logging::ERROR, __FILE__,__LINE__, true).getLogStream()
+#define LOG_ERROR Logging(Logging::ERROR, __FILE__,__LINE__, true).stream()
 
-#define LOG_FATAL Logging(Logging::FATAL,__FILE__, __LINE__, true).getLogStream()
+#define LOG_FATAL Logging(Logging::FATAL,__FILE__, __LINE__, true).stream()
 
 const char* strerror_tl(int savedErrno);
 
@@ -108,9 +112,11 @@ T* CheckNotNull(const char *file, int line, const char *names, T* ptr)
 {
     if (ptr == NULL)
     {
-        Logging(Logging::FATAL, file, line, true).getLogStream() << names;
+        Logging(Logging::FATAL, file, line, true).stream() << names;
     }
     return ptr;
+}
+
 }
 
 }

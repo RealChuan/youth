@@ -1,11 +1,13 @@
-#include "youth/utils/ElapsedTime.h"
-#include "youth/utils/LogOut.h"
+#include <youth/core/ElapsedTime.h>
+#include <youth/utils/LogOut.h>
 
 #include <unistd.h>
 
-using namespace youth;
+using namespace youth::core;
+using namespace youth::utils;
 
-int main(int argc, char** argv){
+int main(int argc, char** argv)
+{
     Logging::setFileBaseName(argv[0]);
     Logging::setOutputMode(LOGGER_MODE_LOGFILE);
     ElapsedTime timer;

@@ -6,7 +6,11 @@
 
 #include <error.h>
 
-using namespace youth;
+namespace youth
+{
+
+namespace utils
+{
 
 LogOut::LogOut(const char* level, const char* file, int line, bool outError)
     : m_line(line)
@@ -29,7 +33,7 @@ LogOut::~LogOut()
 {
 }
 
-LogStream &LogOut::getLogStream()
+LogStream &LogOut::stream()
 {
     return m_logStream;
 }
@@ -92,9 +96,9 @@ Logging::~Logging()
     }
 }
 
-LogStream &Logging::getLogStream()
+LogStream &Logging::stream()
 {
-    return m_logOutPtr->getLogStream();
+    return m_logOutPtr->stream();
 }
 
 Logging::LogLevel Logging::getLogLevel()
@@ -168,4 +172,8 @@ __thread char t_errnobuf[512];
 const char *strerror_tl(int savedErrno)
 {
     return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
+}
+
+}
+
 }

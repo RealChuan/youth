@@ -1,6 +1,6 @@
-#include "../LogOut.h"
+#include <youth/utils/LogOut.h>
 
-using namespace youth;
+using namespace youth::utils;
 
 int main(int argc, char** argv)
 {

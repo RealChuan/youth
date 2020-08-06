@@ -3,9 +3,13 @@
 
 #include <assert.h>
 
-using namespace youth;
+namespace youth
+{
 
-EventLoopThread::EventLoopThread(const youth::EventLoopThread::ThreadInitCallback &cb,
+namespace net
+{
+
+EventLoopThread::EventLoopThread(const EventLoopThread::ThreadInitCallback &cb,
                                  const std::string &name)
     : m_exit(false)
     , m_mutex()
@@ -61,4 +65,8 @@ void EventLoopThread::threadFunc()
     loop.loop();
     MutexLock lock(m_mutex);
     m_loop = nullptr;
+}
+
+}
+
 }

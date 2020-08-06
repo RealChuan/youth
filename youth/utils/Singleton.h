@@ -6,10 +6,19 @@
 
 #include "Thread.h"
 
-namespace youth {
+#include <youth/core/Mutex.h>
+
+namespace youth
+{
+
+using namespace core;
+
+namespace utils
+{
 
 template <typename T>
-class Singleton {
+class Singleton
+{
 public:
     static T& getInstance(); // 获取单例的唯一实例对象
 
@@ -43,12 +52,14 @@ private:                                           \
     Class(const Class &other) = delete;            \
     Class& operator=(const Class &other) = delete; \
     friend class  Singleton<Class>;                \
-                                                   \
+    \
 public:                                            \
     ~Class();                                      \
     static Class& instance() {                     \
-        return Singleton<Class>::getInstance();    \
-    }
+    return Singleton<Class>::getInstance();        \
+}
+
+}
 
 }
 

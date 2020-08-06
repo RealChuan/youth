@@ -1,15 +1,20 @@
-#include "../Thread.h"
-#include "../../core/CurrentThread.h"
+#include <youth/core/Mutex.h>
+#include <youth/core/CurrentThread.h>
+#include <youth/utils/Thread.h>
 
-using namespace youth;
+using namespace youth::core;
+using namespace youth::utils;
 
-class Add{
+class Add
+{
 public:
     Add()
-        :mutex()
-        ,count(0)
+        : m_mutex()
+        , m_count(0)
     {}
-    void start(){
+
+    void start()
+    {
         Thread t1(std::bind(&Add::add, this));
         Thread t2(std::bind(&Add::add, this));
         Thread t3(std::bind(&Add::add, this));
@@ -20,18 +25,21 @@ public:
         t2.join();
         t3.join();
     }
-    void add(){
-        for(int i=0; i<1000; i++){
-            MutexLock lock(mutex);
+
+    void add()
+    {
+        for(int i=0; i<1000; i++)
+        {
+            MutexLock lock(m_mutex);
             CurrentThread::cacheTid();
-            printf("pid = %s, count = %d\n",CurrentThread::tidString(), count);
-            ++count;
+            printf("pid = %s, count = %d\n",CurrentThread::tidString(), m_count);
+            ++m_count;
         }
     }
 
 private:
-    Mutex mutex;
-    int count ;//GUARDED_BY(mutex);
+    Mutex m_mutex;
+    int m_count ;//GUARDED_BY(mutex);
 };
 
 int main()

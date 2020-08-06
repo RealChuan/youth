@@ -2,14 +2,23 @@
 #define LOGFILE_H
 
 #include "Thread.h"
-#include "Singleton.h"
 
 #include <youth/core/Object.h>
+#include <youth/core/Mutex.h>
+
+#include <memory>
 
 namespace youth
 {
 
+using namespace core;
+namespace core{
 class FileUtil;
+}
+
+namespace utils
+{
+
 class LogFile : noncopyable
 {
 public:
@@ -44,6 +53,8 @@ private:
     Mutex m_mutex;
     std::unique_ptr<FileUtil> m_filePtr;
 };
+
+}
 
 }
 

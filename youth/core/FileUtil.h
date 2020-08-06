@@ -4,10 +4,12 @@
 #include "String.h"
 #include "Object.h"
 
-namespace youth {
+namespace youth
+{
 
+namespace core
+{
 //  thread not safe
-
 class FileUtil : noncopyable
 {
 public:
@@ -59,6 +61,8 @@ private:
     OpenModel m_openModel;
     off_t m_writeBytes = 0;
 };
+
+}
 
 }
 

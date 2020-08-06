@@ -7,9 +7,15 @@
 #include <functional>
 
 #include "Thread.h"
-#include "youth/core/Object.h"
+
+#include <youth/core/Condition.h>
 
 namespace youth
+{
+
+using namespace core;
+
+namespace utils
 {
 
 class ThreadPool : noncopyable
@@ -19,7 +25,7 @@ class ThreadPool : noncopyable
 public:
     ThreadPool();
 
-    virtual ~ThreadPool();
+    ~ThreadPool();
 
     void setTaskNum(int maxTaskNum);
     void setThreadInitCallback(const Task& cb);
@@ -50,9 +56,11 @@ private:
     Condition m_notEmpty GUARDED_BY(m_mutex);
     Condition m_notFull GUARDED_BY(m_mutex);
 
-    std::vector<std::unique_ptr<youth::Thread>> m_threadVec;
+    std::vector<std::unique_ptr<Thread>> m_threadVec;
     std::deque<Task> m_queue GUARDED_BY(m_mutex);
 };
+
+}
 
 }
 

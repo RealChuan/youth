@@ -4,12 +4,16 @@
 #include <vector>
 #include <map>
 
-#include "youth/core/Object.h"
-#include "youth/core/Timestamp.h"
+#include <youth/core/Timestamp.h>
 
 struct epoll_event;
 
 namespace youth
+{
+
+using namespace core;
+
+namespace net
 {
 
 class EventLoop;
@@ -40,5 +44,8 @@ private:
     std::vector<struct epoll_event> m_eventVec;
     int m_epollfd;
 };
+
+}
+
 } // namespace youth
 #endif // EPOLL_H

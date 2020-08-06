@@ -1,6 +1,6 @@
 #include "youth/net/EventLoop.h"
 
-using namespace youth;
+using namespace youth::net;
 
 int main()
 {

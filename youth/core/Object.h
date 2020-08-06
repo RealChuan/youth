@@ -4,6 +4,9 @@
 namespace youth
 {
 
+namespace core
+{
+
 class noncopyable
 {
 public:
@@ -21,6 +24,8 @@ protected:
     copyable() = default;
     ~copyable() = default;
 };
+
+}
 
 }
 

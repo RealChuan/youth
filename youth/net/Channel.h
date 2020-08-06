@@ -1,13 +1,17 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-#include <youth/core/Object.h>
 #include <youth/core/Timestamp.h>
 
 #include <functional>
 #include <memory>
 
 namespace youth
+{
+
+using namespace core;
+
+namespace net
 {
 
 class EventLoop;
@@ -82,6 +86,8 @@ private:
     EventCallback m_closeCallback;
     EventCallback m_errorCallback;
 };
+
+}
 
 } // namespace youth
 

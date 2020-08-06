@@ -1,4 +1,5 @@
 #include "LogFile.h"
+
 #include <youth/core/ProcessMsg.h>
 #include <youth/core/FileUtil.h>
 #include <youth/core/Dir.h>
@@ -6,7 +7,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-using namespace youth;
+namespace youth
+{
+
+namespace utils
+{
 
 const static int kRollPerSeconds_ = 60*60*24;
 
@@ -142,3 +147,7 @@ bool LogFile::rollFile(int count)
 //    system(deleteCmd.c_str());
 //    //perror("Delete LogFile Failed!");
 //}
+
+}
+
+}

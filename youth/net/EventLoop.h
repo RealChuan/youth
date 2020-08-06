@@ -1,9 +1,9 @@
 #ifndef EVENTLOOP_H
 #define EVENTLOOP_H
 
-#include "youth/core/Object.h"
-#include "youth/utils/Thread.h"
-#include "youth/core/Timestamp.h"
+#include <youth/utils/Thread.h>
+#include <youth/core/Timestamp.h>
+#include <youth/core/Mutex.h>
 
 #include <sys/types.h>
 #include <vector>
@@ -11,6 +11,11 @@
 #include <atomic>
 
 namespace youth
+{
+
+using namespace core;
+
+namespace net
 {
 
 class Channel;
@@ -74,6 +79,8 @@ private:
     mutable Mutex m_mutex;
     std::vector<Functor> m_pendingFunctors GUARDED_BY(m_mutex);
 };
+
+}
 
 } // namespace youth
 

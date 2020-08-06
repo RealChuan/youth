@@ -1,6 +1,10 @@
 #include "String.h"
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 std::vector<std::string> string::split(std::string str, const char s)
 {
@@ -23,4 +27,8 @@ std::vector<std::string> string::split(std::string str, const char s)
     }
 
     return result;
+}
+
+}
+
 }

@@ -7,7 +7,13 @@
 
 #include <assert.h>
 
-using namespace youth;
+namespace youth
+{
+
+using namespace utils;
+
+namespace net
+{
 
 Connector::Connector(EventLoop *loop, const TcpAddressInfo &serverAddr)
     : m_eventLoop(loop)
@@ -217,4 +223,8 @@ int Connector::removeAndResetChannel()
 void Connector::resetChannel()
 {
     m_channelPtr.reset();
+}
+
+}
+
 }

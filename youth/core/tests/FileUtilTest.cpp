@@ -1,8 +1,9 @@
 #include "../FileUtil.h"
 
-using namespace youth;
+using namespace youth::core;
 
-int main(){
+int main()
+{
     std::string filename = "xxx/yyy/zzz.txt";
     FileUtil file;
     file.setFileName(filename);

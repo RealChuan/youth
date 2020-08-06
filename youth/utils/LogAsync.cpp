@@ -2,7 +2,13 @@
 #include "LogFile.h"
 #include "LogOut.h"
 
-using namespace youth;
+#include <assert.h>
+
+namespace youth
+{
+
+namespace utils
+{
 
 void asyncOutput(const char* msg, int len)
 {
@@ -168,4 +174,8 @@ void LogAsync::threadFunc()
     }
     LogFile::flushFunc();
     m_cond.notify();
+}
+
+}
+
 }

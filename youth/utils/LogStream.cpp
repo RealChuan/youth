@@ -1,19 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * File:   LogStream.cpp
- * Author: root
- *
- * Created on 2019年8月4日, 上午6:43
- */
-
 #include "LogStream.h"
 
-using namespace youth;
+namespace youth
+{
+
+namespace utils
+{
 
 //下面这个函数模板是用来实现整型转换为字符串
 
@@ -217,4 +208,8 @@ LogStream &LogStream::operator<<(const void *p)
     size_t len = convertHex(buf+2, v);
     m_logBuffer.appendLen(int(len + 2));
     return *this;
+}
+
+}
+
 }

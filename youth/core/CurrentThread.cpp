@@ -2,16 +2,18 @@
 #include "ProcessMsg.h"
 #include "Timestamp.h"
 
-namespace youth {
+namespace youth
+{
 
-namespace CurrentThread {
+namespace core
+{
 
-__thread int tidCache = 0;
-__thread char tidString_[32];
-__thread int tidStringLength_ = 6;
+__thread int CurrentThread::tidCache = 0;
+__thread char CurrentThread::tidString_[32];
+__thread int CurrentThread::tidStringLength_ = 6;
 static_assert(std::is_same<int, pid_t>::value, "pid_t should be int");
 
-void cacheTid()
+void CurrentThread::cacheTid()
 {
     if (tidCache == 0)
     {
@@ -20,7 +22,7 @@ void cacheTid()
     }
 }
 
-void sleepUsec(int64_t usec)
+void CurrentThread::sleepUsec(int64_t usec)
 {
     struct timespec ts = { 0, 0 };
     ts.tv_sec = static_cast<time_t>(usec / Timestamp::kMicroSecondsPerSecond);
@@ -28,7 +30,7 @@ void sleepUsec(int64_t usec)
     ::nanosleep(&ts, NULL);
 }
 
-bool isMainThread()
+bool CurrentThread::isMainThread()
 {
     return tid() == ::getpid();
 }

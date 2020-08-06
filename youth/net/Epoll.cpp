@@ -6,9 +6,16 @@
 #include "Epoll.h"
 #include "Socket.h"
 #include "Channel.h"
-#include "youth/utils/LogOut.h"
 
-using namespace youth;
+#include <youth/utils/LogOut.h>
+
+namespace youth
+{
+
+using namespace utils;
+
+namespace net
+{
 
 const int kNew = -1;
 const int kAdded = 1;
@@ -182,4 +189,8 @@ void Epoll::update(int operation, Channel *channel)
             LOG_FATAL << "epoll_ctl op =" << operationToString(operation) << " fd =" << fd;
         }
     }
+}
+
+}
+
 }

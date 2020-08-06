@@ -7,10 +7,15 @@
 namespace youth
 {
 
+namespace core
+{
+
 namespace string
 {
 
 std::vector<std::string> split(std::string, const char);
+
+}
 
 }
 

@@ -7,7 +7,13 @@
 
 #include <assert.h>
 
-using namespace youth;
+namespace youth
+{
+
+using namespace utils;
+
+namespace net
+{
 
 TcpConnection::TcpConnection(EventLoop *loop,
                              const std::string &name,
@@ -440,4 +446,8 @@ void TcpConnection::startReadInLoop()
 void TcpConnection::stopReadInLoop()
 {
     m_eventLoop->runInLoop(std::bind(&TcpConnection::stopReadInLoop, this));
+}
+
+}
+
 }

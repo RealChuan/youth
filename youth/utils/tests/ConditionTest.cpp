@@ -1,10 +1,13 @@
-#include "youth/utils/Thread.h"
+#include <youth/utils/Thread.h>
+#include <youth/core/Condition.h>
 
 #include <unistd.h>
 
-using namespace youth;
+using namespace youth::utils;
+using namespace youth::core;
 
-class A{
+class A
+{
 public:
     A()
         :mutex()

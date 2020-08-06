@@ -3,9 +3,14 @@
 
 #include <memory>
 
-#include <youth/core/Object.h>
+#include "TcpConnection.h"
 
 namespace youth
+{
+
+using namespace core;
+
+namespace net
 {
 
 class Connector;
@@ -26,6 +31,8 @@ public:
     void stop();
 
 };
+
+}
 
 }
 

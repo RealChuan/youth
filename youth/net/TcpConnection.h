@@ -10,8 +10,15 @@
 #include "Socket.h"
 #include "Buffer.h"
 #include "Callbacks.h"
+#include "TcpAddressInfo.h"
 
-namespace youth {
+namespace youth
+{
+
+using namespace core;
+
+namespace net
+{
 
 class Channel;
 class Socket;
@@ -122,6 +129,8 @@ private:
 };
 
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
+
+}
 
 }
 

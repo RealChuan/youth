@@ -6,7 +6,11 @@
 
 #define MAX_LINE 1024
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 FileUtil::FileUtil()
     :m_filePtr()
@@ -175,4 +179,8 @@ void FileUtil::moveFilePoint(FileUtil::Seek seek)
     case End : fseek(m_filePtr, 0, SEEK_END);break;
     default : break;
     }
+}
+
+}
+
 }

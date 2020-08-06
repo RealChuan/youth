@@ -1,13 +1,20 @@
 #ifndef EVENTLOOPTHREAD_H
 #define EVENTLOOPTHREAD_H
 
-#include <youth/core/Object.h>
 #include <youth/utils/Thread.h>
+#include <youth/core/Condition.h>
 
 #include <functional>
 #include <string>
 
-namespace youth {
+namespace youth
+{
+
+using namespace core;
+using namespace utils;
+
+namespace net
+{
 
 class EventLoop;
 class EventLoopThread : noncopyable
@@ -30,6 +37,8 @@ private:
     Thread m_thread;
     ThreadInitCallback m_callback;
 };
+
+}
 
 }
 

@@ -7,9 +7,15 @@
 
 #include <youth/core/Object.h>
 
-namespace youth {
+namespace youth
+{
 
-class Buffer : public copyable
+using namespace core;
+
+namespace net
+{
+
+class Buffer : copyable
 {
 public:
     static const size_t kCheapPrepend = 8;
@@ -133,6 +139,8 @@ private:
 
     static const char kCRLF[];
 };
+
+}
 
 }
 

@@ -1,12 +1,16 @@
-#include "../Singleton.h"
-#include "../LogOut.h"
+#include <youth/utils/Singleton.h>
+#include <youth/utils/LogOut.h>
 
-using namespace youth;
+using namespace youth::utils;
 
-class A{
+class A
+{
     SINGLETON(A)
-    public:
-        void print(){ LOG_INFO << "1111111";    }
+public:
+    void print()
+    {
+        LOG_INFO << "1111111";
+    }
 };
 
 A::A(){     LOG_INFO << "A";    }

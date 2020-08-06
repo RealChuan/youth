@@ -7,7 +7,11 @@
 #include <string.h>
 #include <string_view>
 
-using namespace youth;
+namespace youth
+{
+
+namespace net
+{
 
 Buffer::Buffer(size_t initialSize)
     : m_bufferVec(kCheapPrepend + initialSize)
@@ -374,4 +378,8 @@ void Buffer::makeSpace(size_t len)
         m_writerIndex = m_readerIndex + readable;
         assert(readable == readableBytes());
     }
+}
+
+}
+
 }

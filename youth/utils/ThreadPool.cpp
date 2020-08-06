@@ -2,7 +2,11 @@
 
 #include <assert.h>
 
-using namespace youth;
+namespace youth
+{
+
+namespace utils
+{
 
 ThreadPool::ThreadPool()
     :m_maxTaskNum(0)
@@ -40,8 +44,7 @@ void ThreadPool::start(int numThreads)
     {
         char id[32];
         snprintf(id, sizeof id, "%d", i + 1);
-        m_threadVec.emplace_back(new youth::Thread(
-                                     std::bind(&ThreadPool::threadFunc, this)));
+        m_threadVec.emplace_back(new Thread(std::bind(&ThreadPool::threadFunc, this)));
         m_threadVec[static_cast<unsigned long>(i)]->start();
     }
     if (numThreads == 0 && m_threadInitCallback)
@@ -126,4 +129,8 @@ ThreadPool::Task ThreadPool::take()
         }
     }
     return task;
+}
+
+}
+
 }

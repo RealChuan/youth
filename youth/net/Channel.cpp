@@ -1,13 +1,20 @@
 #include "Channel.h"
 #include "EventLoop.h"
-#include "youth/utils/LogOut.h"
+
+#include <youth/utils/LogOut.h>
 
 #include <assert.h>
 #include <sstream>
 #include <sys/epoll.h>
 #include <poll.h>
 
-using namespace youth;
+namespace youth
+{
+
+using namespace utils;
+
+namespace net
+{
 
 const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
@@ -53,7 +60,7 @@ void Channel::handleEvent(Timestamp receiveTime)
     }
 }
 
-void youth::Channel::setReadCallback(ReadEventCallback cb)
+void Channel::setReadCallback(ReadEventCallback cb)
 {
     m_readCallback = std::move(cb);
 }
@@ -234,4 +241,8 @@ std::string Channel::eventsToString(int fd, int events)
         oss << "NVAL ";
 
     return oss.str();
+}
+
+}
+
 }

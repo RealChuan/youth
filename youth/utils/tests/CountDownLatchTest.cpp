@@ -1,22 +1,26 @@
-#include "youth/utils/CountDownLatch.h"
-#include "youth/utils/Thread.h"
+#include <youth/core/CountDownLatch.h>
+#include <youth/utils/Thread.h>
 
 #include <iostream>
 #include <memory>
 
-using namespace youth;
+using namespace youth::utils;
+using namespace youth::core;
 
-void printFirst(CountDownLatch *latch){
+void printFirst(CountDownLatch *latch)
+{
     latch->wait();
     printf("This is the first thread.\n");
 }
 
-void printSecond(CountDownLatch *latch){
+void printSecond(CountDownLatch *latch)
+{
     latch->wait();
     printf( "This is the Second thread.\n");
 }
 
-void printThird(CountDownLatch *latch){
+void printThird(CountDownLatch *latch)
+{
     latch->wait();
     printf("This is the Third thread.\n");
 }

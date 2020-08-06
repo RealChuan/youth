@@ -10,7 +10,13 @@
 #include <assert.h>
 #include <sys/eventfd.h>
 
-using namespace youth;
+namespace youth
+{
+
+using namespace utils;
+
+namespace net
+{
 
 __thread EventLoop *g_loopInThisThread = nullptr;
 
@@ -211,4 +217,8 @@ void EventLoop::printActiveChannels() const
     {
         LOG_DEBUG << "{" << channel->reventsToString() << "} ";
     }
+}
+
+}
+
 }

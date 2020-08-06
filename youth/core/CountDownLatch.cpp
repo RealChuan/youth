@@ -1,6 +1,10 @@
 #include "CountDownLatch.h"
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 CountDownLatch::CountDownLatch(int count)
     :m_mutex()
@@ -30,4 +34,8 @@ int CountDownLatch::getCount() const
 {
     MutexLock lock(m_mutex);
     return m_count;
+}
+
+}
+
 }

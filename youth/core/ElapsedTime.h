@@ -3,9 +3,12 @@
 
 #include <string>
 
-#include "youth/core/Object.h"
+#include "Object.h"
 
-namespace  youth
+namespace youth
+{
+
+namespace core
 {
 
 class ElapsedTime : noncopyable
@@ -20,6 +23,8 @@ public:
 private:
     struct timeval m_tvStart;
 };
+
+}
 
 }
 

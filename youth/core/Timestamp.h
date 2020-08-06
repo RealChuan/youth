@@ -7,6 +7,10 @@
 
 namespace youth
 {
+
+namespace core
+{
+
 class Timestamp : copyable
 {
 public:
@@ -20,6 +24,7 @@ public:
     int32_t getAbsTimespec(struct timespec *ts, int32_t millisecond);
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
+
 private:
     inline bool getTime();
 
@@ -27,6 +32,8 @@ private:
     struct tm m_tmTime;
     time_t m_lastSecond;
 };
+
+}
 
 }
 

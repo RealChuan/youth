@@ -3,30 +3,41 @@
 
 #include "Thread.h"
 
+#include <youth/core/Mutex.h>
+
 #include <deque>
 
-namespace youth {
+namespace youth
+{
+
+using namespace core;
+
+namespace utils
+{
 
 template<typename T>
 class TaskQueue
 {
 public:
     TaskQueue()
-        :m_mutex()
-        ,m_queue(){
-    }
+        : m_mutex()
+        , m_queue()
+    {}
 
-    void append(const T& t){
+    void append(const T& t)
+    {
         MutexLock lock(m_mutex);
         m_queue.push_back(t);
     }
 
-    void append(const T&& t){
+    void append(const T&& t)
+    {
         MutexLock lock(m_mutex);
         m_queue.push_back(std::move(t));
     }
 
-    T take(){
+    T take()
+    {
         MutexLock lock(m_mutex);
         if(m_queue.empty())
             return T();
@@ -35,7 +46,8 @@ public:
         return t;
     }
 
-    size_t size() const{
+    size_t size() const
+    {
         MutexLock lock(m_mutex);
         return m_queue.size();
     }
@@ -44,6 +56,8 @@ private:
     mutable Mutex m_mutex;
     std::deque<T> m_queue GUARDED_BY(m_mutex);
 };
+
+}
 
 }
 

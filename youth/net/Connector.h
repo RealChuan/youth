@@ -4,11 +4,18 @@
 #include <youth/core/Object.h>
 
 #include "Socket.h"
+#include "TcpAddressInfo.h"
 
 #include <memory>
 #include <functional>
 
-namespace youth {
+namespace youth
+{
+
+using namespace core;
+
+namespace net
+{
 
 class Channel;
 class EventLoop;
@@ -60,6 +67,8 @@ private:
     int m_retryDelayMs = kInitRetryDelayMs;   // 500ms
     NewConnectionCallback m_newConnectionCallback;
 };
+
+}
 
 }
 

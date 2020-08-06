@@ -6,7 +6,13 @@
 
 #include <youth/core/Timestamp.h>
 
-namespace youth {
+namespace youth
+{
+
+using namespace core;
+
+namespace net
+{
 
 class Buffer;
 class TcpConnection;
@@ -27,6 +33,8 @@ void defaultMessageCallback(const TcpConnectionPtr& conn,
                             Buffer* buffer,
                             Timestamp receiveTime);
 
+
+}
 
 }
 #endif // CALLBACKS_H

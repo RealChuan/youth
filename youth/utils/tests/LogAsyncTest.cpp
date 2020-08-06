@@ -3,8 +3,7 @@
 
 #include <unistd.h>
 
-using namespace std;
-using namespace youth;
+using namespace youth::utils;
 
 int main(int argc, char** argv)
 {

@@ -1,8 +1,9 @@
 #include "../String.h"
 
-using namespace youth;
+using namespace youth::core;
 
-int main(){
+int main()
+{
     std::string str("/yyy/xxx/zzz.log");
     std::vector<std::string> strVec = string::split(str, '/');
     for(const std::string& s : strVec)

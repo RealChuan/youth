@@ -10,8 +10,14 @@
 
 #include <youth/core/Timestamp.h>
 #include <youth/core/Object.h>
+#include <youth/core/Condition.h>
 
 namespace youth
+{
+
+using namespace core;
+
+namespace utils
 {
 
 class LogAsync : noncopyable
@@ -46,6 +52,8 @@ private:
     BufferPtr m_nextBuffer GUARDED_BY(m_mutex);
     BufferVector m_buffers GUARDED_BY(m_mutex);
 };
+
+}
 
 }
 #endif /* LOGASYNC_H */

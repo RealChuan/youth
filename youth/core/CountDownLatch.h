@@ -1,11 +1,12 @@
 #ifndef COUNTDOWNLATCH_H
 #define COUNTDOWNLATCH_H
 
-#include "Thread.h"
-#include "youth/core/Object.h"
-
+#include "Condition.h"
 
 namespace youth
+{
+
+namespace core
 {
 
 class CountDownLatch : noncopyable
@@ -21,6 +22,8 @@ private:
     Condition m_condition GUARDED_BY(m_mutex);
     int m_count GUARDED_BY(m_mutex);
 };
+
+}
 
 }
 

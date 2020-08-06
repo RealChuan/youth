@@ -1,13 +1,16 @@
 #include "ElapsedTime.h"
-#include "../core/Timestamp.h"
+#include "Timestamp.h"
 
 #include <sys/time.h>
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 ElapsedTime::ElapsedTime()
 {
-
 }
 
 void ElapsedTime::start()
@@ -30,4 +33,8 @@ std::string ElapsedTime::elapsed()
     double seconds = double(t) / Timestamp::kMicroSecondsPerSecond;
     snprintf(buf, sizeof buf, "%.6lf(S)", seconds);
     return buf;
+}
+
+}
+
 }

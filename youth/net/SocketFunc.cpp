@@ -5,7 +5,13 @@
 #include <arpa/inet.h>
 #include <sys/uio.h>
 
-using namespace youth;
+namespace youth
+{
+
+using namespace utils;
+
+namespace net
+{
 
 void SocketFunc::setServerAddress(uint16_t port, sockaddr_in *serverAddr,
                                   bool loopbackOnly)
@@ -309,4 +315,8 @@ uint64_t SocketFunc::networkToHost64(uint64_t net64)
 uint16_t SocketFunc::networkToHost16(uint16_t net16)
 {
     return be16toh(net16);
+}
+
+}
+
 }

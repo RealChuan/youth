@@ -1,22 +1,26 @@
 #include "Timestamp.h"
-#include "string.h"
 
+#include <string.h>
 #include <sys/time.h>
 
-using namespace youth;
+namespace youth
+{
+
+namespace core
+{
 
 //static const char *arrWeek[] = {"Sunday", "Monday", "Tuesday",
 //                                "Wednessday", "Thursday", "Friday", "Saturday"};
 
 Timestamp::Timestamp()
-    :m_mcroSecondsSinceEpoch(0)
-    ,m_lastSecond(0)
+    : m_mcroSecondsSinceEpoch(0)
+    , m_lastSecond(0)
 {
 }
 
 Timestamp::Timestamp(int64_t ms)
-    :m_mcroSecondsSinceEpoch(ms)
-    ,m_lastSecond(0)
+    : m_mcroSecondsSinceEpoch(ms)
+    , m_lastSecond(0)
 {
 }
 
@@ -89,4 +93,8 @@ int32_t Timestamp::getAbsTimespec(struct timespec *ts, int32_t millisecond)
     ts->tv_nsec %= (1000UL * 1000UL * 1000UL);
 
     return 0;
+}
+
+}
+
 }

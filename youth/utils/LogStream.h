@@ -1,16 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   LogStream.h
- * Author: root
- *
- * Created on 2019年8月4日, 上午6:43
- */
-
 #ifndef LOGSTREAM_H
 #define LOGSTREAM_H
 
@@ -19,6 +6,9 @@
 #include "youth/core/Object.h"
 
 namespace youth
+{
+
+namespace utils
 {
 
 class LogStream : noncopyable
@@ -55,6 +45,9 @@ private:
     buffer m_logBuffer; //这个就是具体的Buffer
 
 };
+
+}
+
 }
 
 #endif /* LOGSTREAM_H */

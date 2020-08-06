@@ -7,6 +7,9 @@
 namespace youth
 {
 
+namespace net
+{
+
 namespace SocketFunc
 {
 
@@ -47,6 +50,8 @@ uint32_t networkToHost32(uint32_t net32);
 uint16_t networkToHost16(uint16_t net16);
 
 }; // namespace socket
+
+}
 
 }
 
