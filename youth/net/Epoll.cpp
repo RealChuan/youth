@@ -7,7 +7,7 @@
 #include "Socket.h"
 #include "Channel.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 
 namespace youth
 {

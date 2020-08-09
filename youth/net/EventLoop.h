@@ -1,6 +1,9 @@
 #ifndef EVENTLOOP_H
 #define EVENTLOOP_H
 
+#include "TimerId.h"
+#include "Callbacks.h"
+
 #include <youth/utils/Thread.h>
 #include <youth/core/Timestamp.h>
 #include <youth/core/Mutex.h>
@@ -9,15 +12,15 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <any>
 
 namespace youth
 {
 
-using namespace core;
-
 namespace net
 {
 
+class TimerQueue;
 class Channel;
 class Epoll;
 class EventLoop : noncopyable
@@ -43,6 +46,29 @@ public:
 
     size_t queueSize() const;
 
+    // timers
+
+    ///
+    /// Runs callback at 'time'.
+    /// Safe to call from other threads.
+    ///
+    TimerId runAt(Timestamp time, TimerCallback cb);
+    ///
+    /// Runs callback after @c delay seconds.
+    /// Safe to call from other threads.
+    ///
+    TimerId runAfter(double delay, TimerCallback cb);
+    ///
+    /// Runs callback every @c interval seconds.
+    /// Safe to call from other threads.
+    ///
+    TimerId runEvery(double interval, TimerCallback cb);
+    ///
+    /// Cancels the timer.
+    /// Safe to call from other threads.
+    ///
+    void cancel(TimerId timerId);
+
     // internal usage
     void wakeup();
     void updateChannel(Channel *channel);
@@ -51,6 +77,12 @@ public:
 
     bool isInLoopThread() const;
     void assertInLoopThread();
+
+    bool eventHandling() const;
+
+    void setContext(const std::any& context);
+    const std::any& getContext() const;
+    std::any* getMutableContext();
 
 private:
     void abortNotInLoopThread();
@@ -67,10 +99,12 @@ private:
     int64_t m_index;
     Timestamp m_pollReturnTime;
     std::unique_ptr<Epoll> m_epoll;
+    std::unique_ptr<TimerQueue> m_timerQueuePtr;
 
     int m_wakeupFd;
 
     std::unique_ptr<Channel> m_channelPtr;
+    std::any m_context;
 
     // scratch variables
     std::vector<Channel *> m_activeChannels;

@@ -1,7 +1,7 @@
 #include "Channel.h"
 #include "EventLoop.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 
 #include <assert.h>
 #include <sstream>

@@ -16,7 +16,7 @@ namespace utils
 {
 
 template<typename T>
-class TaskQueue
+class TaskQueue : copyable
 {
 public:
     TaskQueue()

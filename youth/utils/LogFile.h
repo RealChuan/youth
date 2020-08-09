@@ -3,7 +3,6 @@
 
 #include "Thread.h"
 
-#include <youth/core/Object.h>
 #include <youth/core/Mutex.h>
 
 #include <memory>

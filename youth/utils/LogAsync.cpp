@@ -1,6 +1,6 @@
 #include "LogAsync.h"
 #include "LogFile.h"
-#include "LogOut.h"
+#include "Logging.h"
 
 #include <assert.h>
 
@@ -135,7 +135,7 @@ void LogAsync::threadFunc()
         {
             char buf[256];
             snprintf(buf, sizeof buf, "Dropped log messages at %s, %zd larger buffers\n",
-                     m_timestamp.getMicroSToString().c_str(), buffersToWrite.size() - 2);
+                     m_timestamp.microSecondsToString().c_str(), buffersToWrite.size() - 2);
             fputs(buf, stderr);
             LogFile::outputFunc(buf, static_cast<int> (strlen(buf)));
             buffersToWrite.erase(buffersToWrite.begin() + 2, buffersToWrite.end());

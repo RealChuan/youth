@@ -22,6 +22,9 @@ public:
                             bool ipv6 = false);
 
     TcpAddressInfo(const char *ip, uint16_t port = 0, bool ipv6 = false);
+    explicit TcpAddressInfo(const struct sockaddr_in& addr);
+
+    explicit TcpAddressInfo(const struct sockaddr_in6& addr);
 
     const struct sockaddr* getSockAddr() const;
     sa_family_t family() const;

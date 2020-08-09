@@ -3,7 +3,7 @@
 #include "SocketFunc.h"
 #include "Channel.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 
 #include <assert.h>
 

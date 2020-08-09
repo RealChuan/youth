@@ -3,8 +3,9 @@
 #include "Channel.h"
 #include "Socket.h"
 #include "SocketFunc.h"
+#include "TimerQueue.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 #include <youth/core/CurrentThread.h>
 
 #include <assert.h>
@@ -40,6 +41,7 @@ EventLoop::EventLoop()
     , m_eventHandling(false)
     , m_index(0)
     , m_epoll(new Epoll(this))
+    , m_timerQueuePtr(new TimerQueue(this))
     , m_wakeupFd(createEventfd())
     , m_channelPtr(new Channel(this, m_wakeupFd))
 {
@@ -130,6 +132,28 @@ size_t EventLoop::queueSize() const
     return m_pendingFunctors.size();
 }
 
+TimerId EventLoop::runAt(Timestamp time, TimerCallback cb)
+{
+    return m_timerQueuePtr->addTimer(std::move(cb), time, 0.0);
+}
+
+TimerId EventLoop::runAfter(double delay, TimerCallback cb)
+{
+    Timestamp time(addTime(Timestamp::currentTimestamp(), delay));
+    return runAt(time, std::move(cb));
+}
+
+TimerId EventLoop::runEvery(double interval, TimerCallback cb)
+{
+    Timestamp time(addTime(Timestamp::currentTimestamp(), interval));
+    return m_timerQueuePtr->addTimer(std::move(cb), time, interval);
+}
+
+void EventLoop::cancel(TimerId timerId)
+{
+    return m_timerQueuePtr->cancel(timerId);
+}
+
 void EventLoop::wakeup()
 {
     uint64_t one = 1;
@@ -194,6 +218,26 @@ void EventLoop::assertInLoopThread()
     {
         abortNotInLoopThread();
     }
+}
+
+bool EventLoop::eventHandling() const
+{
+    return m_eventHandling;
+}
+
+void EventLoop::setContext(const std::any &context)
+{
+    m_context = context;
+}
+
+const std::any &EventLoop::getContext() const
+{
+    return m_context;
+}
+
+std::any *EventLoop::getMutableContext()
+{
+    return &m_context;
 }
 
 void EventLoop::doPendingFunctors()

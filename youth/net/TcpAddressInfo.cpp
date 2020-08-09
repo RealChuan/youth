@@ -1,7 +1,7 @@
 #include "TcpAddressInfo.h"
 #include "SocketFunc.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 
 #include <assert.h>
 #include <netdb.h>
@@ -28,6 +28,16 @@ TcpAddressInfo::TcpAddressInfo(const char *ip, uint16_t port, bool ipv6)
         SocketFunc::setServerAddress(ip, port, &m_serveraddr6);
     else
         SocketFunc::setServerAddress(ip, port, &m_serveraddr);
+}
+
+TcpAddressInfo::TcpAddressInfo(const sockaddr_in &addr)
+    : m_serveraddr(addr)
+{
+}
+
+TcpAddressInfo::TcpAddressInfo(const sockaddr_in6 &addr)
+    : m_serveraddr6(addr)
+{
 }
 
 const sockaddr *TcpAddressInfo::getSockAddr() const

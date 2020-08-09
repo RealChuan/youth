@@ -4,7 +4,6 @@
 #include <memory>
 #include <any>
 
-#include <youth/core/Object.h>
 #include <youth/core/Timestamp.h>
 
 #include "Socket.h"

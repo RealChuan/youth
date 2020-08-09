@@ -1,8 +1,6 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <youth/core/Object.h>
-
 #include "Socket.h"
 #include "TcpAddressInfo.h"
 

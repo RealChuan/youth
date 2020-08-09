@@ -2,8 +2,8 @@
 #define LOGSTREAM_H
 
 #include <string>
+
 #include "LogBuffer.h"
-#include "youth/core/Object.h"
 
 namespace youth
 {

@@ -24,12 +24,47 @@ Timestamp::Timestamp(int64_t ms)
 {
 }
 
+void Timestamp::swap(Timestamp &that)
+{
+    std::swap(m_mcroSecondsSinceEpoch, that.m_mcroSecondsSinceEpoch);
+}
+
+bool Timestamp::isValid() const
+{
+    return m_mcroSecondsSinceEpoch > 0;
+}
+
+int64_t Timestamp::microSecondsSinceEpoch() const
+{
+    return m_mcroSecondsSinceEpoch;
+}
+
+time_t Timestamp::secondsSinceEpoch() const
+{
+    return time_t(m_mcroSecondsSinceEpoch / kMicroSecondsPerSecond);
+}
+
 Timestamp Timestamp::currentTimestamp()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int64_t seconds = tv.tv_sec;
     return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
+}
+
+Timestamp Timestamp::invalid()
+{
+    return Timestamp();
+}
+
+Timestamp Timestamp::fromUnixTime(time_t t)
+{
+    return fromUnixTime(t, 0);
+}
+
+Timestamp Timestamp::fromUnixTime(time_t t, int microseconds)
+{
+    return Timestamp(int64_t(t) * kMicroSecondsPerSecond + microseconds);
 }
 
 std::string Timestamp::getDayToString()
@@ -51,7 +86,7 @@ std::string Timestamp::getSecondToString()
     return buf;
 }
 
-std::string Timestamp::getMicroSToString()
+std::string Timestamp::microSecondsToString()
 {
     getTime();
     char buf[64] = {0};
@@ -84,7 +119,7 @@ int32_t Timestamp::getAbsTimespec(struct timespec *ts, int32_t millisecond)
         return ret;
 
     ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = static_cast<long>(static_cast<unsigned long>(tv.tv_usec) * 1000UL);
+    ts->tv_nsec = long(static_cast<unsigned long>(tv.tv_usec) * 1000UL);
 
     ts->tv_sec += static_cast<unsigned long>(millisecond) / 1000UL;
     ts->tv_nsec += static_cast<unsigned long>(millisecond) % 1000UL * 1000000UL;

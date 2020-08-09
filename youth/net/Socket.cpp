@@ -2,7 +2,7 @@
 #include "SocketFunc.h"
 #include "TcpAddressInfo.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 
 #include <netinet/tcp.h>
 

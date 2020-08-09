@@ -5,6 +5,8 @@
 
 #include "TcpConnection.h"
 
+#include <youth/core/Mutex.h>
+
 namespace youth
 {
 
@@ -30,6 +32,44 @@ public:
     void disconnect();
     void stop();
 
+    TcpConnectionPtr connection() const;
+
+    EventLoop* getLoop() const;
+    bool retry() const;
+    void enableRetry();
+
+    const std::string& name() const;
+
+    /// Set connection callback.
+    /// Not thread safe.
+    void setConnectionCallback(ConnectionCallback cb);
+
+    /// Set message callback.
+    /// Not thread safe.
+    void setMessageCallback(MessageCallback cb);
+
+    /// Set write complete callback.
+    /// Not thread safe.
+    void setWriteCompleteCallback(WriteCompleteCallback cb);
+
+private:
+    /// Not thread safe, but in loop
+    void newConnection(int sockfd);
+    /// Not thread safe, but in loop
+    void removeConnection(const TcpConnectionPtr& conn);
+
+    EventLoop* loop_;
+    ConnectorPtr connector_; // avoid revealing Connector
+    const std::string name_;
+    ConnectionCallback connectionCallback_;
+    MessageCallback messageCallback_;
+    WriteCompleteCallback writeCompleteCallback_;
+    bool retry_;   // atomic
+    bool connect_; // atomic
+    // always in loop thread
+    int nextConnId_;
+    mutable Mutex mutex_;
+    TcpConnectionPtr connection_ GUARDED_BY(mutex_);
 };
 
 }

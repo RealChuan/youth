@@ -1,5 +1,5 @@
 #include "Thread.h"
-#include "LogOut.h"
+#include "Logging.h"
 
 #include <youth/core/Timestamp.h>
 

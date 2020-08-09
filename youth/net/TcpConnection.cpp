@@ -3,7 +3,7 @@
 #include "EventLoop.h"
 #include "SocketFunc.h"
 
-#include <youth/utils/LogOut.h>
+#include <youth/utils/Logging.h>
 
 #include <assert.h>
 

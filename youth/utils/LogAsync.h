@@ -4,18 +4,14 @@
 #include "LogBuffer.h"
 #include "Thread.h"
 
+#include <youth/core/Timestamp.h>
+#include <youth/core/Condition.h>
+
 #include <vector>
 #include <memory>
-#include <string>
-
-#include <youth/core/Timestamp.h>
-#include <youth/core/Object.h>
-#include <youth/core/Condition.h>
 
 namespace youth
 {
-
-using namespace core;
 
 namespace utils
 {
