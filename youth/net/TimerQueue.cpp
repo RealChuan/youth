@@ -2,6 +2,7 @@
 #include "TimerId.h"
 #include "Timer.h"
 #include "EventLoop.h"
+#include "Channel.h"
 
 #include <youth/utils/Logging.h>
 
@@ -78,20 +79,19 @@ void resetTimerfd(int timerfd, Timestamp expiration)
 TimerQueue::TimerQueue(EventLoop *loop)
     : m_eventLoop(loop)
     , m_timerfd(createTimerfd())
-    , m_timerfdChannel(loop, m_timerfd)
+    , m_timerfdChannelPtr(new Channel(loop, m_timerfd))
     , m_timers()
     , m_callingExpiredTimers(false)
 {
-    m_timerfdChannel.setReadCallback(
-                std::bind(&TimerQueue::handleRead, this));
+    m_timerfdChannelPtr->setReadCallback(std::bind(&TimerQueue::handleRead, this));
     // we are always reading the timerfd, we disarm it with timerfd_settime.
-    m_timerfdChannel.enableReading();
+    m_timerfdChannelPtr->enableReading();
 }
 
 TimerQueue::~TimerQueue()
 {
-    m_timerfdChannel.disableAll();
-    m_timerfdChannel.remove();
+    m_timerfdChannelPtr->disableAll();
+    m_timerfdChannelPtr->remove();
     ::close(m_timerfd);
     // do not remove channel, since we're in EventLoop::dtor();
     for (const Entry& timer : m_timers)
@@ -195,7 +195,7 @@ void TimerQueue::reset(const std::vector<TimerQueue::Entry> &expired, Timestamp 
     for (const Entry& it : expired)
     {
         ActiveTimer timer(it.second, it.second->sequence());
-        if (it.second->repeat()
+        if (it.second->repeat() // 重复定时触发
                 && m_cancelingTimers.find(timer) == m_cancelingTimers.end())
         {
             it.second->restart(now);

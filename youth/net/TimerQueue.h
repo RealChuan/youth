@@ -3,7 +3,6 @@
 
 #include <youth/core/Timestamp.h>
 
-#include "Channel.h"
 #include "Callbacks.h"
 
 #include <set>
@@ -16,6 +15,7 @@ using namespace core;
 namespace net
 {
 
+class Channel;
 class EventLoop;
 class Timer;
 class TimerId;
@@ -57,7 +57,7 @@ private:
 
     EventLoop* m_eventLoop;
     const int m_timerfd;
-    Channel m_timerfdChannel;
+    std::unique_ptr<Channel> m_timerfdChannelPtr;
     // Timer list sorted by expiration
     TimerList m_timers;
 

@@ -103,7 +103,7 @@ private:
 
     int m_wakeupFd;
 
-    std::unique_ptr<Channel> m_channelPtr;
+    std::unique_ptr<Channel> m_wakeupChannelPtr;
     std::any m_context;
 
     // scratch variables

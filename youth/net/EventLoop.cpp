@@ -36,14 +36,15 @@ int createEventfd()
 
 EventLoop::EventLoop()
     : m_threadID(CurrentThread::tid())
-    , m_looping(false), m_quit(false)
+    , m_looping(false)
+    , m_quit(false)
     , m_callingPendingFunctors(false)
     , m_eventHandling(false)
     , m_index(0)
     , m_epoll(new Epoll(this))
     , m_timerQueuePtr(new TimerQueue(this))
     , m_wakeupFd(createEventfd())
-    , m_channelPtr(new Channel(this, m_wakeupFd))
+    , m_wakeupChannelPtr(new Channel(this, m_wakeupFd))
 {
     LOG_DEBUG << "EventLoop created " << this << " in thread " << m_threadID;
     if (g_loopInThisThread)
@@ -55,12 +56,17 @@ EventLoop::EventLoop()
     {
         g_loopInThisThread = this;
     }
-    m_channelPtr->setReadCallback(std::bind(&EventLoop::handleRead, this));
-    m_channelPtr->enableReading();
+    m_wakeupChannelPtr->setReadCallback(std::bind(&EventLoop::handleRead, this));
+    m_wakeupChannelPtr->enableReading();
 }
 
 EventLoop::~EventLoop()
 {
+    LOG_DEBUG << "EventLoop " << this << " of thread " << m_threadID
+              << " destructs in thread " << CurrentThread::tid();
+    m_wakeupChannelPtr->disableAll();
+    m_wakeupChannelPtr->remove();
+    ::close(m_wakeupFd);
     g_loopInThisThread = nullptr;
 }
 

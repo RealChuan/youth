@@ -17,9 +17,11 @@ class Timer;
 class TimerId : copyable
 {
 public:
-    TimerId();
-
-    TimerId(Timer* timer, int64_t seq);
+    TimerId() {}
+    TimerId(Timer* timer, int64_t seq)
+        : m_timer(timer)
+        , m_sequence(seq)
+    {}
 
     // default copy-ctor, dtor and assignment are okay
 

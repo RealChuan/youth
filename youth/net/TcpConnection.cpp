@@ -4,6 +4,7 @@
 #include "SocketFunc.h"
 
 #include <youth/utils/Logging.h>
+#include <youth/core/WeakCallback.h>
 
 #include <assert.h>
 
@@ -110,10 +111,7 @@ void TcpConnection::send(const std::string_view &message)
         else
         {
             void (TcpConnection::*fp)(const std::string_view& message) = &TcpConnection::sendInLoop;
-            m_eventLoop->runInLoop(
-                        std::bind(fp,
-                                  this,     // FIXME
-                                  std::string(message)));
+            m_eventLoop->runInLoop(std::bind(fp, this, std::string(message)));
             //std::forward<string>(message)));
         }
     }
@@ -166,10 +164,9 @@ void TcpConnection::forceCloseWithDelay(double seconds)
     if (m_state == kConnected || m_state == kDisconnecting)
     {
         m_state = kDisconnecting;
-        //        m_eventLoop->runAfter(
-        //                    seconds,
-        //                    makeWeakCallback(shared_from_this(),
-        //                                     &TcpConnection::forceClose));  // not forceCloseInLoop to avoid race condition
+        m_eventLoop->runAfter(seconds,
+                              makeWeakCallback(shared_from_this(),
+                                               &TcpConnection::forceClose));  // not forceCloseInLoop to avoid race condition
     }
 }
 
@@ -223,7 +220,8 @@ void TcpConnection::setWriteCompleteCallback(const WriteCompleteCallback &cb)
     m_writeCompleteCallback = cb;
 }
 
-void TcpConnection::setHighWaterMarkCallback(const HighWaterMarkCallback &cb, size_t highWaterMark)
+void TcpConnection::setHighWaterMarkCallback(const HighWaterMarkCallback &cb,
+                                             size_t highWaterMark)
 {
     m_highWaterMarkCallback = cb;
     m_highWaterMark = highWaterMark;
@@ -305,7 +303,8 @@ void TcpConnection::handleWrite()
                 m_channelPtr->disableWriting();
                 if (m_writeCompleteCallback)
                 {
-                    m_eventLoop->queueInLoop(std::bind(m_writeCompleteCallback, shared_from_this()));
+                    m_eventLoop->queueInLoop(std::bind(m_writeCompleteCallback,
+                                                       shared_from_this()));
                 }
                 if (m_state == kDisconnecting)
                 {
@@ -376,7 +375,8 @@ void TcpConnection::sendInLoop(const void *data, size_t len)
             remaining = len - nwrote;
             if (remaining == 0 && m_writeCompleteCallback)
             {
-                m_eventLoop->queueInLoop(std::bind(m_writeCompleteCallback, shared_from_this()));
+                m_eventLoop->queueInLoop(std::bind(m_writeCompleteCallback,
+                                                   shared_from_this()));
             }
         }
         else // nwrote < 0

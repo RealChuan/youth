@@ -14,8 +14,6 @@
 namespace youth
 {
 
-using namespace core;
-
 namespace net
 {
 

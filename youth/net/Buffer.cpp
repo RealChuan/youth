@@ -364,16 +364,16 @@ void Buffer::makeSpace(size_t len)
     if (writableBytes() + prependableBytes() < len + kCheapPrepend)
     {
         // FIXME: move readable data
-        m_bufferVec.resize(m_writerIndex+len);
+        m_bufferVec.resize(m_writerIndex + len);
     }
     else
     {
         // move readable data to the front, make space inside buffer
         assert(kCheapPrepend < m_readerIndex);
         size_t readable = readableBytes();
-        std::copy(begin()+m_readerIndex,
-                  begin()+m_writerIndex,
-                  begin()+kCheapPrepend);
+        std::copy(begin() + m_readerIndex,
+                  begin() + m_writerIndex,
+                  begin() + kCheapPrepend);
         m_readerIndex = kCheapPrepend;
         m_writerIndex = m_readerIndex + readable;
         assert(readable == readableBytes());

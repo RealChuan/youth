@@ -39,7 +39,8 @@ Epoll::~Epoll()
 
 Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
-    int numEvents = ::epoll_wait(m_epollfd, &*m_eventVec.begin(),
+    int numEvents = ::epoll_wait(m_epollfd,
+                                 &*m_eventVec.begin(),
                                  static_cast<int>(m_eventVec.size()),
                                  timeoutMs);
     int savedErrno = errno;
