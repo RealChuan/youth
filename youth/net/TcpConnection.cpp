@@ -16,6 +16,21 @@ using namespace utils;
 namespace net
 {
 
+void defaultConnectionCallback(const TcpConnectionPtr& conn)
+{
+    LOG_DEBUG << conn->localAddress().ipAndPort() << " -> "
+              << conn->peerAddress().ipAndPort() << " is "
+              << (conn->connected() ? "UP" : "DOWN");
+    // do not call conn->forceClose(), because some users want to register message callback only.
+}
+
+void defaultMessageCallback(const TcpConnectionPtr&,
+                            Buffer* buf,
+                            Timestamp)
+{
+    buf->retrieveAll();
+}
+
 TcpConnection::TcpConnection(EventLoop *loop,
                              const std::string &name,
                              int sockfd,
@@ -155,7 +170,8 @@ void TcpConnection::forceClose()
     if (m_state == kConnected || m_state == kDisconnecting)
     {
         m_state = kDisconnecting;
-        m_eventLoop->queueInLoop(std::bind(&TcpConnection::forceCloseInLoop, shared_from_this()));
+        m_eventLoop->queueInLoop(std::bind(&TcpConnection::forceCloseInLoop,
+                                           shared_from_this()));
     }
 }
 
@@ -418,6 +434,16 @@ void TcpConnection::shutdownInLoop()
     {
         // we are not writing
         m_socketPtr->shutdownWrite();
+    }
+}
+
+void TcpConnection::forceCloseInLoop()
+{
+    m_eventLoop->assertInLoopThread();
+    if (m_state == kConnected || m_state == kDisconnecting)
+    {
+        // as if we received 0 byte in handleRead();
+        handleClose();
     }
 }
 

@@ -28,40 +28,39 @@ void removeConnector(const ConnectorPtr& connector)
 TcpClient::TcpClient(EventLoop *loop,
                      const TcpAddressInfo &serverAddr,
                      const std::string &nameArg)
-    : loop_(CHECK_NOTNULL(loop)),
-      connector_(new Connector(loop, serverAddr)),
-      name_(nameArg),
-      connectionCallback_(defaultConnectionCallback),
-      messageCallback_(defaultMessageCallback),
-      retry_(false),
-      connect_(true),
-      nextConnId_(1)
+    : m_eventLoop(CHECK_NOTNULL(loop))
+    , m_connectorPtr(new Connector(loop, serverAddr))
+    , m_name(nameArg)
+    , m_connectionCallback(defaultConnectionCallback)
+    , m_messageCallback(defaultMessageCallback)
+    , m_retry(false)
+    , m_connect(true)
+    , m_nextConnId(1)
 {
-    connector_->setNewConnectionCallback(
+    m_connectorPtr->setNewConnectionCallback(
                 std::bind(&TcpClient::newConnection, this, std::placeholders::_1));
     // FIXME setConnectFailedCallback
-    LOG_INFO << "TcpClient::TcpClient[" << name_
-             << "] - connector " << connector_.get();
-
+    LOG_INFO << "TcpClient::TcpClient[" << m_name
+             << "] - connector " << m_connectorPtr.get();
 }
 
 TcpClient::~TcpClient()
 {
-    LOG_INFO << "TcpClient::~TcpClient[" << name_
-             << "] - connector " << connector_.get();
+    LOG_INFO << "TcpClient::~TcpClient[" << m_name
+             << "] - connector " << m_connectorPtr.get();
     TcpConnectionPtr conn;
     bool unique = false;
     {
-        MutexLock lock(mutex_);
-        unique = connection_.unique();
-        conn = connection_;
+        MutexLock lock(m_mutex);
+        unique = m_connectionPtr.unique();
+        conn = m_connectionPtr;
     }
     if (conn)
     {
-        assert(loop_ == conn->eventLoop());
+        assert(m_eventLoop == conn->eventLoop());
         // FIXME: not 100% safe, if we are in different thread
-        CloseCallback cb = std::bind(&net::removeConnection, loop_, std::placeholders::_1);
-        loop_->runInLoop(
+        CloseCallback cb = std::bind(&net::removeConnection, m_eventLoop, std::placeholders::_1);
+        m_eventLoop->runInLoop(
                     std::bind(&TcpConnection::setCloseCallback, conn, cb));
         if (unique)
         {
@@ -70,128 +69,128 @@ TcpClient::~TcpClient()
     }
     else
     {
-        connector_->stop();
+        m_connectorPtr->stop();
         // FIXME: HACK
-        //loop_->runAfter(1, std::bind(&net::removeConnector, connector_));
+        m_eventLoop->runAfter(1, std::bind(&net::removeConnector, m_connectorPtr));
     }
 }
 
 void TcpClient::connect()
 {
     // FIXME: check state
-    LOG_INFO << "TcpClient::connect[" << name_ << "] - connecting to "
-             << connector_->serverAddress().ipAndPort();
-    connect_ = true;
-    connector_->start();
+    LOG_INFO << "TcpClient::connect[" << m_name << "] - connecting to "
+             << m_connectorPtr->serverAddress().ipAndPort();
+    m_connect = true;
+    m_connectorPtr->start();
 }
 
 void TcpClient::disconnect()
 {
-    connect_ = false;
+    m_connect = false;
 
     {
-        MutexLock lock(mutex_);
-        if (connection_)
+        MutexLock lock(m_mutex);
+        if (m_connectionPtr)
         {
-            connection_->shutdown();
+            m_connectionPtr->shutdown();
         }
     }
 }
 
 void TcpClient::stop()
 {
-    connect_ = false;
-    connector_->stop();
+    m_connect = false;
+    m_connectorPtr->stop();
 }
 
 TcpConnectionPtr TcpClient::connection() const
 {
-    MutexLock lock(mutex_);
-    return connection_;
+    MutexLock lock(m_mutex);
+    return m_connectionPtr;
 }
 
 EventLoop *TcpClient::getLoop() const
 {
-    return loop_;
+    return m_eventLoop;
 }
 
 bool TcpClient::retry() const
 {
-    return retry_;
+    return m_retry;
 }
 
 void TcpClient::enableRetry()
 {
-    retry_ = true;
+    m_retry = true;
 }
 
 const std::string &TcpClient::name() const
 {
-    return name_;
+    return m_name;
 }
 
 void TcpClient::setConnectionCallback(ConnectionCallback cb)
 {
-    connectionCallback_ = std::move(cb);
+    m_connectionCallback = std::move(cb);
 }
 
 void TcpClient::setMessageCallback(MessageCallback cb)
 {
-    messageCallback_ = std::move(cb);
+    m_messageCallback = std::move(cb);
 }
 
 void TcpClient::setWriteCompleteCallback(WriteCompleteCallback cb)
 {
-    writeCompleteCallback_ = std::move(cb);
+    m_writeCompleteCallback = std::move(cb);
 }
 
 void TcpClient::newConnection(int sockfd)
 {
-    loop_->assertInLoopThread();
+    m_eventLoop->assertInLoopThread();
     TcpAddressInfo peerAddr(SocketFunc::getPeerAddr(sockfd));
     char buf[32];
-    snprintf(buf, sizeof buf, ":%s#%d", peerAddr.ipAndPort().c_str(), nextConnId_);
-    ++nextConnId_;
-    std::string connName = name_ + buf;
+    snprintf(buf, sizeof buf, ":%s#%d", peerAddr.ipAndPort().c_str(), m_nextConnId);
+    ++m_nextConnId;
+    std::string connName = m_name + buf;
 
     TcpAddressInfo localAddr(SocketFunc::getLocalAddr(sockfd));
     // FIXME poll with zero timeout to double confirm the new connection
     // FIXME use make_shared if necessary
-    TcpConnectionPtr conn(new TcpConnection(loop_,
+    TcpConnectionPtr conn(new TcpConnection(m_eventLoop,
                                             connName,
                                             sockfd,
                                             localAddr,
                                             peerAddr));
 
-    conn->setConnectionCallback(connectionCallback_);
-    conn->setMessageCallback(messageCallback_);
-    conn->setWriteCompleteCallback(writeCompleteCallback_);
+    conn->setConnectionCallback(m_connectionCallback);
+    conn->setMessageCallback(m_messageCallback);
+    conn->setWriteCompleteCallback(m_writeCompleteCallback);
     conn->setCloseCallback(
                 std::bind(&TcpClient::removeConnection, this, std::placeholders::_1)); // FIXME: unsafe
     {
-        MutexLock lock(mutex_);
-        connection_ = conn;
+        MutexLock lock(m_mutex);
+        m_connectionPtr = conn;
     }
     conn->connectEstablished();
 }
 
 void TcpClient::removeConnection(const TcpConnectionPtr &conn)
 {
-    loop_->assertInLoopThread();
-    assert(loop_ == conn->eventLoop());
+    m_eventLoop->assertInLoopThread();
+    assert(m_eventLoop == conn->eventLoop());
 
     {
-        MutexLock lock(mutex_);
-        assert(connection_ == conn);
-        connection_.reset();
+        MutexLock lock(m_mutex);
+        assert(m_connectionPtr == conn);
+        m_connectionPtr.reset();
     }
 
-    loop_->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
-    if (retry_ && connect_)
+    m_eventLoop->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
+    if (m_retry && m_connect)
     {
-        LOG_INFO << "TcpClient::connect[" << name_ << "] - Reconnecting to "
-                 << connector_->serverAddress().ipAndPort();
-        connector_->restart();
+        LOG_INFO << "TcpClient::connect[" << m_name << "] - Reconnecting to "
+                 << m_connectorPtr->serverAddress().ipAndPort();
+        m_connectorPtr->restart();
     }
 }
 

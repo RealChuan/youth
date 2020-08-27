@@ -26,7 +26,7 @@ void SocketFunc::setServerAddress(uint16_t port, sockaddr_in *serverAddr,
 void SocketFunc::setServerAddress(uint16_t port, sockaddr_in6 *serverAddr6,
                                   bool loopbackOnly)
 {
-    memset(serverAddr6, 0, sizeof(struct sockaddr_in));
+    memset(serverAddr6, 0, sizeof(struct sockaddr_in6));
     serverAddr6->sin6_family = AF_INET6;
     serverAddr6->sin6_port = hostToNetwork16(port);
     in6_addr ip = loopbackOnly ? in6addr_loopback : in6addr_any;
@@ -41,14 +41,14 @@ void SocketFunc::setServerAddress(const char *ip, uint16_t port,
     serverAddr->sin_port = hostToNetwork16(port);
     if (::inet_pton(AF_INET, ip, &serverAddr->sin_addr) <= 0)
     {
-        LOG_ERROR << "SocketFunc::serServerAddr";
+        LOG_ERROR << "SocketFunc::setServerAddr";
     }
 }
 
 void SocketFunc::setServerAddress(const char *ip, uint16_t port,
                                   sockaddr_in6 *serverAddr6)
 {
-    memset(serverAddr6, 0, sizeof(struct sockaddr_in));
+    memset(serverAddr6, 0, sizeof(struct sockaddr_in6));
     serverAddr6->sin6_family = AF_INET;
     serverAddr6->sin6_port = hostToNetwork16(port);
     if (::inet_pton(AF_INET6, ip, &serverAddr6->sin6_addr) <= 0)
@@ -149,10 +149,12 @@ int SocketFunc::accept(const int serverfd, const sockaddr_in6 *clientAddr)
 
 int SocketFunc::connect(int sockfd, const sockaddr *addr)
 {
-    int ret = connect(sockfd, reinterpret_cast<struct sockaddr *>(&addr),
-                      static_cast<socklen_t>(sizeof addr));
-    if (ret < 0)
+
+    int ret = ::connect(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
+    if (ret == -1)
     {
+        // 115 Operation now in progress
+        // 原因 createNonblockingOrDie函数  参数SOCK_NONBLOCK
         LOG_ERROR << "connect Server error";
         return ret;
     }

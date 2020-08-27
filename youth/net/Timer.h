@@ -15,8 +15,6 @@ using namespace core;
 namespace net
 {
 
-static std::atomic<int64_t> m_numCreated = 0;
-
 class Timer : noncopyable
 {
 public:
@@ -38,6 +36,8 @@ private:
     const double m_interval;
     const bool m_repeat;
     const int64_t m_sequence;
+
+    static std::atomic<int64_t> m_numCreated;
 };
 
 }

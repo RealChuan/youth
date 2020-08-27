@@ -33,7 +33,7 @@ int createTimerfd()
     return timerfd;
 }
 
-//定时间隔
+//定时 间隔
 struct timespec howMuchTimeFromNow(Timestamp when)
 {
     int64_t microseconds = when.microSecondsSinceEpoch()
@@ -83,7 +83,7 @@ TimerQueue::TimerQueue(EventLoop *loop)
     , m_timers()
     , m_callingExpiredTimers(false)
 {
-    m_timerfdChannelPtr->setReadCallback(std::bind(&TimerQueue::handleRead, this));
+    m_timerfdChannelPtr->setReadCallback(std::bind(&TimerQueue::handleRead, this, std::placeholders::_1));
     // we are always reading the timerfd, we disarm it with timerfd_settime.
     m_timerfdChannelPtr->enableReading();
 }
@@ -146,10 +146,10 @@ void TimerQueue::cancelInLoop(TimerId timerId)
     assert(m_timers.size() == m_activeTimers.size());
 }
 
-void TimerQueue::handleRead()
+void TimerQueue::handleRead(Timestamp now)
 {
     m_eventLoop->assertInLoopThread();
-    Timestamp now(Timestamp::currentTimestamp());
+    //Timestamp now(Timestamp::currentTimestamp());
     readTimerfd(m_timerfd, now);
 
     std::vector<Entry> expired = getExpired(now);
@@ -195,7 +195,8 @@ void TimerQueue::reset(const std::vector<TimerQueue::Entry> &expired, Timestamp 
     for (const Entry& it : expired)
     {
         ActiveTimer timer(it.second, it.second->sequence());
-        if (it.second->repeat() // 重复定时触发
+        // 重复定时触发 now存在误差，会损失精度
+        if (it.second->repeat()
                 && m_cancelingTimers.find(timer) == m_cancelingTimers.end())
         {
             it.second->restart(now);

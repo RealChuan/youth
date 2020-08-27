@@ -13,6 +13,8 @@ namespace youth
 namespace net
 {
 
+const char Buffer::kCRLF[] = "\r\n";
+
 Buffer::Buffer(size_t initialSize)
     : m_bufferVec(kCheapPrepend + initialSize)
     , m_readerIndex(kCheapPrepend)

@@ -58,18 +58,18 @@ private:
     /// Not thread safe, but in loop
     void removeConnection(const TcpConnectionPtr& conn);
 
-    EventLoop* loop_;
-    ConnectorPtr connector_; // avoid revealing Connector
-    const std::string name_;
-    ConnectionCallback connectionCallback_;
-    MessageCallback messageCallback_;
-    WriteCompleteCallback writeCompleteCallback_;
-    bool retry_;   // atomic
-    bool connect_; // atomic
+    EventLoop* m_eventLoop;
+    ConnectorPtr m_connectorPtr; // avoid revealing Connector
+    const std::string m_name;
+    ConnectionCallback m_connectionCallback;
+    MessageCallback m_messageCallback;
+    WriteCompleteCallback m_writeCompleteCallback;
+    bool m_retry;   // atomic
+    bool m_connect; // atomic
     // always in loop thread
-    int nextConnId_;
-    mutable Mutex mutex_;
-    TcpConnectionPtr connection_ GUARDED_BY(mutex_);
+    int m_nextConnId;
+    mutable Mutex m_mutex;
+    TcpConnectionPtr m_connectionPtr GUARDED_BY(m_mutex);
 };
 
 }

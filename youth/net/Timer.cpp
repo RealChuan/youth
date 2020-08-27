@@ -6,6 +6,8 @@ namespace youth
 namespace net
 {
 
+std::atomic<int64_t> Timer::m_numCreated = 0;
+
 Timer::Timer(TimerCallback cb, Timestamp when, double interval)
     : m_callback(std::move(cb))
     , m_expiration(when)
@@ -47,10 +49,10 @@ void Timer::restart(Timestamp now)
     }
 }
 
-//int64_t Timer::numCreated()
-//{
-//    return m_numCreated;
-//}
+int64_t Timer::numCreated()
+{
+    return m_numCreated;
+}
 
 }
 

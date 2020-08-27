@@ -15,6 +15,8 @@ using namespace utils;
 namespace net
 {
 
+const int Connector::kMaxRetryDelayMs;
+
 Connector::Connector(EventLoop *loop, const TcpAddressInfo &serverAddr)
     : m_eventLoop(loop)
     , m_serverAddr(serverAddr)

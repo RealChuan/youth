@@ -48,7 +48,7 @@ private:
     void addTimerInLoop(Timer* timer);
     void cancelInLoop(TimerId timerId);
     // called when timerfd alarms
-    void handleRead();
+    void handleRead(Timestamp now);
     // move out all expired timers
     std::vector<Entry> getExpired(Timestamp now);
     void reset(const std::vector<Entry>& expired, Timestamp now);
