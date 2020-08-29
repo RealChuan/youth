@@ -2,8 +2,6 @@
 #include "LogFile.h"
 #include "Logging.h"
 
-#include <assert.h>
-
 namespace youth
 {
 
@@ -48,11 +46,6 @@ LogAsync *LogAsync::instance()
     MutexLock lock(g_logAsyncMutex);
     static LogAsync logAsync;
     return &logAsync;
-}
-
-void LogAsync::setFlushInterval(int flushInterval)
-{
-    m_refreshTime = flushInterval;
 }
 
 void LogAsync::append(const char* buf, int len)

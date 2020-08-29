@@ -26,38 +26,53 @@ public:
 
     void handleEvent(Timestamp receiveTime);
 
-    void setReadCallback(ReadEventCallback cb);
-    void setWriteCallback(EventCallback cb);
-    void setCloseCallback(EventCallback cb);
-    void setErrorCallback(EventCallback cb);
+    void setReadCallback(ReadEventCallback cb)
+    { m_readCallback = std::move(cb); }
+    void setWriteCallback(EventCallback cb)
+    { m_writeCallback = std::move(cb); }
+    void setCloseCallback(EventCallback cb)
+    { m_closeCallback = std::move(cb); }
+    void setErrorCallback(EventCallback cb)
+    { m_errorCallback = std::move(cb); }
 
-    void tie(const std::shared_ptr<void>&);
+    void tie(const std::shared_ptr<void> &obj)
+    { m_tie = obj; m_tied = true; }
 
-    void enableReading();
-    void disableReading();
-    void enableWriting();
-    void disableWriting();
-    void disableAll();
-    bool isWriting() const;
-    bool isReading() const;
+    void enableReading()
+    { m_events |= kReadEvent; update(); }
+    void disableReading()
+    { m_events &= ~kReadEvent; update(); }
+    void enableWriting()
+    { m_events |= kWriteEvent; update(); }
+    void disableWriting()
+    { m_events &= ~kWriteEvent; update(); }
+    void disableAll()
+    { m_events = kNoneEvent; update(); }
+    bool isWriting() const
+    { return m_events & kWriteEvent; }
+    bool isReading() const
+    { return m_events & kReadEvent; }
 
-    bool isNoneEvent() const;
+    bool isNoneEvent() const
+    { return m_events == kNoneEvent; }
 
     // for EPoll
-    int index() const;
-    void setIndex(int idx);
+    int index() const { return m_index; }
+    void setIndex(int idx) { m_index = idx; }
 
     void remove();
 
-    EventLoop *ownerLoop() const;
+    EventLoop *ownerLoop() const { return m_eventLoop; }
 
     // for debug
-    std::string eventsToString() const;
-    std::string reventsToString() const;
+    std::string eventsToString() const
+    { return eventsToString(m_fd, m_events); }
+    std::string reventsToString() const
+    { return eventsToString(m_fd, m_revents); }
 
-    int fd() const;
-    int events() const;
-    void setRevents(int revents); // used by pollers
+    int fd() const { return m_fd; }
+    int events() const { return m_events; }
+    void setRevents(int revents) { m_revents = revents; } // used by pollers
 
 private:
     void update();

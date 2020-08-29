@@ -5,22 +5,19 @@
 
 #include <youth/core/Timestamp.h>
 
-#include <memory>
-
 namespace youth
 {
 
 namespace utils
 {
 
-class LogStream;
 class LogOut : noncopyable
 {
 public:
     LogOut(const char* level, const char* m_file, int m_line, bool outError = false);
     ~LogOut();
 
-    LogStream& stream();
+    LogStream& stream() { return m_logStream; }
 
     //这个方法是在完成日志流的输出后填充文件名和行号的
     void finishLog();

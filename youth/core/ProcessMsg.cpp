@@ -10,15 +10,9 @@ namespace youth
 namespace core
 {
 
-pid_t ProcessMsg::getTid()
-{
-    return static_cast<pid_t>(::syscall(SYS_gettid));
-}
 
-pid_t ProcessMsg::getPid()
-{
-    return ::getpid();
-}
+
+
 
 std::string ProcessMsg::hostname()
 {
@@ -46,6 +40,16 @@ std::string ProcessMsg::fileBaseName(const char* basename)
         //Len = static_cast<int> (strlen(_basename));
     }
     return _basename;
+}
+
+pid_t ProcessMsg::getTid()
+{
+    return pid_t(::syscall(SYS_gettid));
+}
+
+pid_t ProcessMsg::getPid()
+{
+    return ::getpid();
 }
 
 }

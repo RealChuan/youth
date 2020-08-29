@@ -53,14 +53,14 @@ LogStream &Logging::stream()
     return m_logOutPtr->stream();
 }
 
-Logging::LogLevel Logging::getLogLevel()
-{
-    return g_LogLevel;
-}
-
 void Logging::setLogLevel(LogLevel level)
 {
     g_LogLevel = level;
+}
+
+Logging::LogLevel Logging::getLogLevel()
+{
+    return g_LogLevel;
 }
 
 void Logging::setOutputMode(int iMode)

@@ -25,13 +25,15 @@ public:
     Connector(EventLoop* loop, const TcpAddressInfo& serverAddr);
     ~Connector();
 
-    void setNewConnectionCallback(const NewConnectionCallback& cb);
+    void setNewConnectionCallback(const NewConnectionCallback& cb)
+    { m_newConnectionCallback = cb; }
 
     void start();  // can be called in any thread
     void restart();  // must be called in loop thread
     void stop();  // can be called in any thread
 
-    const TcpAddressInfo& serverAddress() const;
+    const TcpAddressInfo& serverAddress() const
+    { return m_serverAddr; }
 
 private:
     void startInLoop();

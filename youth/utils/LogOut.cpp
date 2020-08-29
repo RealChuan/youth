@@ -32,11 +32,6 @@ LogOut::~LogOut()
 {
 }
 
-LogStream &LogOut::stream()
-{
-    return m_logStream;
-}
-
 void LogOut::finishLog()
 {
     //根据我们的日志格式安排，最后输出的是

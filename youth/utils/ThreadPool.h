@@ -24,16 +24,20 @@ class ThreadPool : noncopyable
 
 public:
     ThreadPool();
-
     ~ThreadPool();
 
-    void setTaskNum(int maxTaskNum);
-    void setThreadInitCallback(const Task& cb);
+    void setTaskNum(int maxTaskNum) { m_maxTaskNum = maxTaskNum; }
+    void setThreadInitCallback(const Task& cb)
+    {  m_threadInitCallback = cb; }
 
     void start(int numThreads);
     void stop();
 
-    size_t queueSize() const;
+    size_t queueSize() const
+    {
+        MutexLock lock(m_mutex);
+        return m_queue.size();
+    }
 
     void run(Task f);
 

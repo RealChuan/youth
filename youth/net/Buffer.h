@@ -28,11 +28,15 @@ public:
 
     void swap(Buffer& rhs);
 
-    size_t readableBytes() const;
-    size_t writableBytes() const;
-    size_t prependableBytes() const;
+    size_t readableBytes() const
+    { return m_writerIndex - m_readerIndex; }
+    size_t writableBytes() const
+    { return m_bufferVec.size() - m_writerIndex; }
+    size_t prependableBytes() const
+    { return m_readerIndex; }
 
-    const char* peek() const;
+    const char* peek() const
+    { return begin() + m_readerIndex; }
 
     const char* findCRLF() const;
     const char* findCRLF(const char* start) const;
@@ -44,23 +48,28 @@ public:
     // the evaluation of two functions are unspecified
     void retrieve(size_t len);
     void retrieveUntil(const char* end);
-    void retrieveInt64();
-    void retrieveInt32();
-    void retrieveInt16();
-    void retrieveInt8();
-    void retrieveAll();
-    std::string retrieveAllAsString();
+    void retrieveInt64() { retrieve(sizeof(int64_t)); }
+    void retrieveInt32() { retrieve(sizeof(int32_t)); }
+    void retrieveInt16() { retrieve(sizeof(int16_t)); }
+    void retrieveInt8() { retrieve(sizeof(int8_t)); }
+    void retrieveAll()
+    { m_readerIndex = kCheapPrepend; m_writerIndex = kCheapPrepend; }
+    std::string retrieveAllAsString()
+    { return retrieveAsString(readableBytes()); }
     std::string retrieveAsString(size_t len);
-    std::string_view toStringPiece() const;
+    std::string_view toStringPiece() const
+    { return std::string_view(peek(), int(readableBytes())); }
 
-    void append(const std::string_view& str);
+    void append(const std::string_view& str)
+    { append(str.data(), str.size()); }
     void append(const char* /*restrict*/ data, size_t len);
-    void append(const void* /*restrict*/ data, size_t len);
+    void append(const void* /*restrict*/ data, size_t len)
+    { append(static_cast<const char*>(data), len); }
 
     void ensureWritableBytes(size_t len);
 
-    char* beginWrite();
-    const char* beginWrite() const;
+    char* beginWrite() { return begin() + m_writerIndex; }
+    const char* beginWrite() const { return begin() + m_writerIndex; }
     void hasWritten(size_t len);
     void unwrite(size_t len);
 
@@ -74,7 +83,7 @@ public:
     ///
     void appendInt32(int32_t x);
     void appendInt16(int16_t x);
-    void appendInt8(int8_t x);
+    void appendInt8(int8_t x) { append(&x, sizeof x); }
 
     ///
     /// Read int64_t from network endian
@@ -114,12 +123,12 @@ public:
     ///
     void prependInt32(int32_t x);
     void prependInt16(int16_t x);
-    void prependInt8(int8_t x);
+    void prependInt8(int8_t x) { prepend(&x, sizeof x); }
     void prepend(const void* /*restrict*/ data, size_t len);
 
     void shrink(size_t reserve);
 
-    size_t internalCapacity() const;
+    size_t internalCapacity() const { return m_bufferVec.capacity(); }
 
     /// Read data directly into buffer.
     ///
@@ -128,8 +137,8 @@ public:
     ssize_t readFd(int fd, int* savedErrno);
 
 private:
-    char* begin();
-    const char* begin() const;
+    char* begin() { return &*m_bufferVec.begin(); }
+    const char* begin() const { return &*m_bufferVec.begin(); }
 
     void makeSpace(size_t len);
 

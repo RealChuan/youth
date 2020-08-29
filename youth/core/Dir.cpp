@@ -40,7 +40,10 @@ void Dir::newDirectory(const std::string &path)
 
 void Dir::getCurrenPath()
 {
-    currentPathLength = snprintf(currentPath_, sizeof currentPath_, "%s", get_current_dir_name());
+    currentPathLength = snprintf(currentPath_,
+                                 sizeof currentPath_,
+                                 "%s",
+                                 get_current_dir_name());
 }
 
 std::string Dir::currentPath()

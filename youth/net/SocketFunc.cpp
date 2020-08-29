@@ -88,7 +88,7 @@ void SocketFunc::bind(const int fd, const sockaddr *addr)
     }
 }
 
-void SocketFunc::listen(const int serverfd, const sockaddr *serverAddr)
+void SocketFunc::listen(const int serverfd)
 {
     int ret_ = ::listen(serverfd, SOMAXCONN);
     if (ret_ < 0)
@@ -96,8 +96,6 @@ void SocketFunc::listen(const int serverfd, const sockaddr *serverAddr)
         LOG_FATAL << "listen error:" << errno;
         return;
     }
-
-    LOG_INFO << "Server: " << SocketFunc::getIpAndPort(serverAddr) << "Listen...";
 }
 
 int SocketFunc::accept(const int serverfd, const sockaddr_in6 *clientAddr)

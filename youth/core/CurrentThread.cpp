@@ -30,10 +30,7 @@ void CurrentThread::sleepUsec(int64_t usec)
     ::nanosleep(&ts, NULL);
 }
 
-bool CurrentThread::isMainThread()
-{
-    return tid() == ::getpid();
-}
+
 
 }
 

@@ -12,59 +12,12 @@ namespace core
 //static const char *arrWeek[] = {"Sunday", "Monday", "Tuesday",
 //                                "Wednessday", "Thursday", "Friday", "Saturday"};
 
-Timestamp::Timestamp()
-    : m_mcroSecondsSinceEpoch(0)
-    , m_lastSecond(0)
-{
-}
-
-Timestamp::Timestamp(int64_t ms)
-    : m_mcroSecondsSinceEpoch(ms)
-    , m_lastSecond(0)
-{
-}
-
-void Timestamp::swap(Timestamp &that)
-{
-    std::swap(m_mcroSecondsSinceEpoch, that.m_mcroSecondsSinceEpoch);
-}
-
-bool Timestamp::isValid() const
-{
-    return m_mcroSecondsSinceEpoch > 0;
-}
-
-int64_t Timestamp::microSecondsSinceEpoch() const
-{
-    return m_mcroSecondsSinceEpoch;
-}
-
-time_t Timestamp::secondsSinceEpoch() const
-{
-    return time_t(m_mcroSecondsSinceEpoch / kMicroSecondsPerSecond);
-}
-
 Timestamp Timestamp::currentTimestamp()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int64_t seconds = tv.tv_sec;
     return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
-}
-
-Timestamp Timestamp::invalid()
-{
-    return Timestamp();
-}
-
-Timestamp Timestamp::fromUnixTime(time_t t)
-{
-    return fromUnixTime(t, 0);
-}
-
-Timestamp Timestamp::fromUnixTime(time_t t, int microseconds)
-{
-    return Timestamp(int64_t(t) * kMicroSecondsPerSecond + microseconds);
 }
 
 std::string Timestamp::getDayToString()

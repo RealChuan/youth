@@ -1,8 +1,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <youth/core/Timestamp.h>
-
 #include <atomic>
 
 #include "Callbacks.h"
@@ -20,15 +18,15 @@ class Timer : noncopyable
 public:
     Timer(TimerCallback cb, Timestamp when, double interval);
 
-    void run() const;
+    void run() const { m_callback(); }
 
-    Timestamp expiration() const;
-    bool repeat() const;
-    int64_t sequence() const;
+    Timestamp expiration() const { return m_expiration; }
+    bool repeat() const { return m_repeat; }
+    int64_t sequence() const { return m_sequence; }
 
     void restart(Timestamp now);
 
-    static int64_t numCreated();
+    static int64_t numCreated() { return m_numCreated; }
 
 private:
     const TimerCallback m_callback;

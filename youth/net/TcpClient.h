@@ -1,11 +1,11 @@
 #ifndef TCPCLIENT_H
 #define TCPCLIENT_H
 
-#include <memory>
-
 #include "TcpConnection.h"
 
 #include <youth/core/Mutex.h>
+
+#include <memory>
 
 namespace youth
 {
@@ -32,25 +32,29 @@ public:
     void disconnect();
     void stop();
 
-    TcpConnectionPtr connection() const;
+    TcpConnectionPtr connection() const
+    {
+        MutexLock lock(m_mutex);
+        return m_tcpConnectionPtr;
+    }
 
-    EventLoop* getLoop() const;
-    bool retry() const;
-    void enableRetry();
+    EventLoop* eventLoop() const { return m_eventLoop; }
+    bool retry() const { return m_retry; }
+    void enableRetry() { m_retry = true; }
 
-    const std::string& name() const;
+    const std::string& name() const { return m_name; }
 
-    /// Set connection callback.
     /// Not thread safe.
-    void setConnectionCallback(ConnectionCallback cb);
+    void setConnectionCallback(ConnectionCallback cb)
+    { m_connectionCallback = std::move(cb); }
 
-    /// Set message callback.
     /// Not thread safe.
-    void setMessageCallback(MessageCallback cb);
+    void setMessageCallback(MessageCallback cb)
+    { m_messageCallback = std::move(cb); }
 
-    /// Set write complete callback.
     /// Not thread safe.
-    void setWriteCompleteCallback(WriteCompleteCallback cb);
+    void setWriteCompleteCallback(WriteCompleteCallback cb)
+    { m_writeCompleteCallback = std::move(cb); }
 
 private:
     /// Not thread safe, but in loop
@@ -69,7 +73,7 @@ private:
     // always in loop thread
     int m_nextConnId;
     mutable Mutex m_mutex;
-    TcpConnectionPtr m_connectionPtr GUARDED_BY(m_mutex);
+    TcpConnectionPtr m_tcpConnectionPtr GUARDED_BY(m_mutex);
 };
 
 }

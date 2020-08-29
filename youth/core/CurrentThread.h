@@ -36,7 +36,10 @@ inline int tidStringLength() // for logging
     return tidStringLength_;
 }
 
-inline bool isMainThread();
+inline bool isMainThread()
+{
+    return tid() == ::getpid();
+}
 
 inline void sleepUsec(int64_t usec);  // for testing
 

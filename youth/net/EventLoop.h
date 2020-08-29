@@ -32,7 +32,7 @@ public:
     ~EventLoop();
 
     void loop();
-    void quit();
+    void quit() { m_quit = true; }
 
     /// Runs callback immediately in the loop thread.
     /// It wakes up the loop, and run the cb.
@@ -44,7 +44,11 @@ public:
     /// Safe to call from other threads.
     void queueInLoop(Functor cb);
 
-    size_t queueSize() const;
+    size_t queueSize() const
+    {
+        MutexLock lock(m_mutex);
+        return m_pendingFunctors.size();
+    }
 
     // timers
 
@@ -75,14 +79,16 @@ public:
     void removeChannel(Channel *channel);
     bool hasChannel(Channel *channel);
 
-    bool isInLoopThread() const;
+    bool isInLoopThread() const
+    { return m_threadID == CurrentThread::tid(); }
     void assertInLoopThread();
 
-    bool eventHandling() const;
+    bool eventHandling() const
+    { return m_eventHandling; }
 
-    void setContext(const std::any& context);
-    const std::any& getContext() const;
-    std::any* getMutableContext();
+    void setContext(const std::any& context) { m_context = context; }
+    const std::any& getContext() const { return m_context; }
+    std::any* getMutableContext() { return &m_context; }
 
 private:
     void abortNotInLoopThread();

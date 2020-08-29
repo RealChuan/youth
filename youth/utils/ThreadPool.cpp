@@ -25,16 +25,6 @@ ThreadPool::~ThreadPool()
     }
 }
 
-void ThreadPool::setTaskNum(int maxTaskNum)
-{
-    m_maxTaskNum = maxTaskNum;
-}
-
-void ThreadPool::setThreadInitCallback(const ThreadPool::Task &cb)
-{
-    m_threadInitCallback = cb;
-}
-
 void ThreadPool::start(int numThreads)
 {
     assert(m_threadVec.empty());
@@ -64,12 +54,6 @@ void ThreadPool::stop()
     {
         thr->join();
     }
-}
-
-size_t ThreadPool::queueSize() const
-{
-    //YMutexLock lock(mutex_);
-    return m_queue.size();
 }
 
 void ThreadPool::threadFunc()

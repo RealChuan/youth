@@ -14,11 +14,11 @@ namespace utils
 class LogStream : noncopyable
 {
 public:
-    LogStream();
-    virtual ~LogStream();
+    LogStream() {}
+    ~LogStream() {}
 
-    const char *GetStreamBuff();
-    int GetStreamBuffLen();
+    const char *GetStreamBuff() { return m_logBuffer.data(); }
+    int GetStreamBuffLen() { return m_logBuffer.length(); }
 
     LogStream &operator<<(bool);
     LogStream &operator<<(char);

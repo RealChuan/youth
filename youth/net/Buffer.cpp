@@ -32,26 +32,6 @@ void Buffer::swap(Buffer &rhs)
     std::swap(m_writerIndex, rhs.m_writerIndex);
 }
 
-size_t Buffer::readableBytes() const
-{
-    return m_writerIndex - m_readerIndex;
-}
-
-size_t Buffer::writableBytes() const
-{
-    return m_bufferVec.size() - m_writerIndex;
-}
-
-size_t Buffer::prependableBytes() const
-{
-    return m_readerIndex;
-}
-
-const char *Buffer::peek() const
-{
-    return begin() + m_readerIndex;
-}
-
 const char *Buffer::findCRLF() const
 {
     // FIXME: replace with memmem()?
@@ -102,37 +82,6 @@ void Buffer::retrieveUntil(const char *end)
     retrieve(end - peek());
 }
 
-void Buffer::retrieveInt64()
-{
-    retrieve(sizeof(int64_t));
-}
-
-void Buffer::retrieveInt32()
-{
-    retrieve(sizeof(int32_t));
-}
-
-void Buffer::retrieveInt16()
-{
-    retrieve(sizeof(int16_t));
-}
-
-void Buffer::retrieveInt8()
-{
-    retrieve(sizeof(int8_t));
-}
-
-void Buffer::retrieveAll()
-{
-    m_readerIndex = kCheapPrepend;
-    m_writerIndex = kCheapPrepend;
-}
-
-std::string Buffer::retrieveAllAsString()
-{
-    return retrieveAsString(readableBytes());
-}
-
 std::string Buffer::retrieveAsString(size_t len)
 {
     assert(len <= readableBytes());
@@ -141,26 +90,11 @@ std::string Buffer::retrieveAsString(size_t len)
     return result;
 }
 
-std::string_view Buffer::toStringPiece() const
-{
-    return std::string_view(peek(), static_cast<int>(readableBytes()));
-}
-
-void Buffer::append(const std::string_view &str)
-{
-    append(str.data(), str.size());
-}
-
 void Buffer::append(const char *data, size_t len)
 {
     ensureWritableBytes(len);
     std::copy(data, data+len, beginWrite());
     hasWritten(len);
-}
-
-void Buffer::append(const void *data, size_t len)
-{
-    append(static_cast<const char*>(data), len);
 }
 
 void Buffer::ensureWritableBytes(size_t len)
@@ -171,12 +105,6 @@ void Buffer::ensureWritableBytes(size_t len)
     }
     assert(writableBytes() >= len);
 }
-
-char *Buffer::beginWrite()
-{ return begin() + m_writerIndex; }
-
-const char *Buffer::beginWrite() const
-{ return begin() + m_writerIndex; }
 
 void Buffer::hasWritten(size_t len)
 {
@@ -206,11 +134,6 @@ void Buffer::appendInt16(int16_t x)
 {
     int16_t be16 = SocketFunc::hostToNetwork16(x);
     append(&be16, sizeof be16);
-}
-
-void Buffer::appendInt8(int8_t x)
-{
-    append(&x, sizeof x);
 }
 
 int64_t Buffer::readInt64()
@@ -290,11 +213,6 @@ void Buffer::prependInt16(int16_t x)
     prepend(&be16, sizeof be16);
 }
 
-void Buffer::prependInt8(int8_t x)
-{
-    prepend(&x, sizeof x);
-}
-
 void Buffer::prepend(const void *data, size_t len)
 {
     assert(len <= prependableBytes());
@@ -310,11 +228,6 @@ void Buffer::shrink(size_t reserve)
     other.ensureWritableBytes(readableBytes()+reserve);
     other.append(toStringPiece());
     swap(other);
-}
-
-size_t Buffer::internalCapacity() const
-{
-    return m_bufferVec.capacity();
 }
 
 ssize_t Buffer::readFd(int fd, int *savedErrno)
@@ -349,16 +262,6 @@ ssize_t Buffer::readFd(int fd, int *savedErrno)
     //   goto line_30;
     // }
     return n;
-}
-
-char *Buffer::begin()
-{
-    return &*m_bufferVec.begin();
-}
-
-const char *Buffer::begin() const
-{
-    return &*m_bufferVec.begin();
 }
 
 void Buffer::makeSpace(size_t len)

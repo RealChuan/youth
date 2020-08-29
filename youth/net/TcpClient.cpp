@@ -5,8 +5,6 @@
 
 #include <youth/utils/Logging.h>
 
-#include <assert.h>
-
 namespace youth
 {
 
@@ -22,7 +20,7 @@ void removeConnection(EventLoop* loop, const TcpConnectionPtr& conn)
 
 void removeConnector(const ConnectorPtr& connector)
 {
-    //connector->
+    //connector->stop();
 }
 
 TcpClient::TcpClient(EventLoop *loop,
@@ -52,16 +50,16 @@ TcpClient::~TcpClient()
     bool unique = false;
     {
         MutexLock lock(m_mutex);
-        unique = m_connectionPtr.unique();
-        conn = m_connectionPtr;
+        unique = m_tcpConnectionPtr.unique();
+        conn = m_tcpConnectionPtr;
     }
     if (conn)
     {
         assert(m_eventLoop == conn->eventLoop());
         // FIXME: not 100% safe, if we are in different thread
         CloseCallback cb = std::bind(&net::removeConnection, m_eventLoop, std::placeholders::_1);
-        m_eventLoop->runInLoop(
-                    std::bind(&TcpConnection::setCloseCallback, conn, cb));
+        m_eventLoop->runInLoop(std::bind(&TcpConnection::setCloseCallback,
+                                         conn, cb));
         if (unique)
         {
             conn->forceClose();
@@ -90,9 +88,9 @@ void TcpClient::disconnect()
 
     {
         MutexLock lock(m_mutex);
-        if (m_connectionPtr)
+        if (m_tcpConnectionPtr)
         {
-            m_connectionPtr->shutdown();
+            m_tcpConnectionPtr->shutdown();
         }
     }
 }
@@ -101,47 +99,6 @@ void TcpClient::stop()
 {
     m_connect = false;
     m_connectorPtr->stop();
-}
-
-TcpConnectionPtr TcpClient::connection() const
-{
-    MutexLock lock(m_mutex);
-    return m_connectionPtr;
-}
-
-EventLoop *TcpClient::getLoop() const
-{
-    return m_eventLoop;
-}
-
-bool TcpClient::retry() const
-{
-    return m_retry;
-}
-
-void TcpClient::enableRetry()
-{
-    m_retry = true;
-}
-
-const std::string &TcpClient::name() const
-{
-    return m_name;
-}
-
-void TcpClient::setConnectionCallback(ConnectionCallback cb)
-{
-    m_connectionCallback = std::move(cb);
-}
-
-void TcpClient::setMessageCallback(MessageCallback cb)
-{
-    m_messageCallback = std::move(cb);
-}
-
-void TcpClient::setWriteCompleteCallback(WriteCompleteCallback cb)
-{
-    m_writeCompleteCallback = std::move(cb);
 }
 
 void TcpClient::newConnection(int sockfd)
@@ -169,7 +126,7 @@ void TcpClient::newConnection(int sockfd)
                 std::bind(&TcpClient::removeConnection, this, std::placeholders::_1)); // FIXME: unsafe
     {
         MutexLock lock(m_mutex);
-        m_connectionPtr = conn;
+        m_tcpConnectionPtr = conn;
     }
     conn->connectEstablished();
 }
@@ -181,8 +138,8 @@ void TcpClient::removeConnection(const TcpConnectionPtr &conn)
 
     {
         MutexLock lock(m_mutex);
-        assert(m_connectionPtr == conn);
-        m_connectionPtr.reset();
+        assert(m_tcpConnectionPtr == conn);
+        m_tcpConnectionPtr.reset();
     }
 
     m_eventLoop->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));

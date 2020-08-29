@@ -37,11 +37,6 @@ LogFile *LogFile::instance()
     return &logFile;
 }
 
-void LogFile::setRollSize(off_t size)
-{
-    m_rollSize = size;
-}
-
 //void LogFile::setDelLogFileDays(uint days)
 //{
 //    delLogFileDays = days;

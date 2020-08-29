@@ -2,11 +2,10 @@
 #include "Channel.h"
 #include "EventLoop.h"
 #include "SocketFunc.h"
+#include "Socket.h"
 
 #include <youth/utils/Logging.h>
 #include <youth/core/WeakCallback.h>
-
-#include <assert.h>
 
 namespace youth
 {
@@ -67,36 +66,6 @@ TcpConnection::~TcpConnection()
     assert(m_state == kDisconnected);
 }
 
-EventLoop *TcpConnection::eventLoop() const
-{
-    return m_eventLoop;
-}
-
-const std::string& TcpConnection::name() const
-{
-    return m_name;
-}
-
-const TcpAddressInfo &TcpConnection::localAddress() const
-{
-    return m_localAddr;
-}
-
-const TcpAddressInfo &TcpConnection::peerAddress() const
-{
-    return m_peerAddr;
-}
-
-bool TcpConnection::connected() const
-{
-    return m_state == kConnected;
-}
-
-bool TcpConnection::disconnected() const
-{
-    return m_state == kDisconnected;
-}
-
 bool TcpConnection::getTcpInfo(tcp_info *tcpi) const
 {
     return m_socketPtr->getTcpInfo(tcpi);
@@ -108,11 +77,6 @@ std::string TcpConnection::getTcpInfoString() const
     buf[0] = '\0';
     m_socketPtr->getTcpInfoString(buf, sizeof buf);
     return buf;
-}
-
-void TcpConnection::send(const void *data, int len)
-{
-    send(std::string_view(static_cast<const char*>(data), len));
 }
 
 void TcpConnection::send(const std::string_view &message)
@@ -199,63 +163,6 @@ void TcpConnection::startRead()
 void TcpConnection::stopRead()
 {
     m_eventLoop->runInLoop(std::bind(&TcpConnection::stopReadInLoop, this));
-}
-
-bool TcpConnection::isReading() const
-{
-    return m_reading;
-}
-
-void TcpConnection::setContext(const std::any &context)
-{
-    m_context = context;
-}
-
-const std::any &TcpConnection::getContext() const
-{
-    return m_context;
-}
-
-std::any *TcpConnection::getMutableContext()
-{
-    return &m_context;
-}
-
-void TcpConnection::setConnectionCallback(const ConnectionCallback &cb)
-{
-    m_connectionCallback = cb;
-}
-
-void TcpConnection::setMessageCallback(const MessageCallback &cb)
-{
-    m_messageCallback = cb;
-}
-
-void TcpConnection::setWriteCompleteCallback(const WriteCompleteCallback &cb)
-{
-    m_writeCompleteCallback = cb;
-}
-
-void TcpConnection::setHighWaterMarkCallback(const HighWaterMarkCallback &cb,
-                                             size_t highWaterMark)
-{
-    m_highWaterMarkCallback = cb;
-    m_highWaterMark = highWaterMark;
-}
-
-Buffer *TcpConnection::inputBuffer()
-{
-    return &m_inputBuffer;
-}
-
-Buffer *TcpConnection::outputBuffer()
-{
-    return &m_outputBuffer;
-}
-
-void TcpConnection::setCloseCallback(const CloseCallback &cb)
-{
-    m_closeCallback = cb;
 }
 
 void TcpConnection::connectEstablished()
@@ -353,6 +260,7 @@ void TcpConnection::handleClose()
     m_state = kDisconnected;
     m_channelPtr->disableAll();
 
+    // shared_from_this() 不可以在析构函数调用
     TcpConnectionPtr guardThis(shared_from_this());
     m_connectionCallback(guardThis);
     // must be the last line
@@ -364,11 +272,6 @@ void TcpConnection::handleError()
     int err = SocketFunc::getSocketError(m_channelPtr->fd());
     LOG_ERROR << "TcpConnection::handleError [" << m_name
               << "] - SO_ERROR = " << err << " " << strerror_tl(err);
-}
-
-void TcpConnection::sendInLoop(const std::string_view &message)
-{
-    sendInLoop(message.data(), message.size());
 }
 
 void TcpConnection::sendInLoop(const void *data, size_t len)

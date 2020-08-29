@@ -17,26 +17,6 @@ Timer::Timer(TimerCallback cb, Timestamp when, double interval)
 {
 }
 
-void Timer::run() const
-{
-    m_callback();
-}
-
-Timestamp Timer::expiration() const
-{
-    return m_expiration;
-}
-
-bool Timer::repeat() const
-{
-    return m_repeat;
-}
-
-int64_t Timer::sequence() const
-{
-    return m_sequence;
-}
-
 void Timer::restart(Timestamp now)
 {
     if (m_repeat)
@@ -47,11 +27,6 @@ void Timer::restart(Timestamp now)
     {
         m_expiration = Timestamp::invalid();
     }
-}
-
-int64_t Timer::numCreated()
-{
-    return m_numCreated;
 }
 
 }

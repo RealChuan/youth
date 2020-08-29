@@ -14,21 +14,33 @@ namespace core
 class Timestamp : copyable
 {
 public:
-    explicit Timestamp();
-    explicit Timestamp(int64_t);
+    explicit Timestamp()
+        : m_mcroSecondsSinceEpoch(0)
+        , m_lastSecond(0)
+    {}
 
-    void swap(Timestamp& that);
+    explicit Timestamp(int64_t ms)
+        : m_mcroSecondsSinceEpoch(ms)
+        , m_lastSecond(0)
+    {}
 
-    bool isValid() const;
+    void swap(Timestamp& that)
+    { std::swap(m_mcroSecondsSinceEpoch, that.m_mcroSecondsSinceEpoch); }
 
-    int64_t microSecondsSinceEpoch() const;
-    time_t secondsSinceEpoch() const;
+    bool isValid() const { return m_mcroSecondsSinceEpoch > 0; }
+
+    int64_t microSecondsSinceEpoch() const
+    { return m_mcroSecondsSinceEpoch; }
+    time_t secondsSinceEpoch() const
+    { return time_t(m_mcroSecondsSinceEpoch / kMicroSecondsPerSecond); }
 
     static Timestamp currentTimestamp();
-    static Timestamp invalid();
+    static Timestamp invalid() { return Timestamp(); }
 
-    static Timestamp fromUnixTime(time_t t);
-    static Timestamp fromUnixTime(time_t t, int microseconds);
+    static Timestamp fromUnixTime(time_t t)
+    { return fromUnixTime(t, 0); }
+    static Timestamp fromUnixTime(time_t t, int microseconds)
+    { return Timestamp(int64_t(t) * kMicroSecondsPerSecond + microseconds); }
 
     std::string getDayToString();
     std::string getSecondToString();

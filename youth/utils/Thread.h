@@ -5,6 +5,8 @@
 
 #include <functional>
 #include <string>
+#include <atomic>
+#include <memory>
 
 namespace youth
 {
@@ -18,28 +20,36 @@ class Thread : noncopyable
 {
     typedef std::function<void()> ThreadFunc;
 public:
-    Thread(ThreadFunc func_);
+    Thread(ThreadFunc threadFunc, const std::string &name = std::string());
     ~Thread();
 
     void start();
-    int join(); // return pthread_join()
-    bool isRunning() const;
-    pthread_t pthreadID() const;
+    int join(); // pthread_join()
+    int cancel(); // pthread_cancel()
 
-    static void* threadFunc(void *obj)
-    {
-        Thread *pThis = static_cast<Thread *>(obj);
-        pThis->m_func(); //------
-        return 0;
-    }
+    bool isRunning() const{ return m_running; }
 
-private:	
-    bool m_running;
-    bool m_joined;
+    pthread_t pthreadID() const{ return m_pthreadId; }
+    pid_t tid() const { return m_tid; }
+    std::string name() const { return m_name; }
+
+    static void* threadFunc(void *obj);
+    static int64_t numCreated() { return m_numCreated; }
+    static int64_t allThreadNum() { return m_allThreadNum; }
+
+private:
+    void setDefaultName();
+
+    bool m_running = false;
+    bool m_joined = false;
     pthread_t m_pthreadId;
-    //pid_t _tid;
+    // pthread_attr_t m_attr;
+    pid_t m_tid;
     ThreadFunc m_func;
-    //std::string _name;
+    std::string m_name;
+
+    static std::atomic<int64_t> m_numCreated;
+    static std::atomic<int64_t> m_allThreadNum;
 };
 
 }

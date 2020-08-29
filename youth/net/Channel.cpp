@@ -8,6 +8,14 @@
 #include <sys/epoll.h>
 #include <poll.h>
 
+// EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
+// EPOLLOUT：表示对应的文件描述符可以写；
+// EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；
+// EPOLLERR：表示对应的文件描述符发生错误；
+// EPOLLHUP：表示对应的文件描述符被挂断；
+// EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
+// EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
+
 namespace youth
 {
 
@@ -60,68 +68,6 @@ void Channel::handleEvent(Timestamp receiveTime)
     }
 }
 
-void Channel::setReadCallback(ReadEventCallback cb)
-{
-    m_readCallback = std::move(cb);
-}
-
-void Channel::setWriteCallback(Channel::EventCallback cb)
-{
-    m_writeCallback = std::move(cb);
-}
-
-void Channel::setCloseCallback(Channel::EventCallback cb)
-{
-    m_closeCallback = std::move(cb);
-}
-
-void Channel::setErrorCallback(Channel::EventCallback cb)
-{
-    m_errorCallback = std::move(cb);
-}
-
-void Channel::tie(const std::shared_ptr<void> &obj)
-{
-    m_tie = obj;
-    m_tied = true;
-}
-
-void Channel::enableReading()
-{
-    m_events |= kReadEvent;
-    update();
-}
-
-void Channel::disableReading()
-{
-    m_events &= ~kReadEvent;
-    update();
-}
-
-void Channel::enableWriting()
-{
-    m_events |= kWriteEvent;
-    update();
-}
-
-void Channel::disableWriting()
-{
-    m_events &= ~kWriteEvent;
-    update();
-}
-
-void Channel::disableAll()
-{
-    m_events = kNoneEvent;
-    update();
-}
-
-void Channel::update()
-{
-    m_addedToLoop = true;
-    m_eventLoop->updateChannel(this);
-}
-
 void Channel::remove()
 {
     assert(isNoneEvent());
@@ -129,59 +75,10 @@ void Channel::remove()
     m_eventLoop->removeChannel(this);
 }
 
-bool Channel::isWriting() const
+void Channel::update()
 {
-    return m_events & kWriteEvent;
-}
-
-bool Channel::isReading() const
-{
-    return m_events & kReadEvent;
-}
-
-bool Channel::isNoneEvent() const
-{
-    return m_events == kNoneEvent;
-}
-
-int Channel::index() const
-{
-    return m_index;
-}
-
-void Channel::setIndex(int idx)
-{
-    m_index = idx;
-}
-
-EventLoop *Channel::ownerLoop() const
-{
-    return m_eventLoop;
-}
-
-std::string Channel::eventsToString() const
-{
-    return eventsToString(m_fd, m_events);
-}
-
-std::string Channel::reventsToString() const
-{
-    return eventsToString(m_fd, m_revents);
-}
-
-int Channel::fd() const
-{
-    return m_fd;
-}
-
-void Channel::setRevents(int revents)
-{
-    m_revents = revents;
-}
-
-int Channel::events() const
-{
-    return m_events;
+    m_addedToLoop = true;
+    m_eventLoop->updateChannel(this);
 }
 
 void Channel::handleEventWithGuard(Timestamp receiveTime)

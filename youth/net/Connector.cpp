@@ -30,11 +30,6 @@ Connector::~Connector()
     assert(!m_channelPtr);
 }
 
-void Connector::setNewConnectionCallback(const Connector::NewConnectionCallback &cb)
-{
-    m_newConnectionCallback = cb;
-}
-
 void Connector::start()
 {
     m_connect = true;
@@ -55,11 +50,6 @@ void Connector::stop()
     m_connect = false;
     m_eventLoop->queueInLoop(std::bind(&Connector::stopInLoop, this)); // FIXME: unsafe
     // FIXME: cancel timer
-}
-
-const TcpAddressInfo &Connector::serverAddress() const
-{
-    return m_serverAddr;
 }
 
 void Connector::startInLoop()

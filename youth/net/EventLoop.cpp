@@ -8,7 +8,6 @@
 #include <youth/utils/Logging.h>
 #include <youth/core/CurrentThread.h>
 
-#include <assert.h>
 #include <sys/eventfd.h>
 
 namespace youth
@@ -103,11 +102,6 @@ void EventLoop::loop()
     m_looping = false;
 }
 
-void EventLoop::quit()
-{
-    m_quit = true;
-}
-
 void EventLoop::runInLoop(Functor cb)
 {
     if (isInLoopThread())
@@ -130,12 +124,6 @@ void EventLoop::queueInLoop(Functor cb)
     {
         wakeup();
     }
-}
-
-size_t EventLoop::queueSize() const
-{
-    MutexLock lock(m_mutex);
-    return m_pendingFunctors.size();
 }
 
 TimerId EventLoop::runAt(Timestamp time, TimerCallback cb)
@@ -206,11 +194,6 @@ bool EventLoop::hasChannel(Channel *channel)
     return m_epoll->hasChannel(channel);
 }
 
-bool EventLoop::isInLoopThread() const
-{
-    return m_threadID == CurrentThread::tid();
-}
-
 void EventLoop::abortNotInLoopThread()
 {
     LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop " << this
@@ -224,26 +207,6 @@ void EventLoop::assertInLoopThread()
     {
         abortNotInLoopThread();
     }
-}
-
-bool EventLoop::eventHandling() const
-{
-    return m_eventHandling;
-}
-
-void EventLoop::setContext(const std::any &context)
-{
-    m_context = context;
-}
-
-const std::any &EventLoop::getContext() const
-{
-    return m_context;
-}
-
-std::any *EventLoop::getMutableContext()
-{
-    return &m_context;
 }
 
 void EventLoop::doPendingFunctors()

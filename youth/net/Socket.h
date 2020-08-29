@@ -3,9 +3,6 @@
 
 #include <youth/core/Object.h>
 
-#include <netinet/in.h>
-#include <string>
-
 struct tcp_info;
 
 namespace youth
@@ -23,14 +20,14 @@ public:
     Socket(int sockfd);
     ~Socket();
 
-    int fd() const;
+    int fd() const { return m_sockfd; }
 
     bool getTcpInfo(struct tcp_info*) const;
     bool getTcpInfoString(char* buf, int len) const;
 
     void bindAddress(const TcpAddressInfo&);
 
-    void listen(const TcpAddressInfo&);
+    void listen();
 
     /// On success, returns a non-negative integer that is
     /// a descriptor for the accepted socket, which has been

@@ -22,16 +22,21 @@ public:
                             bool ipv6 = false);
 
     TcpAddressInfo(const char *ip, uint16_t port = 0, bool ipv6 = false);
-    explicit TcpAddressInfo(const struct sockaddr_in& addr);
-    explicit TcpAddressInfo(const struct sockaddr_in6& addr);
+    explicit TcpAddressInfo(const struct sockaddr_in& addr)
+        : m_serveraddr(addr) {}
+    explicit TcpAddressInfo(const struct sockaddr_in6& addr)
+        : m_serveraddr6(addr) {}
 
-    const struct sockaddr* getSockAddr() const;
-    sa_family_t family() const;
+    const struct sockaddr* getSockAddr() const
+    { return reinterpret_cast<const sockaddr*>(&m_serveraddr); }
+    sa_family_t family() const
+    { return m_serveraddr.sin_family; }
     std::string ip() const;
     uint16_t port() const;
     std::string ipAndPort() const;
 
-    void setSockAddrInet6(const struct sockaddr_in6& addr6);
+    void setSockAddrInet6(const struct sockaddr_in6& addr6)
+    { m_serveraddr6 = addr6; }
 
     // resolve hostname to IP address, not changing port or sin_family
     // return true on success.

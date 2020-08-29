@@ -21,7 +21,8 @@ class LogAsync : noncopyable
 public:
     static LogAsync* instance();
 
-    void setFlushInterval(int flushInterval);
+    void setFlushInterval(int flushInterval)
+    { m_refreshTime = flushInterval; }
 
     void append(const char* logline, int len);
 

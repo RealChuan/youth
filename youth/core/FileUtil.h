@@ -23,31 +23,36 @@ public:
 
     enum Seek{ Begin, Current, End };
 
-    FileUtil();
-    FileUtil(const std::string&);
-    ~FileUtil();
+    FileUtil(): m_filePtr() {}
+    FileUtil(const std::string &filename)
+        : m_filePtr()
+        , m_fileName(filename)
+    {}
+    ~FileUtil() { close(); }
 
-    void setFileName(const std::string&);
-    void setFileName(const char*);
-    std::string fileName() const;
+    void setFileName(const std::string &name) { m_fileName = name; }
+    void setFileName(const char *name) { m_fileName = name; }
+    std::string fileName() const { return m_fileName; }
 
     bool open(OpenModel);
     void close();
 
-    void setOpenModel(OpenModel);
-    OpenModel openModel() const;
+    void setOpenModel(OpenModel model) { m_openModel = model; }
+    OpenModel openModel() const { return m_openModel; }
 
     bool isOpen();
 
     std::string readLine();
     std::string readAll();
 
-    void write(const std::string&);
+    void write(const std::string &str)
+    { write(str.c_str(), int(str.size())); }
+
     void write(const char*, int len);
 
     void flushFile();
 
-    off_t writeBytes() const;
+    off_t writeBytes() const { return m_writeBytes; }
 
     void moveFilePoint(Seek);
 

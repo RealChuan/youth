@@ -12,37 +12,6 @@ namespace youth
 namespace core
 {
 
-FileUtil::FileUtil()
-    :m_filePtr()
-{
-}
-
-FileUtil::FileUtil(const std::string& filename)
-    :m_filePtr()
-    ,m_fileName(filename)
-{
-}
-
-FileUtil::~FileUtil()
-{
-    close();
-}
-
-void FileUtil::setFileName(const std::string& name)
-{
-    m_fileName = name;
-}
-
-void FileUtil::setFileName(const char *name)
-{
-    m_fileName = name;
-}
-
-std::string FileUtil::fileName() const
-{
-    return m_fileName;
-}
-
 bool FileUtil::open(FileUtil::OpenModel model)
 {
     //close();
@@ -87,16 +56,6 @@ void FileUtil::close()
     }
 }
 
-void FileUtil::setOpenModel(OpenModel model)
-{
-    m_openModel = model;
-}
-
-FileUtil::OpenModel FileUtil::openModel() const
-{
-    return m_openModel;
-}
-
 bool FileUtil::isOpen()
 {
     if(m_filePtr != nullptr)
@@ -135,11 +94,6 @@ std::string FileUtil::readAll()
     return str;
 }
 
-void FileUtil::write(const std::string &str)
-{
-    write(str.c_str(), int(str.size()));
-}
-
 void FileUtil::write(const char *ch, int len)
 {
     if(isOpen() && checkModel(Write))
@@ -153,11 +107,6 @@ void FileUtil::flushFile()
 {
     if(isOpen())
         ::fflush(m_filePtr);
-}
-
-off_t FileUtil::writeBytes() const
-{
-    return m_writeBytes;
 }
 
 bool FileUtil::checkModel(FileUtil::OpenModel model)

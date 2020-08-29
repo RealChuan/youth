@@ -60,26 +60,8 @@ size_t convertHex(char buf[], uintptr_t value)
     return static_cast<size_t>(p - buf);
 }
 
-LogStream::LogStream()
-{
-}
-
-LogStream::~LogStream()
-{
-}
-
 const int iFloatMaxStrLen = 16;
 const int iDoubleMaxStrLen = 32;
-
-const char *LogStream::GetStreamBuff()
-{
-    return m_logBuffer.data();
-}
-
-int LogStream::GetStreamBuffLen()
-{
-    return m_logBuffer.length();
-}
 
 LogStream &LogStream::operator<<(bool value)
 {

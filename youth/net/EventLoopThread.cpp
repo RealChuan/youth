@@ -15,8 +15,8 @@ EventLoopThread::EventLoopThread(const EventLoopThread::ThreadInitCallback &cb,
     , m_mutex()
     , m_cond(m_mutex)
     , m_loop(nullptr)
-    , m_thread(std::bind(&EventLoopThread::threadFunc, this))
-    ,m_callback(cb)
+    , m_thread(std::bind(&EventLoopThread::threadFunc, this), name)
+    , m_callback(cb)
 {
 }
 

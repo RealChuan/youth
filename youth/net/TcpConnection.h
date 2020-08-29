@@ -4,12 +4,11 @@
 #include <memory>
 #include <any>
 
-#include <youth/core/Timestamp.h>
-
-#include "Socket.h"
 #include "Buffer.h"
 #include "Callbacks.h"
 #include "TcpAddressInfo.h"
+
+struct tcp_info;
 
 namespace youth
 {
@@ -20,7 +19,6 @@ namespace net
 class Channel;
 class Socket;
 class EventLoop;
-class TcpAddressInfo;
 class TcpConnection: noncopyable,
         public std::enable_shared_from_this<TcpConnection>
 {
@@ -32,18 +30,20 @@ public:
                   const TcpAddressInfo& peerAddr);
     ~TcpConnection();
 
-    EventLoop* eventLoop() const;
-    const std::string& name() const;
-    const TcpAddressInfo& localAddress() const;
-    const TcpAddressInfo& peerAddress() const;
-    bool connected() const;
-    bool disconnected() const;
+    EventLoop* eventLoop() const { return m_eventLoop; }
+    const std::string& name() const { return m_name; }
+    const TcpAddressInfo& localAddress() const { return m_localAddr; }
+    const TcpAddressInfo& peerAddress() const { return m_peerAddr; }
+    bool connected() const { return m_state == kConnected; }
+    bool disconnected() const { return m_state == kDisconnected; }
     // return true if success.
-    bool getTcpInfo(struct tcp_info*) const;
+    bool getTcpInfo(struct tcp_info *tcpi) const;
     std::string getTcpInfoString() const;
 
-    // void send(string&& message); // C++11
-    void send(const void* message, int len);
+    //    void send(const std::string &&message)
+    //    { send(std::string_view(message.data(), message.size())); }
+    void send(const void* data, int len)
+    { send(std::string_view(static_cast<const char*>(data), len));  }
     void send(const std::string_view& message);
     // void send(Buffer&& message); // C++11
     void send(Buffer* message);  // this one will swap data
@@ -55,24 +55,28 @@ public:
     // reading or not
     void startRead();
     void stopRead();
-    bool isReading() const;; // NOT thread safe, may race with start/stopReadInLoop
+    bool isReading() const { return m_reading; }; // NOT thread safe, may race with start/stopReadInLoop
 
-    void setContext(const std::any& context);
-    const std::any& getContext() const;
+    void setContext(const std::any& context) { m_context = context; }
+    const std::any& getContext() const { return m_context; }
+    std::any* getMutableContext() { return &m_context; }
 
-    std::any* getMutableContext();
-
-    void setConnectionCallback(const ConnectionCallback& cb);
-    void setMessageCallback(const MessageCallback& cb);
-    void setWriteCompleteCallback(const WriteCompleteCallback& cb);
-    void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t highWaterMark);
+    void setConnectionCallback(const ConnectionCallback& cb)
+    { m_connectionCallback = cb;  }
+    void setMessageCallback(const MessageCallback& cb)
+    { m_messageCallback = cb; }
+    void setWriteCompleteCallback(const WriteCompleteCallback& cb)
+    { m_writeCompleteCallback = cb; }
+    void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t highWaterMark)
+    { m_highWaterMarkCallback = cb; m_highWaterMark = highWaterMark; }
 
     /// Advanced interface
-    Buffer* inputBuffer();
-    Buffer* outputBuffer();
+    Buffer* inputBuffer() { return &m_inputBuffer; }
+    Buffer* outputBuffer() { return &m_outputBuffer; }
 
     /// Internal use only.
-    void setCloseCallback(const CloseCallback& cb);
+    void setCloseCallback(const CloseCallback& cb)
+    { m_closeCallback = cb; }
 
     // called when TcpServer accepts a new connection
     void connectEstablished();   // should be called only once
@@ -85,7 +89,8 @@ private:
     void handleClose();
     void handleError();
     // void sendInLoop(string&& message);
-    void sendInLoop(const std::string_view& message);
+    void sendInLoop(const std::string_view& message)
+    { sendInLoop(message.data(), message.size()); }
     void sendInLoop(const void* message, size_t len);
     void shutdownInLoop();
     // void shutdownAndForceCloseInLoop(double seconds);

@@ -40,8 +40,8 @@ Epoll::~Epoll()
 Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
     int numEvents = ::epoll_wait(m_epollfd,
-                                 &*m_eventVec.begin(),
-                                 static_cast<int>(m_eventVec.size()),
+                                 m_eventVec.data(),
+                                 int(m_eventVec.size()),
                                  timeoutMs);
     int savedErrno = errno;
     Timestamp timestamp(Timestamp::currentTimestamp());
@@ -49,6 +49,10 @@ Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
     {
         LOG_DEBUG << numEvents << " events happened";
         fillActiveChannels(numEvents, activeChannels);
+        if(numEvents == int(m_eventVec.size()))
+        {
+            m_eventVec.resize(m_eventVec.size() * 2);
+        }
     }
     else if (numEvents == 0)
     {
@@ -142,7 +146,8 @@ void Epoll::fillActiveChannels(int numEvents, ChannelList *activeChannels) const
     assert(numEvents <= int(m_eventVec.size()));
     for (int i = 0; i < numEvents; ++i)
     {
-        Channel *channel = static_cast<Channel *>(m_eventVec[i].data.ptr);
+        // why can Conversion ?
+        Channel *channel = static_cast<Channel*>(m_eventVec[i].data.ptr);
 #ifndef NDEBUG
         int fd = channel->fd();
         ChannelMap::const_iterator it = m_channelMap.find(fd);

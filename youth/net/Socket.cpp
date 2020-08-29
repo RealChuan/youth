@@ -17,17 +17,11 @@ namespace net
 Socket::Socket(int sockfd)
     : m_sockfd(sockfd)
 {
-
 }
 
 Socket::~Socket()
 {
     SocketFunc::close(m_sockfd);
-}
-
-int Socket::fd() const
-{
-    return m_sockfd;
 }
 
 bool Socket::getTcpInfo(tcp_info *tcpi) const
@@ -68,9 +62,9 @@ void Socket::bindAddress(const TcpAddressInfo &addrInfo)
     SocketFunc::bind(m_sockfd, addrInfo.getSockAddr());
 }
 
-void Socket::listen(const TcpAddressInfo &addrInfo)
+void Socket::listen()
 {
-    SocketFunc::listen(m_sockfd, addrInfo.getSockAddr());
+    SocketFunc::listen(m_sockfd);
 }
 
 int Socket::accept(TcpAddressInfo *peeraddr)

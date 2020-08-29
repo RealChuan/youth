@@ -11,6 +11,7 @@ namespace youth
 {
 
 using namespace core;
+
 namespace core{
 class FileUtil;
 }
@@ -26,7 +27,7 @@ public:
     static void outputFunc(const char*, int);
     static void flushFunc(void);
 
-    void setRollSize(off_t);
+    void setRollSize(off_t size) { m_rollSize = size; }
     //void setDelLogFileDays(uint);   //delete log files
     void setBaseFileName(const std::string&);
 
