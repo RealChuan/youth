@@ -27,8 +27,8 @@ public:
     explicit TcpAddressInfo(const struct sockaddr_in6& addr)
         : m_serveraddr6(addr) {}
 
-    const struct sockaddr* getSockAddr() const
-    { return reinterpret_cast<const sockaddr*>(&m_serveraddr); }
+    const struct sockaddr* sockAddr() const
+    { return reinterpret_cast<const sockaddr*>(&m_serveraddr6); }
     sa_family_t family() const
     { return m_serveraddr.sin_family; }
     std::string ip() const;

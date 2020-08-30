@@ -32,17 +32,17 @@ TcpAddressInfo::TcpAddressInfo(const char *ip, uint16_t port, bool ipv6)
 
 std::string TcpAddressInfo::ip() const
 {
-    return SocketFunc::getIp(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
+    return SocketFunc::getIp(sockAddr());
 }
 
 uint16_t TcpAddressInfo::port() const
 {
-    return SocketFunc::getPort(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
+    return SocketFunc::getPort(sockAddr());
 }
 
 std::string TcpAddressInfo::ipAndPort() const
 {
-    return SocketFunc::getIpAndPort(reinterpret_cast<const struct sockaddr*>(&m_serveraddr6));
+    return SocketFunc::getIpAndPort(sockAddr());
 }
 
 static __thread char t_resolveBuf[64 * 1024];

@@ -24,8 +24,8 @@ class TcpClient : noncopyable
 {
 public:
     TcpClient(EventLoop* loop,
-              const TcpAddressInfo& serverAddr,
-              const std::string& nameArg);
+              const TcpAddressInfo &serverAddr,
+              const std::string &name);
     ~TcpClient();
 
     void connect();

@@ -7,3 +7,6 @@ target_link_libraries(TimerTest youth_net)
 
 ADD_EXECUTABLE(TcpClientTest TcpClientTest.cpp)
 target_link_libraries(TcpClientTest youth_net)
+
+ADD_EXECUTABLE(TcpServerTest TcpServerTest.cpp)
+target_link_libraries(TcpServerTest youth_net)

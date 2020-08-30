@@ -25,10 +25,10 @@ void removeConnector(const ConnectorPtr& connector)
 
 TcpClient::TcpClient(EventLoop *loop,
                      const TcpAddressInfo &serverAddr,
-                     const std::string &nameArg)
+                     const std::string &name)
     : m_eventLoop(CHECK_NOTNULL(loop))
     , m_connectorPtr(new Connector(loop, serverAddr))
-    , m_name(nameArg)
+    , m_name(name)
     , m_connectionCallback(defaultConnectionCallback)
     , m_messageCallback(defaultMessageCallback)
     , m_retry(false)

@@ -23,7 +23,7 @@ void setServerAddress(const char* ip, uint16_t port, struct sockaddr_in6* server
 int createNonblockingOrDie(sa_family_t family);
 void bind(const int fd, const struct sockaddr *serverAddr);
 void listen(const int serverfd);
-int accept(const int serverfd, const struct sockaddr_in6 *clientAddr);
+int accept(const int serverfd, struct sockaddr_in6 *clientAddr);
 int connect(int sockfd, const struct sockaddr* addr);
 void shutdownWrite(int sockfd);
 void close(int sockfd);

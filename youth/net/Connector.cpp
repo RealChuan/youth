@@ -80,7 +80,7 @@ void Connector::stopInLoop()
 void Connector::connect()
 {
     int sockfd = SocketFunc::createNonblockingOrDie(m_serverAddr.family());
-    int ret = SocketFunc::connect(sockfd, m_serverAddr.getSockAddr());
+    int ret = SocketFunc::connect(sockfd, m_serverAddr.sockAddr());
     int savedErrno = (ret == 0) ? 0 : errno;
     switch (savedErrno)
     {

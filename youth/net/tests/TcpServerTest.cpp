@@ -1,5 +1,6 @@
-#include <youth/net/TcpClient.h>
+#include <youth/net/TcpServer.h>
 #include <youth/net/TcpAddressInfo.h>
+#include <youth/net/TcpConnection.h>
 #include <youth/net/EventLoop.h>
 #include <youth/utils/Logging.h>
 #include <youth/core/CurrentThread.h>
@@ -8,31 +9,37 @@ using namespace youth::core;
 using namespace youth::utils;
 using namespace youth::net;
 
-class EchoTcpCLient : noncopyable
+class EchoTcpServer : noncopyable
 {
 public:
-    EchoTcpCLient(EventLoop *loop, const TcpAddressInfo& serverAddr)
+    EchoTcpServer(EventLoop *loop, const TcpAddressInfo& localAddr)
         : m_eventLoop(loop)
-        , m_tcpClientPtr(new TcpClient(loop, serverAddr, "EchoClient"))
+        , m_tcpServerPtr(new TcpServer(loop, localAddr, "EchoServer"))
     {
-        m_tcpClientPtr->setConnectionCallback(
-                    std::bind(&EchoTcpCLient::connection, this,
+        m_tcpServerPtr->setConnectionCallback(
+                    std::bind(&EchoTcpServer::connection, this,
                               std::placeholders::_1));
-        m_tcpClientPtr->setMessageCallback(
-                    std::bind(&EchoTcpCLient::message, this,
+        m_tcpServerPtr->setMessageCallback(
+                    std::bind(&EchoTcpServer::message, this,
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3));
-        m_tcpClientPtr->connect();
+    }
+
+    void start(int numThread)
+    {
+        m_tcpServerPtr->setThreadNum(numThread);
+        m_tcpServerPtr->start();
     }
 
 private:
     void connection(const TcpConnectionPtr &conn)
     {
-        LOG_INFO << conn->localAddress().ipAndPort() << " -> "
-                 << conn->peerAddress().ipAndPort() << " is "
+        LOG_INFO << conn->peerAddress().ipAndPort() << " -> "
+                 << conn->localAddress().ipAndPort() << " is "
                  << (conn->connected() ? "UP" : "DOWN");
-        conn->send("Hello Server, I am client\n");
+        LOG_INFO << conn->getTcpInfoString();
+        conn->send("Hello Client, I am server\n");
     }
 
     void message(const TcpConnectionPtr &conn,
@@ -59,7 +66,7 @@ private:
     }
 
     EventLoop *m_eventLoop;
-    std::unique_ptr<TcpClient> m_tcpClientPtr;
+    std::unique_ptr<TcpServer> m_tcpServerPtr;
 };
 
 int main(int argc, char** argv)
@@ -68,8 +75,11 @@ int main(int argc, char** argv)
 
     LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
     EventLoop loop;
-    TcpAddressInfo address("127.0.0.1", 65533);
-    EchoTcpCLient echoTcpCLient(&loop, address);
+    TcpAddressInfo address(65533, true);
+    EchoTcpServer echoTcpServer(&loop, address);
+    echoTcpServer.start(5);
     loop.loop();
     return 0;
 }
+
+

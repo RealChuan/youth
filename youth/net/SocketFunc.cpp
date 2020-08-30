@@ -13,6 +13,25 @@ using namespace utils;
 namespace net
 {
 
+#if VALGRIND || defined (NO_ACCEPT4)
+void setNonBlockAndCloseOnExec(int sockfd)
+{
+    // non-block
+    int flags = ::fcntl(sockfd, F_GETFL, 0);
+    flags |= O_NONBLOCK;
+    int ret = ::fcntl(sockfd, F_SETFL, flags);
+    // FIXME check
+
+    // close-on-exec
+    flags = ::fcntl(sockfd, F_GETFD, 0);
+    flags |= FD_CLOEXEC;
+    ret = ::fcntl(sockfd, F_SETFD, flags);
+    // FIXME check
+
+    (void)ret;
+}
+#endif
+
 void SocketFunc::setServerAddress(uint16_t port, sockaddr_in *serverAddr,
                                   bool loopbackOnly)
 {
@@ -96,24 +115,27 @@ void SocketFunc::listen(const int serverfd)
         LOG_FATAL << "listen error:" << errno;
         return;
     }
+    LOG_DEBUG << "Listening, Wait Client Connect...";
 }
 
-int SocketFunc::accept(const int serverfd, const sockaddr_in6 *clientAddr)
+int SocketFunc::accept(const int serverfd, sockaddr_in6 *clientAddr)
 {
-    LOG_INFO << "Wait Client Connect...";
-    socklen_t addrlen = static_cast<socklen_t>(sizeof clientAddr);
+    socklen_t addrlen = socklen_t(sizeof *clientAddr);
 #if VALGRIND || defined (NO_ACCEPT4)
-    int connfd = ::accept(serverfd, reinterpret_cast<struct sockaddr*>(&clientAddr),
+    int connfd = ::accept(sockfd,
+                          reinterpret_cast<sockaddr*>(clientAddr),
                           &addrlen);
     setNonBlockAndCloseOnExec(connfd);
 #else
-    int connfd = ::accept4(serverfd, reinterpret_cast<struct sockaddr*>(&clientAddr),
-                           &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC);
+    int connfd = ::accept4(serverfd,
+                           reinterpret_cast<sockaddr*>(clientAddr),
+                           &addrlen,
+                           SOCK_NONBLOCK | SOCK_CLOEXEC);
 #endif
     if (connfd < 0)
     {
         int savedErrno = errno;
-        LOG_ERROR << "SocketFunc::accept";
+        LOG_ERROR << "Socket::accept";
         switch (savedErrno)
         {
         case EAGAIN:
@@ -141,7 +163,9 @@ int SocketFunc::accept(const int serverfd, const sockaddr_in6 *clientAddr)
             break;
         }
     }
-    LOG_INFO << "Client Online: " << SocketFunc::getIpAndPort(reinterpret_cast<const sockaddr*>(clientAddr));
+    LOG_DEBUG << "Client Online: "
+              << SocketFunc::getIpAndPort(
+                     reinterpret_cast<const sockaddr*>(clientAddr));
     return connfd;
 }
 
@@ -157,7 +181,7 @@ int SocketFunc::connect(int sockfd, const sockaddr *addr)
         return ret;
     }
 
-    LOG_INFO << "Successfully connected to the server: " << SocketFunc::getIpAndPort(addr);
+    LOG_DEBUG << "Successfully connected to the server: " << SocketFunc::getIpAndPort(addr);
     return ret;
 }
 
@@ -187,16 +211,19 @@ std::string SocketFunc::getIp(const sockaddr *addr)
     {
         const struct sockaddr_in* addr4 =
                 reinterpret_cast<const struct sockaddr_in*>(addr);
-        ::inet_ntop(AF_INET, &addr4->sin_addr, buf,
-                    static_cast<socklen_t>(static_cast<socklen_t>(sizeof buf)));
+        if(nullptr == ::inet_ntop(AF_INET, &addr4->sin_addr, buf,
+                                  socklen_t(sizeof buf))){
+            LOG_ERROR << "SocketFunc::getIp" << buf;
+        }
     }
     else if(addr->sa_family == AF_INET6)
     {
         const struct sockaddr_in6* addr6 =
                 reinterpret_cast<const struct sockaddr_in6*>(addr);
-        ::inet_ntop(AF_INET6, &addr6->sin6_addr, buf,
-                    static_cast<socklen_t>(sizeof buf));
-
+        if(nullptr == ::inet_ntop(AF_INET6, &addr6->sin6_addr, buf,
+                                  socklen_t(sizeof buf))){
+            LOG_ERROR << "SocketFunc::getIp" << buf;
+        }
     }
     return buf;
 }
