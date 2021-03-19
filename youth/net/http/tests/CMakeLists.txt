@@ -1,0 +1,2 @@
+ADD_EXECUTABLE(HttpServerTest HttpServerTest.cpp)
+target_link_libraries(HttpServerTest youth_net_http youth_utils youth_core)
