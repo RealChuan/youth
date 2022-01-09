@@ -120,7 +120,7 @@ bool LogFile::rollFile(int count)
     std::string fileName = getFileName(&now);
     if(count)
     {
-        char buf[5] = {0};
+        char buf[32] = {0};
         snprintf(buf, sizeof buf, ".%d", count);
         fileName += buf;
     }

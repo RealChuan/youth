@@ -1,7 +1,7 @@
 #设定版本号
 cmake_minimum_required(VERSION 3.5)
 
-set(CMAKE_TOOLCHAIN_FILE "/home/youth/code/vcpkg/scripts/buildsystems/vcpkg.cmake")
+#set(CMAKE_TOOLCHAIN_FILE "/home/youth/code/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 #设定工程名
 project(youth C CXX)
@@ -45,10 +45,10 @@ include_directories( ${PROJECT_SOURCE_DIR} )
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
-find_package(Protobuf REQUIRED)
-if(PROTOBUF_FOUND)
-    include_directories(${Protobuf_INCLUDE_DIRS})
-endif()
+#find_package(Protobuf)
+#if(PROTOBUF_FOUND)
+#    include_directories(${Protobuf_INCLUDE_DIRS})
+#endif()
 
 #设定可执行二进制文件的目录
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)  #源文件目录
