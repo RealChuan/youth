@@ -1,29 +1,28 @@
 #ifndef FILEUTIL_H
 #define FILEUTIL_H
 
-#include "String.h"
 #include "Object.h"
+#include "String.h"
 
-namespace youth
-{
+namespace youth {
 
-namespace core
-{
+namespace core {
 //  thread not safe
 class FileUtil : noncopyable
 {
 public:
-    enum OpenModel
-    {
+    enum OpenModel {
         Read = 0x01,
         Write = 0x02,
-        ReadAndWrite = Read|Write,
-        Append = 0x04|ReadAndWrite
+        ReadAndWrite = Read | Write,
+        Append = 0x04 | ReadAndWrite
     };
 
-    enum Seek{ Begin, Current, End };
+    enum Seek { Begin, Current, End };
 
-    FileUtil(): m_filePtr() {}
+    FileUtil()
+        : m_filePtr()
+    {}
     FileUtil(const std::string &filename)
         : m_filePtr()
         , m_fileName(filename)
@@ -45,10 +44,9 @@ public:
     std::string readLine();
     std::string readAll();
 
-    void write(const std::string &str)
-    { write(str.c_str(), int(str.size())); }
+    void write(const std::string &str) { write(str.c_str(), int(str.size())); }
 
-    void write(const char*, int len);
+    void write(const char *, int len);
 
     void flushFile();
 
@@ -67,8 +65,8 @@ private:
     off_t m_writeBytes = 0;
 };
 
-}
+} // namespace core
 
-}
+} // namespace youth
 
 #endif // FILEUTIL_H

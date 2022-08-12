@@ -1,31 +1,29 @@
 #ifndef ELAPSEDTIME_H
 #define ELAPSEDTIME_H
 
+#include <chrono>
 #include <string>
 
 #include "Object.h"
 
-namespace youth
-{
+namespace youth {
 
-namespace core
-{
+namespace core {
 
-class ElapsedTime : noncopyable
-{
+class ElapsedTime : noncopyable {
 public:
-    ElapsedTime();
+  ElapsedTime();
 
-    void start();
-    void reStart();
-    std::string elapsed();
+  void start();
+  void reStart();
+  std::string elapsed() const;
 
 private:
-    struct timeval m_tvStart;
+  std::chrono::steady_clock::time_point m_startPoint;
 };
 
-}
+} // namespace core
 
-}
+} // namespace youth
 
 #endif // ELAPSEDTIME_H

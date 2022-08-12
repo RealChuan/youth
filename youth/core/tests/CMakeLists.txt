@@ -4,3 +4,9 @@ target_link_libraries(StringTest youth_core)
 
 ADD_EXECUTABLE(FileUtilTest FileUtilTest.cpp)
 target_link_libraries(FileUtilTest youth_core)
+
+ADD_EXECUTABLE(Condition_unittest Condition_unittest.cc)
+target_link_libraries(Condition_unittest youth_core)
+
+ADD_EXECUTABLE(CountDownLatch_unittext CountDownLatch_unittext.cc)
+target_link_libraries(CountDownLatch_unittext youth_core)

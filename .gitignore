@@ -33,6 +33,7 @@
 
 #others
 bin/
+bin-*/
 build/
 CMakeLists.txt.*
 .vscode/

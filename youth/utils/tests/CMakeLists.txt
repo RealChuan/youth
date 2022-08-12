@@ -13,13 +13,3 @@ target_link_libraries(ThreadPoolTest youth_utils)
 
 ADD_EXECUTABLE(ElapsedTimeTest ElapsedTimeTest.cpp)
 target_link_libraries(ElapsedTimeTest youth_utils)
-
-ADD_EXECUTABLE(CountDownLatchTest CountDownLatchTest.cpp)
-target_link_libraries(CountDownLatchTest youth_utils)
-
-ADD_EXECUTABLE(MutexTest MutexTest.cpp)
-target_link_libraries(MutexTest youth_core)
-target_link_libraries(MutexTest youth_utils)
-
-ADD_EXECUTABLE(ConditionTest ConditionTest.cpp)
-target_link_libraries(ConditionTest youth_utils)

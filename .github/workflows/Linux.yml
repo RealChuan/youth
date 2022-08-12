@@ -50,10 +50,29 @@ jobs:
         if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build cmake
+          sudo apt-get install ninja-build
           ninja --version
           cmake --version
           gcc --version
+
+      - name: cache vcpkg
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/share/vcpkg/downloads
+          key: ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-
+            ${{ runner.os }}-vcpkg-download-
+      - uses: actions/cache@v3
+        with:
+          path: /usr/local/share/vcpkg/installed
+          key: ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-
+            ${{ runner.os }}-vcpkg-installed-
+      - name: Install libraries with vcpkg
+        run: |
+          vcpkg install curl[ssl,http2,tool] protobuf
           
       - name: Configure
         shell: bash

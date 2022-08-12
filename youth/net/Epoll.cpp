@@ -1,21 +1,19 @@
+#include <assert.h>
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <assert.h>
 
-#include "EventLoop.h"
-#include "Epoll.h"
-#include "Socket.h"
 #include "Channel.h"
+#include "Epoll.h"
+#include "EventLoop.h"
+#include "Socket.h"
 
 #include <youth/utils/Logging.h>
 
-namespace youth
-{
+namespace youth {
 
 using namespace utils;
 
-namespace net
-{
+namespace net {
 
 const int kNew = -1;
 const int kAdded = 1;
@@ -26,8 +24,7 @@ Epoll::Epoll(EventLoop *eventLoop)
     , m_eventVec(kInitEventListSize)
     , m_epollfd(::epoll_create(EPOLL_CLOEXEC))
 {
-    if (m_epollfd < 0)
-    {
+    if (m_epollfd < 0) {
         LOG_FATAL << "EPoll";
     }
 }
@@ -39,30 +36,20 @@ Epoll::~Epoll()
 
 Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
-    int numEvents = ::epoll_wait(m_epollfd,
-                                 m_eventVec.data(),
-                                 int(m_eventVec.size()),
-                                 timeoutMs);
+    int numEvents = ::epoll_wait(m_epollfd, m_eventVec.data(), int(m_eventVec.size()), timeoutMs);
     int savedErrno = errno;
     Timestamp timestamp(Timestamp::currentTimestamp());
-    if (numEvents > 0)
-    {
+    if (numEvents > 0) {
         LOG_DEBUG << numEvents << " events happened";
         fillActiveChannels(numEvents, activeChannels);
-        if(numEvents == int(m_eventVec.size()))
-        {
+        if (numEvents == int(m_eventVec.size())) {
             m_eventVec.resize(m_eventVec.size() * 2);
         }
-    }
-    else if (numEvents == 0)
-    {
+    } else if (numEvents == 0) {
         LOG_DEBUG << "nothing happened";
-    }
-    else
-    {
+    } else {
         // error happens, log uncommon ones
-        if (savedErrno != EINTR)
-        {
+        if (savedErrno != EINTR) {
             errno = savedErrno;
             LOG_ERROR << "EPoll::poll()";
         }
@@ -74,17 +61,15 @@ void Epoll::updateChannel(Channel *channel)
 {
     m_eventLoop->assertInLoopThread();
     const int index = channel->index();
-    LOG_DEBUG << "Channel fd = " << channel->fd() << " events = " << channel->events() << " index = " << index;
-    if (index == kNew || index == kDeleted)
-    {
+    LOG_DEBUG << "Channel fd = " << channel->fd() << " events = " << channel->events()
+              << " index = " << index;
+    if (index == kNew || index == kDeleted) {
         // a new one, add with EPOLL_CTL_ADD
         int fd = channel->fd();
-        if (index == kNew)
-        {
+        if (index == kNew) {
             assert(m_channelMap.find(fd) == m_channelMap.end());
             m_channelMap[fd] = channel;
-        }
-        else // index == kDeleted
+        } else // index == kDeleted
         {
             assert(m_channelMap.find(fd) != m_channelMap.end());
             assert(m_channelMap[fd] == channel);
@@ -92,22 +77,17 @@ void Epoll::updateChannel(Channel *channel)
 
         channel->setIndex(kAdded);
         update(EPOLL_CTL_ADD, channel);
-    }
-    else
-    {
+    } else {
         // update existing one with EPOLL_CTL_MOD/DEL
         int fd = channel->fd();
-        (void)fd;
+        (void) fd;
         assert(m_channelMap.find(fd) != m_channelMap.end());
         assert(m_channelMap[fd] == channel);
         assert(index == kAdded);
-        if (channel->isNoneEvent())
-        {
+        if (channel->isNoneEvent()) {
             update(EPOLL_CTL_DEL, channel);
             channel->setIndex(kDeleted);
-        }
-        else
-        {
+        } else {
             update(EPOLL_CTL_MOD, channel);
         }
     }
@@ -124,11 +104,10 @@ void Epoll::removeChannel(Channel *channel)
     int index = channel->index();
     assert(index == kAdded || index == kDeleted);
     size_t n = m_channelMap.erase(fd);
-    (void)n;
+    (void) n;
     assert(n == 1);
 
-    if (index == kAdded)
-    {
+    if (index == kAdded) {
         update(EPOLL_CTL_DEL, channel);
     }
     channel->setIndex(kNew);
@@ -144,10 +123,9 @@ bool Epoll::hasChannel(Channel *channel) const
 void Epoll::fillActiveChannels(int numEvents, ChannelList *activeChannels) const
 {
     assert(numEvents <= int(m_eventVec.size()));
-    for (int i = 0; i < numEvents; ++i)
-    {
+    for (int i = 0; i < numEvents; ++i) {
         // why can Conversion ?
-        Channel *channel = static_cast<Channel*>(m_eventVec[i].data.ptr);
+        Channel *channel = static_cast<Channel *>(m_eventVec[i].data.ptr);
 #ifndef NDEBUG
         int fd = channel->fd();
         ChannelMap::const_iterator it = m_channelMap.find(fd);
@@ -161,17 +139,11 @@ void Epoll::fillActiveChannels(int numEvents, ChannelList *activeChannels) const
 
 inline const char *operationToString(int op)
 {
-    switch (op)
-    {
-    case EPOLL_CTL_ADD:
-        return "ADD";
-    case EPOLL_CTL_DEL:
-        return "DEL";
-    case EPOLL_CTL_MOD:
-        return "MOD";
-    default:
-        assert(false && "ERROR op");
-        return "Unknown Operation";
+    switch (op) {
+    case EPOLL_CTL_ADD: return "ADD";
+    case EPOLL_CTL_DEL: return "DEL";
+    case EPOLL_CTL_MOD: return "MOD";
+    default: assert(false && "ERROR op"); return "Unknown Operation";
     }
 }
 
@@ -182,21 +154,17 @@ void Epoll::update(int operation, Channel *channel)
     event.events = channel->events();
     event.data.ptr = channel;
     int fd = channel->fd();
-    LOG_DEBUG << "epoll_ctl op = " << operationToString(operation)
-              << " fd = " << fd << " event = { " << channel->eventsToString() << " }";
-    if (::epoll_ctl(m_epollfd, operation, fd, &event) < 0)
-    {
-        if (operation == EPOLL_CTL_DEL)
-        {
+    LOG_DEBUG << "epoll_ctl op = " << operationToString(operation) << " fd = " << fd
+              << " event = { " << channel->eventsToString() << " }";
+    if (::epoll_ctl(m_epollfd, operation, fd, &event) < 0) {
+        if (operation == EPOLL_CTL_DEL) {
             LOG_ERROR << "epoll_ctl op =" << operationToString(operation) << " fd =" << fd;
-        }
-        else
-        {
+        } else {
             LOG_FATAL << "epoll_ctl op =" << operationToString(operation) << " fd =" << fd;
         }
     }
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth

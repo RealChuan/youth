@@ -1,17 +1,14 @@
 #ifndef CURRENTTHREAD_H
 #define CURRENTTHREAD_H
 
-#include <unistd.h>
 #include <stdint.h>
+#include <unistd.h>
 
-namespace youth
-{
+namespace youth {
 
-namespace core
-{
+namespace core {
 
-namespace CurrentThread
-{
+namespace CurrentThread {
 // internal
 extern __thread int tidCache;
 extern __thread char tidString_[32];
@@ -26,7 +23,7 @@ inline int tid()
     return tidCache;
 }
 
-inline const char* tidString() // for logging
+inline const char *tidString() // for logging
 {
     return tidString_;
 }
@@ -41,12 +38,12 @@ inline bool isMainThread()
     return tid() == ::getpid();
 }
 
-inline void sleepUsec(int64_t usec);  // for testing
+inline void sleepUsec(int64_t usec); // for testing
 
-}
+} // namespace CurrentThread
 
-}
+} // namespace core
 
-}
+} // namespace youth
 
 #endif // CURRENTTHREAD_H

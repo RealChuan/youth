@@ -1,40 +1,24 @@
 #include "ElapsedTime.h"
 #include "Timestamp.h"
 
-#include <sys/time.h>
+namespace youth {
 
-namespace youth
-{
+namespace core {
 
-namespace core
-{
+ElapsedTime::ElapsedTime() { start(); }
 
-ElapsedTime::ElapsedTime()
-{
+void ElapsedTime::start() { m_startPoint = std::chrono::steady_clock::now(); }
+
+void ElapsedTime::reStart() { start(); }
+
+std::string ElapsedTime::elapsed() const {
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end - m_startPoint;
+  char buf[20];
+  snprintf(buf, sizeof buf, "%.6lf(S)", elapsed_seconds.count());
+  return buf;
 }
 
-void ElapsedTime::start()
-{
-    gettimeofday(&m_tvStart, NULL);
-}
+} // namespace core
 
-void ElapsedTime::reStart()
-{
-    gettimeofday(&m_tvStart, NULL);
-}
-
-std::string ElapsedTime::elapsed()
-{
-    struct timeval tv_end;
-    gettimeofday(&tv_end, NULL);
-    long int t = Timestamp::kMicroSecondsPerSecond * (tv_end.tv_sec - m_tvStart.tv_sec)
-            + (tv_end.tv_usec - m_tvStart.tv_usec);
-    char buf[20];
-    double seconds = double(t) / Timestamp::kMicroSecondsPerSecond;
-    snprintf(buf, sizeof buf, "%.6lf(S)", seconds);
-    return buf;
-}
-
-}
-
-}
+} // namespace youth

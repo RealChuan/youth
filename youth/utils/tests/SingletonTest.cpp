@@ -1,22 +1,21 @@
-#include <youth/utils/Singleton.h>
 #include <youth/utils/Logging.h>
+#include <youth/utils/Singleton.h>
 
 using namespace youth::utils;
 
-class A
-{
-    SINGLETON(A)
+class S {
+  SINGLETON(S)
 public:
-    void print()
-    {
-        LOG_INFO << "1111111";
-    }
+  void print() { LOG_INFO << "1111111"; }
 };
 
-A::A(){     LOG_INFO << "A";    }
-A::~A(){    LOG_INFO << "~A";   }
+S::S() { LOG_INFO << "A"; }
+S::~S() { LOG_INFO << "~A"; }
 
-int main(){
-    A::instance().print();
-    return 0;
+int main() {
+  S::instance().print();
+  S::instance().print();
+  S::instance().print();
+  S::instance().print();
+  return 0;
 }

@@ -1,45 +1,38 @@
 #ifndef EVENTLOOPTHREAD_H
 #define EVENTLOOPTHREAD_H
 
-#include <youth/utils/Thread.h>
-#include <youth/core/Condition.h>
+#include <youth/core/Thread.hpp>
 
-#include <functional>
-#include <string>
-
-namespace youth
-{
+namespace youth {
 
 using namespace core;
-using namespace utils;
 
-namespace net
-{
+namespace net {
 
 class EventLoop;
-class EventLoopThread : noncopyable
-{
-    typedef std::function<void(EventLoop*)> ThreadInitCallback;
-public:
-    EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback(),
-                    const std::string& name = std::string());
-    ~EventLoopThread();
+class EventLoopThread : noncopyable {
+  typedef std::function<void(EventLoop *)> ThreadInitCallback;
 
-    EventLoop* startLoop();
+public:
+  EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback(),
+                  const std::string &name = std::string());
+  ~EventLoopThread();
+
+  EventLoop *startLoop();
 
 private:
-    void threadFunc();
+  void threadFunc();
 
-    bool m_exit;
-    Mutex m_mutex;
-    Condition m_cond GUARDED_BY(m_mutex);
-    EventLoop* m_loop GUARDED_BY(m_mutex);
-    Thread m_thread;
-    ThreadInitCallback m_callback;
+  bool m_exit;
+  Mutex m_mutex;
+  Condition m_cond;
+  EventLoop *m_loop;
+  Thread m_thread;
+  ThreadInitCallback m_callback;
 };
 
-}
+} // namespace net
 
-}
+} // namespace youth
 
 #endif // EVENTLOOPTHREAD_H
