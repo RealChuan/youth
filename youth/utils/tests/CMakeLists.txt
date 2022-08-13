@@ -11,5 +11,5 @@ target_link_libraries(LogAsyncTest youth_utils)
 ADD_EXECUTABLE(ThreadPoolTest ThreadPoolTest.cpp)
 target_link_libraries(ThreadPoolTest youth_utils)
 
-ADD_EXECUTABLE(ElapsedTimeTest ElapsedTimeTest.cpp)
-target_link_libraries(ElapsedTimeTest youth_utils)
+ADD_EXECUTABLE(LogSpeed_unitest LogSpeed_unitest.cc)
+target_link_libraries(LogSpeed_unitest youth_utils)

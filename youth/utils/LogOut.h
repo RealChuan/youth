@@ -3,21 +3,19 @@
 
 #include "LogStream.h"
 
-#include <youth/core/Timestamp.h>
+#include <youth/core/DateTime.hpp>
 
-namespace youth
-{
+namespace youth {
 
-namespace utils
-{
+namespace utils {
 
 class LogOut : noncopyable
 {
 public:
-    LogOut(const char* level, const char* m_file, int m_line, bool outError = false);
+    LogOut(const char *level, const char *m_file, int m_line, bool outError = false);
     ~LogOut();
 
-    LogStream& stream() { return m_logStream; }
+    LogStream &stream() { return m_logStream; }
 
     //这个方法是在完成日志流的输出后填充文件名和行号的
     void finishLog();
@@ -30,13 +28,13 @@ public:
 
 private:
     int m_line; //行号
-    const char* m_file;
-    Timestamp m_timestamp; //Log时间类
+    const char *m_file;
+    DateTime m_dateTime;
     LogStream m_logStream; //LogStream类
 };
 
-}
+} // namespace utils
 
-}
+} // namespace youth
 
 #endif /* LOGOUT_H */

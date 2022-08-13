@@ -38,8 +38,6 @@ inline bool isMainThread()
     return tid() == ::getpid();
 }
 
-inline void sleepUsec(int64_t usec); // for testing
-
 } // namespace CurrentThread
 
 } // namespace core

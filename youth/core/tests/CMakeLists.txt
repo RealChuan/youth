@@ -10,3 +10,9 @@ target_link_libraries(Condition_unittest youth_core)
 
 ADD_EXECUTABLE(CountDownLatch_unittext CountDownLatch_unittext.cc)
 target_link_libraries(CountDownLatch_unittext youth_core)
+
+ADD_EXECUTABLE(DateTime_unittest DateTime_unittest.cc )
+target_link_libraries(DateTime_unittest youth_core)
+
+ADD_EXECUTABLE(ElapsedTimer_unittest ElapsedTimer_unittest.cc )
+target_link_libraries(ElapsedTimer_unittest youth_core)

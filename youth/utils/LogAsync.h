@@ -3,8 +3,8 @@
 
 #include "LogBuffer.h"
 
+#include <youth/core/DateTime.hpp>
 #include <youth/core/Thread.hpp>
-#include <youth/core/Timestamp.h>
 
 #include <memory>
 #include <vector>
@@ -13,39 +13,42 @@ namespace youth {
 
 namespace utils {
 
-class LogAsync : noncopyable {
+class LogAsync : noncopyable
+{
 public:
-  static LogAsync *instance();
+    static LogAsync *instance();
 
-  void setFlushInterval(int flushInterval) { m_refreshTime = flushInterval; }
+    void setFlushInterval(int flushInterval) { m_refreshTime = flushInterval; }
 
-  void append(const char *logline, int len);
+    void append(const char *logline, int len);
 
-  void start();
-  void stop();
+    void start();
+    void stop();
 
 private:
-  LogAsync(int flushInterval = 5);
-  ~LogAsync();
+    LogAsync(int flushInterval = 5);
+    ~LogAsync();
 
-  void threadFunc();
-  Timestamp m_timestamp;
+    void threadFunc();
 
-  typedef LogBuffer<maxBuffer> Buffer;
-  typedef std::vector<std::unique_ptr<Buffer>> BufferVector;
-  typedef BufferVector::value_type BufferPtr;
+    DateTime m_dateTime;
 
-  int m_refreshTime;
-  bool m_running = false;
-  Thread m_thread;
-  Mutex m_mutex;
-  Condition m_cond;
-  BufferPtr m_currentBuffer;
-  BufferPtr m_nextBuffer;
-  BufferVector m_buffers;
+    typedef LogBuffer<maxBuffer> Buffer;
+    typedef std::vector<std::unique_ptr<Buffer>> BufferVector;
+    typedef BufferVector::value_type BufferPtr;
+
+    int m_refreshTime;
+    bool m_running = false;
+    Thread m_thread;
+    Mutex m_mutex;
+    Condition m_cond;
+    BufferPtr m_currentBuffer;
+    BufferPtr m_nextBuffer;
+    BufferVector m_buffers;
 };
 
 } // namespace utils
 
 } // namespace youth
+
 #endif /* LOGASYNC_H */
