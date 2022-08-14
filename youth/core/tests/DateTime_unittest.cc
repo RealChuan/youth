@@ -4,7 +4,7 @@
 
 using namespace youth::core;
 
-int main()
+void addTest()
 {
     auto dateTime = DateTime::currentDateTime();
     std::cout << dateTime.toStandardFormat() << std::endl;
@@ -80,11 +80,47 @@ int main()
     addYears = dateTime.addYears(-1);
     std::cout << addYears.toStandardFormat() << std::endl;
     std::cout << (addYears > dateTime) << std::endl;
+}
 
+void addFebruary29thTest()
+{
     std::cout << "form String--------------------" << std::endl;
-    auto formString = DateTime::fromString("2022-09-13 08:44:03", "%Y-%m-%d %H:%M:%S");
+    auto formString = DateTime::fromString("2020-01-31 08:44:03", "%Y-%m-%d %H:%M:%S");
     formString = formString.addMicroSeconds(123456);
     std::cout << formString.toStandardFormat() << std::endl;
+
+    std::cout << "add February Month--------------------" << std::endl;
+    auto addFebruaryMouths = formString.addMonths(1);
+    std::cout << addFebruaryMouths.toStandardFormat() << std::endl;
+
+    std::cout << "add February Year--------------------" << std::endl;
+    auto addFebruaryYears = addFebruaryMouths.addYears(1);
+    std::cout << addFebruaryYears.toStandardFormat() << std::endl;
+}
+
+void addFebruary29thTest2()
+{
+    std::cout << "form String-2-------------------" << std::endl;
+    auto formString = DateTime::fromString("2022-01-31 08:44:03", "%Y-%m-%d %H:%M:%S");
+    formString = formString.addMicroSeconds(123456);
+    std::cout << formString.toStandardFormat() << std::endl;
+
+    std::cout << "add February Month-2-------------------" << std::endl;
+    auto addFebruaryMouths = formString.addMonths(1);
+    std::cout << addFebruaryMouths.toStandardFormat() << std::endl;
+
+    std::cout << "add February Year-2-------------------" << std::endl;
+    auto addFebruaryYears = addFebruaryMouths.addYears(1);
+    std::cout << addFebruaryYears.toStandardFormat() << std::endl;
+}
+
+int main()
+{
+    addTest();
+
+    addFebruary29thTest();
+
+    addFebruary29thTest2();
 
     return 0;
 }

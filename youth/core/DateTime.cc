@@ -31,24 +31,31 @@ std::string DateTime::toString(const char *fmt) const
     return buf;
 }
 
+int daysOfMonth(int year, int month)
+{
+    if (month == 2) {
+        if (((year % 4 == 0) && (year % 100 != 0)) || year % 400 == 0) {
+            return 29;
+        } else {
+            return 28;
+        }
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+        return 30;
+    } else {
+        return 31;
+    }
+}
+
 DateTime DateTime::addMonths(int64_t months) const
 {
     std::chrono::time_point<std::chrono::system_clock> tp(
         (std::chrono::microseconds(m_microSecondsSinceEpoch)));
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
-    std::tm tm = *std::gmtime(&t);
+    std::tm tm = *std::localtime(&t);
     tm.tm_mon += months;
     tm.tm_year += tm.tm_mon / 12;
     tm.tm_mon %= 12;
-    tm.tm_mday = std::min(tm.tm_mday,
-                          tm.tm_mon == 1 ? 31
-                                         : (tm.tm_mon == 3 || tm.tm_mon == 5 || tm.tm_mon == 8
-                                                    || tm.tm_mon == 10
-                                                ? 30
-                                                : (tm.tm_mon == 4 || tm.tm_mon == 6
-                                                           || tm.tm_mon == 9 || tm.tm_mon == 11
-                                                       ? 29
-                                                       : 28)));
+    tm.tm_mday = std::min(tm.tm_mday, daysOfMonth(tm.tm_year + 1900, tm.tm_mon + 1));
     t = std::mktime(&tm);
     return DateTime(std::chrono::system_clock::from_time_t(t).time_since_epoch().count() / 1000
                     + m_microSecondsSinceEpoch % 1000000);
@@ -59,11 +66,9 @@ DateTime DateTime::addYears(int64_t years) const
     std::chrono::time_point<std::chrono::system_clock> tp(
         (std::chrono::microseconds(m_microSecondsSinceEpoch)));
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
-    std::tm tm = *std::gmtime(&t);
+    std::tm tm = *std::localtime(&t);
     tm.tm_year += years;
-    if (tm.tm_mon == 2 && (tm.tm_year + 1900) % 4 > 0) {
-        tm.tm_mday = std::min(tm.tm_mday, 28);
-    }
+    tm.tm_mday = std::min(tm.tm_mday, daysOfMonth(tm.tm_year + 1900, tm.tm_mon + 1));
     t = std::mktime(&tm);
     return DateTime(std::chrono::system_clock::from_time_t(t).time_since_epoch().count() / 1000
                     + m_microSecondsSinceEpoch % 1000000);
