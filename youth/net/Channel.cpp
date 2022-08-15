@@ -4,9 +4,9 @@
 #include <youth/utils/Logging.h>
 
 #include <assert.h>
+#include <poll.h>
 #include <sstream>
 #include <sys/epoll.h>
-#include <poll.h>
 
 // EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
 // EPOLLOUT：表示对应的文件描述符可以写；
@@ -16,13 +16,11 @@
 // EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
 // EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
 
-namespace youth
-{
+namespace youth {
 
 using namespace utils;
 
-namespace net
-{
+namespace net {
 
 const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
@@ -38,32 +36,26 @@ Channel::Channel(EventLoop *loop, int fd)
     , m_eventHandling(false)
     , m_addedToLoop(false)
     , m_tied(false)
-{
-}
+{}
 
 Channel::~Channel()
 {
     assert(!m_eventHandling);
     assert(!m_addedToLoop);
-    if (m_eventLoop->isInLoopThread())
-    {
+    if (m_eventLoop->isInLoopThread()) {
         assert(!m_eventLoop->hasChannel(this));
     }
 }
 
-void Channel::handleEvent(Timestamp receiveTime)
+void Channel::handleEvent(DateTime receiveTime)
 {
     std::shared_ptr<void> guard;
-    if (m_tied)
-    {
+    if (m_tied) {
         guard = m_tie.lock();
-        if (guard)
-        {
+        if (guard) {
             handleEventWithGuard(receiveTime);
         }
-    }
-    else
-    {
+    } else {
         handleEventWithGuard(receiveTime);
     }
 }
@@ -81,37 +73,31 @@ void Channel::update()
     m_eventLoop->updateChannel(this);
 }
 
-void Channel::handleEventWithGuard(Timestamp receiveTime)
+void Channel::handleEventWithGuard(DateTime receiveTime)
 {
     m_eventHandling = true;
     LOG_DEBUG << reventsToString();
-    if ((m_revents & EPOLLHUP) && !(m_revents & EPOLLIN))
-    {
-        if (m_logHup)
-        {
+    if ((m_revents & EPOLLHUP) && !(m_revents & EPOLLIN)) {
+        if (m_logHup) {
             LOG_WARN << "fd = " << m_fd << " Channel::handle_event() POLLHUP";
         }
         if (m_closeCallback)
             m_closeCallback();
     }
 
-    if (m_revents & POLLNVAL)
-    {
+    if (m_revents & POLLNVAL) {
         LOG_WARN << "fd = " << m_fd << " Channel::handle_event() POLLNVAL";
     }
 
-    if (m_revents & (EPOLLERR | POLLNVAL))
-    {
+    if (m_revents & (EPOLLERR | POLLNVAL)) {
         if (m_errorCallback)
             m_errorCallback();
     }
-    if (m_revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP))
-    {
+    if (m_revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
         if (m_readCallback)
             m_readCallback(receiveTime);
     }
-    if (m_revents & EPOLLOUT)
-    {
+    if (m_revents & EPOLLOUT) {
         if (m_writeCallback)
             m_writeCallback();
     }
@@ -140,6 +126,6 @@ std::string Channel::eventsToString(int fd, int events)
     return oss.str();
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth

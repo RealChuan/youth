@@ -34,11 +34,11 @@ Epoll::~Epoll()
     ::close(m_epollfd);
 }
 
-Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
+DateTime Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
     int numEvents = ::epoll_wait(m_epollfd, m_eventVec.data(), int(m_eventVec.size()), timeoutMs);
     int savedErrno = errno;
-    Timestamp timestamp(Timestamp::currentTimestamp());
+    DateTime timestamp(DateTime::currentDateTime());
     if (numEvents > 0) {
         LOG_DEBUG << numEvents << " events happened";
         fillActiveChannels(numEvents, activeChannels);

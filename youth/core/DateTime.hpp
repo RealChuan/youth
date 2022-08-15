@@ -12,7 +12,9 @@ namespace core {
 class DateTime : copyable
 {
 public:
-    DateTime() = delete;
+    DateTime()
+        : m_microSecondsSinceEpoch(0)
+    {}
 
     explicit DateTime(int64_t microSecondsSinceEpoch)
         : m_microSecondsSinceEpoch(microSecondsSinceEpoch)
@@ -66,6 +68,11 @@ public:
         return m_microSecondsSinceEpoch != other.m_microSecondsSinceEpoch;
     }
 
+    void swap(DateTime &that)
+    {
+        std::swap(m_microSecondsSinceEpoch, that.m_microSecondsSinceEpoch);
+    }
+
     bool isValid() const { return m_microSecondsSinceEpoch > 0; }
 
     int64_t microSecondsSinceEpoch() const { return m_microSecondsSinceEpoch; }
@@ -98,15 +105,21 @@ public:
     static int64_t currentMicroSecondsSinceEpoch();
     static int64_t currentMilliSecondsSinceEpoch();
     static int64_t currentSecondsSinceEpoch();
+    static DateTime fromString(const std::string &dateTime, const std::string_view &format)
+    {
+        return fromString(dateTime.data(), format.data());
+    }
     static DateTime fromString(std::string_view dateTime, std::string_view format)
     {
-        return fromString(dateTime, format.data());
+        return fromString(dateTime.data(), format.data());
     }
     static DateTime fromString(const std::string &dateTime, std::string_view format)
     {
-        return fromString(dateTime, format.data());
+        return fromString(dateTime.data(), format.data());
     }
-    static DateTime fromString(const std::string &dateTime, const char *format);
+    static DateTime fromString(const char *dateTime, const char *format);
+
+    static const int kMicroSecondsPerSecond = 1000 * 1000;
 
 private:
     int64_t m_microSecondsSinceEpoch = 0;

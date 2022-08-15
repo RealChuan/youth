@@ -4,7 +4,7 @@
 1. [examples](./examples)----------例子;  
 2. [youth](./youth)----------库;  
    1. [core](./youth/core)   
-      1. [CountDownLatch](./youth/core/CountDownLatch.h)-----------倒计时器封装<!--类似 JAVA-->；  
+      1. [CountDownLatch](./youth/core/CountDownLatch.h)-----------倒计时器封装；  
       2. [CurrentThread](./youth/core/CurrentThread.h)-----------当前线程ID信息；  
       3. [DateTime](./youth/core/DateTime.hpp)-----------时间日期处理；
       4. [Dir](./youth/core/Dir.h)-----------文件目录相关；  
@@ -13,10 +13,9 @@
       7. [Object](./youth/core/Object.h)-----------拷贝<!--值语义-->和不可拷贝<!--对象语义-->类，用于继承；  
       8. [ProcessMsg](./youth/core/ProcessMsg.h)-----------进程信息；  
       9.  [string](./youth/core/string.h)-----------std::string处理；  
-      10. [Thread](./youth/core/Thread.hpp)-----------线程/互斥量/条件变量封装类； 
-      11. [Timestamp](./youth/core/Timestamp.h)-----------时间戳类；  
-      12. [WeakCallback](./youth/core/WeakCallback.h)-----------弱引用模板，解决std::shared_ptr缺陷<!--循环引用成环-->；  
-      13. [tests](./youth/core/tests)-----------测试;  
+      10. [Thread](./youth/core/Thread.hpp)-----------线程/互斥量/条件变量封装类；  
+      11. [WeakCallback](./youth/core/WeakCallback.h)-----------弱引用模板，解决std::shared_ptr缺陷<!--循环引用成环-->；  
+      12. [tests](./youth/core/tests)-----------测试;  
           1.  [Condition_unittest](./youth/core/tests/Condition_unittest.cc)-----------条件变量类测试；  
           2. [CountDownLatch_unittext](./youth/core/tests/CountDownLatch_unittext.cc)-----------倒计时类测试；
           3. [DateTime_unittext](./youth/core/tests/DateTime_unittext.cc)-----------时间日期类测试；

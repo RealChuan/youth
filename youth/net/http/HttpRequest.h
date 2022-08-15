@@ -1,8 +1,8 @@
 #ifndef HTTPREQUEST_H
 #define HTTPREQUEST_H
 
+#include <youth/core/DateTime.hpp>
 #include <youth/core/Object.h>
-#include <youth/core/Timestamp.h>
 
 #include <assert.h>
 #include <map>
@@ -43,9 +43,9 @@ public:
 
     void setQuery(const char *start, const char *end) { m_query.assign(start, end); }
 
-    void setReceiveTime(Timestamp t) { m_receiveTime = t; }
+    void setReceiveTime(DateTime t) { m_receiveTime = t; }
 
-    Timestamp receiveTime() const { return m_receiveTime; }
+    DateTime receiveTime() const { return m_receiveTime; }
 
     void addHeader(const char *start, const char *colon, const char *end);
     std::string getHeader(const std::string &field) const;
@@ -57,7 +57,7 @@ private:
     Version m_version;
     std::string m_path;
     std::string m_query;
-    Timestamp m_receiveTime;
+    DateTime m_receiveTime;
     std::map<std::string, std::string> m_headers;
 };
 

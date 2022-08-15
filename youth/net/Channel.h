@@ -1,60 +1,69 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-#include <youth/core/Timestamp.h>
+#include <youth/core/DateTime.hpp>
 
 #include <functional>
 #include <memory>
 
-namespace youth
-{
+namespace youth {
 
 using namespace core;
 
-namespace net
-{
+namespace net {
 
 class EventLoop;
 class Channel : noncopyable
 {
     typedef std::function<void()> EventCallback;
-    typedef std::function<void(Timestamp)> ReadEventCallback;
+    typedef std::function<void(DateTime)> ReadEventCallback;
 
 public:
     Channel(EventLoop *loop, int fd);
     ~Channel();
 
-    void handleEvent(Timestamp receiveTime);
+    void handleEvent(DateTime receiveTime);
 
-    void setReadCallback(ReadEventCallback cb)
-    { m_readCallback = std::move(cb); }
-    void setWriteCallback(EventCallback cb)
-    { m_writeCallback = std::move(cb); }
-    void setCloseCallback(EventCallback cb)
-    { m_closeCallback = std::move(cb); }
-    void setErrorCallback(EventCallback cb)
-    { m_errorCallback = std::move(cb); }
+    void setReadCallback(ReadEventCallback cb) { m_readCallback = std::move(cb); }
+    void setWriteCallback(EventCallback cb) { m_writeCallback = std::move(cb); }
+    void setCloseCallback(EventCallback cb) { m_closeCallback = std::move(cb); }
+    void setErrorCallback(EventCallback cb) { m_errorCallback = std::move(cb); }
 
     void tie(const std::shared_ptr<void> &obj)
-    { m_tie = obj; m_tied = true; }
+    {
+        m_tie = obj;
+        m_tied = true;
+    }
 
     void enableReading()
-    { m_events |= kReadEvent; update(); }
+    {
+        m_events |= kReadEvent;
+        update();
+    }
     void disableReading()
-    { m_events &= ~kReadEvent; update(); }
+    {
+        m_events &= ~kReadEvent;
+        update();
+    }
     void enableWriting()
-    { m_events |= kWriteEvent; update(); }
+    {
+        m_events |= kWriteEvent;
+        update();
+    }
     void disableWriting()
-    { m_events &= ~kWriteEvent; update(); }
+    {
+        m_events &= ~kWriteEvent;
+        update();
+    }
     void disableAll()
-    { m_events = kNoneEvent; update(); }
-    bool isWriting() const
-    { return m_events & kWriteEvent; }
-    bool isReading() const
-    { return m_events & kReadEvent; }
+    {
+        m_events = kNoneEvent;
+        update();
+    }
+    bool isWriting() const { return m_events & kWriteEvent; }
+    bool isReading() const { return m_events & kReadEvent; }
 
-    bool isNoneEvent() const
-    { return m_events == kNoneEvent; }
+    bool isNoneEvent() const { return m_events == kNoneEvent; }
 
     // for EPoll
     int index() const { return m_index; }
@@ -65,10 +74,8 @@ public:
     EventLoop *ownerLoop() const { return m_eventLoop; }
 
     // for debug
-    std::string eventsToString() const
-    { return eventsToString(m_fd, m_events); }
-    std::string reventsToString() const
-    { return eventsToString(m_fd, m_revents); }
+    std::string eventsToString() const { return eventsToString(m_fd, m_events); }
+    std::string reventsToString() const { return eventsToString(m_fd, m_revents); }
 
     int fd() const { return m_fd; }
     int events() const { return m_events; }
@@ -76,7 +83,7 @@ public:
 
 private:
     void update();
-    void handleEventWithGuard(Timestamp receiveTime);
+    void handleEventWithGuard(DateTime receiveTime);
 
     static std::string eventsToString(int fd, int events);
 
@@ -102,7 +109,7 @@ private:
     EventCallback m_errorCallback;
 };
 
-}
+} // namespace net
 
 } // namespace youth
 

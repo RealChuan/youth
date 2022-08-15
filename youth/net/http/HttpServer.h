@@ -36,7 +36,7 @@ public:
 
 private:
     void onConnection(const net::TcpConnectionPtr &conn);
-    void onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, Timestamp receiveTime);
+    void onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, DateTime receiveTime);
     void onRequest(const net::TcpConnectionPtr &, const HttpRequest &);
 
     net::TcpServer m_server;

@@ -34,7 +34,7 @@ std::string DateTime::toString(const char *fmt) const
 int daysOfMonth(int year, int month)
 {
     if (month == 2) {
-        if (((year % 4 == 0) && (year % 100 != 0)) || year % 400 == 0) {
+        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
             return 29;
         } else {
             return 28;
@@ -57,8 +57,11 @@ DateTime DateTime::addMonths(int64_t months) const
     tm.tm_mon %= 12;
     tm.tm_mday = std::min(tm.tm_mday, daysOfMonth(tm.tm_year + 1900, tm.tm_mon + 1));
     t = std::mktime(&tm);
-    return DateTime(std::chrono::system_clock::from_time_t(t).time_since_epoch().count() / 1000
-                    + m_microSecondsSinceEpoch % 1000000);
+    auto microSecondsSinceEpoch = std::chrono::duration_cast<std::chrono::microseconds>(
+                                      std::chrono::system_clock::from_time_t(t).time_since_epoch())
+                                      .count()
+                                  + m_microSecondsSinceEpoch % 1000000;
+    return DateTime(microSecondsSinceEpoch);
 }
 
 DateTime DateTime::addYears(int64_t years) const
@@ -70,8 +73,11 @@ DateTime DateTime::addYears(int64_t years) const
     tm.tm_year += years;
     tm.tm_mday = std::min(tm.tm_mday, daysOfMonth(tm.tm_year + 1900, tm.tm_mon + 1));
     t = std::mktime(&tm);
-    return DateTime(std::chrono::system_clock::from_time_t(t).time_since_epoch().count() / 1000
-                    + m_microSecondsSinceEpoch % 1000000);
+    auto microSecondsSinceEpoch = std::chrono::duration_cast<std::chrono::microseconds>(
+                                      std::chrono::system_clock::from_time_t(t).time_since_epoch())
+                                      .count()
+                                  + m_microSecondsSinceEpoch % 100000;
+    return DateTime(microSecondsSinceEpoch);
 }
 
 DateTime DateTime::currentDateTime()
@@ -103,7 +109,7 @@ int64_t DateTime::currentSecondsSinceEpoch()
         .count();
 }
 
-DateTime DateTime::fromString(const std::string &dateTime, const char *format)
+DateTime DateTime::fromString(const char *dateTime, const char *format)
 {
     std::tm tm = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     std::istringstream is(dateTime);

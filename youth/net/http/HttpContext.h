@@ -25,7 +25,7 @@ public:
         : m_state(ExpectRequestLine)
     {}
 
-    bool parseRequest(net::Buffer *buf, Timestamp receiveTime);
+    bool parseRequest(net::Buffer *buf, DateTime receiveTime);
 
     bool gotAll() const { return m_state == GotAll; }
 

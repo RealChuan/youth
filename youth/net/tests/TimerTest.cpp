@@ -1,6 +1,5 @@
 #include <youth/net/EventLoop.h>
 #include <youth/utils/Logging.h>
-#include <youth/core/Timestamp.h>
 
 using namespace youth::net;
 using namespace youth::utils;
