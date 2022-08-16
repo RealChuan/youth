@@ -6,17 +6,13 @@ namespace youth {
 
 namespace core {
 
-bool File::open(const char *filename, OpenMode mode)
+bool File::open(const std::filesystem::path &filename, OpenMode mode)
 {
     close();
-    m_filename = filename;
-    m_fstream.open(filename, static_cast<std::ios_base::openmode>(mode));
+    m_filePath = filename;
+    m_openMode = mode;
+    m_fstream.open(m_filePath, static_cast<std::ios_base::openmode>(m_openMode));
     return m_fstream.is_open();
-}
-
-bool File::open()
-{
-    return open(m_filename.c_str(), m_openMode);
 }
 
 void File::close()
@@ -51,12 +47,12 @@ std::string File::readAll()
         return all;
     }
     std::string line;
-    while (m_fstream.peek() != EOF) {
+    while (!atEnd()) {
         std::getline(m_fstream, line);
         if (line.empty()) {
             break;
         }
-        all += line;
+        all += line; // need to add "\n" ?
         line.clear();
     }
     return all;
@@ -70,6 +66,13 @@ void File::write(const char *str, int len)
     m_fstream.write(str, len);
 }
 
+void File::seek(int offset)
+{
+    if (isOpen()) {
+        m_fstream.seekp(offset);
+    }
+}
+
 void File::seek(SeekType type, int offset)
 {
     if (isOpen()) {
@@ -77,28 +80,66 @@ void File::seek(SeekType type, int offset)
     }
 }
 
+std::streampos File::tell()
+{
+    if (isOpen()) {
+        return m_fstream.tellp();
+    }
+    return -1;
+}
+
+bool File::atEnd()
+{
+    if (!isOpen()) {
+        return true;
+    }
+
+    return m_fstream.peek() == EOF;
+}
+
 int64_t File::size() const
 {
-    std::ifstream ifs(m_filename, std::ios::binary | std::ios::ate);
-    return ifs.tellg();
+    int64_t s = 0;
+    try {
+        s = std::filesystem::file_size(m_filePath);
+    } catch (std::filesystem::filesystem_error &e) {
+        fprintf(stderr, "%s\n", e.what());
+    }
+    return s;
 }
 
 std::string File::errorString() const
 {
     std::string err;
-    if (m_fstream.rdstate() & std::ios::failbit) {
+    auto rdstate = m_fstream.rdstate();
+    if (rdstate & std::ios::failbit) {
         err = "failbit ";
     }
-    if (m_fstream.rdstate() & std::ios::eofbit) {
+    if (rdstate & std::ios::eofbit) {
         err += "eofbit ";
     }
-    if (m_fstream.rdstate() & std::ios::badbit) {
+    if (rdstate & std::ios::badbit) {
         err += "badbit ";
     }
-    if (m_fstream.rdstate() & std::ios::goodbit) {
+    if (rdstate & std::ios::goodbit) {
         err += "goodbit ";
     }
     return err;
+}
+
+bool File::copy(const std::filesystem::path &src, const std::filesystem::path &dst)
+{
+    bool ret = false;
+    std::error_code error;
+    try {
+        ret = std::filesystem::copy_file(src, dst, error);
+    } catch (std::filesystem::filesystem_error &e) {
+        fprintf(stderr, "%s\n", e.what());
+    }
+    if (!ret) {
+        fprintf(stderr, "%s\n", error.message().c_str());
+    }
+    return ret;
 }
 
 bool File::checkMode(OpenMode mode)
