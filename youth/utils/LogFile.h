@@ -10,7 +10,7 @@ namespace youth {
 using namespace core;
 
 namespace core {
-class FileUtil;
+class File;
 }
 
 namespace utils {
@@ -47,7 +47,7 @@ private:
     time_t m_startTime;
     time_t m_lastRoll;
     Mutex m_mutex;
-    std::unique_ptr<FileUtil> m_filePtr;
+    std::unique_ptr<File> m_filePtr;
 };
 
 } // namespace utils

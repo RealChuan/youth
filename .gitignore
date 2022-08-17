@@ -37,3 +37,4 @@ bin-*/
 build/
 CMakeLists.txt.*
 .vscode/
+.cache/

@@ -3,24 +3,21 @@
 
 #include <string>
 
-namespace youth
-{
+namespace youth {
 
-namespace core
-{
+namespace core {
 
-namespace ProcessMsg
-{
+namespace ProcessMsg {
 
 pid_t getTid();
 pid_t getPid();
 std::string hostname();
-std::string fileBaseName(const char*);
+std::string fileBaseName(const char *);
 
-}
+} // namespace ProcessMsg
 
-}
+} // namespace core
 
-}
+} // namespace youth
 
 #endif /* PROCESSMSG_H */

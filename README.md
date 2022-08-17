@@ -7,9 +7,9 @@
       1. [CountDownLatch](./youth/core/CountDownLatch.h)-----------倒计时器封装；  
       2. [CurrentThread](./youth/core/CurrentThread.h)-----------当前线程ID信息；  
       3. [DateTime](./youth/core/DateTime.hpp)-----------时间日期处理；
-      4. [Dir](./youth/core/Dir.h)-----------文件目录相关；  
-      5. [ElapsedTimer](./youth/core/ElapsedTimer.h)-----------计时器；  
-      6. [FileUtil](./youth/core/FileUtil.h)-----------文件读写类；   
+      4. [Dir](./youth/core/Dir.h)-----------目录；  
+      5. [ElapsedTimer](./youth/core/ElapsedTimer.h)-----------计时器； 
+      6. [File](./youth/core/File.h)-----------文件；   
       7. [Object](./youth/core/Object.h)-----------拷贝<!--值语义-->和不可拷贝<!--对象语义-->类，用于继承；  
       8. [ProcessMsg](./youth/core/ProcessMsg.h)-----------进程信息；  
       9.  [string](./youth/core/string.h)-----------std::string处理；  
@@ -20,7 +20,7 @@
           2. [CountDownLatch_unittext](./youth/core/tests/CountDownLatch_unittext.cc)-----------倒计时类测试；
           3. [DateTime_unittext](./youth/core/tests/DateTime_unittext.cc)-----------时间日期类测试；
           4. [ElapsedTimer_unittext](./youth/core/tests/ElapsedTimer_unittext.cc)-----------计时器类测试；
-          5. [FileUtilTest](./youth/core/tests/FileUtilTest.cpp)-----------文件读写类测试；  
+          5. [File_unittext](./youth/core/tests/File_unittext.cc)-----------文件类测试；  
           6. [StringTest](./youth/core/tests/StringTest.cpp)-----------std::string处理测试；  
    2. [net](./youth/net)  
       1. [Acceptor](./youth/net/Acceptor.h)-----------TCP服务器请求接受处理类；
