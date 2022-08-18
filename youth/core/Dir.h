@@ -11,6 +11,9 @@ namespace youth {
 
 namespace core {
 
+class FileInfo;
+using FileInfoList = std::vector<FileInfo>;
+
 class Dir : copyable
 {
 public:
@@ -23,14 +26,13 @@ public:
         SortType_DirsLast,
     };
     enum FilterType {
-        FilterType_All,
-        FilterType_Dir,
-        FilterType_File,
-        FilterType_Hidden,
-        FilterType_System,
-        FilterType_NoDot,
-        FilterType_NoDotDot,
-        FilterType_NoDotAndDotDot
+        FilterType_All = 1,
+        FilterType_Dir = 2,
+        FilterType_File = 4,
+        FilterType_Hidden = 8,
+        FilterType_NoDot = 16,
+        FilterType_NoDotDot = 32,
+        FilterType_NoDotAndDotDot = FilterType_NoDot | FilterType_NoDotDot
     };
 
     using NameFilterList = std::vector<std::string>;
@@ -114,19 +116,25 @@ public:
         return filepath;
     }
 
-    std::filesystem::path absolutePath() { return m_path; }
-    std::filesystem::path canonicalPath() { return std::filesystem::canonical(m_path); }
+    std::filesystem::path absolutePath() const { return m_path; }
+    std::filesystem::path canonicalPath() const { return std::filesystem::canonical(m_path); }
+    std::string dirname() { return m_path.filename().string(); }
+
+    FileInfoList entryInfoList(const NameFilterList &nameFilter,
+                               FilterType filterType = FilterType_All,
+                               SortType sortType = SortType_None) const;
+
     bool cd(const std::filesystem::path &path);
     bool cdup() { return cd(m_path.parent_path()); }
-    std::string dirname() { return m_path.filename().string(); }
 
     bool exists() const { return std::filesystem::exists(m_path); }
 
     bool mkdir(const std::string &name);
+    bool rmdir(const std::string &name);
 
     static bool mkdirs(const std::filesystem::path &path);
     static bool mkdirs(const std::filesystem::path &path, std::filesystem::perms perms);
-    static bool rmdir(const std::filesystem::path &path);
+    static bool rmdirs(const std::filesystem::path &path);
 
     static Dir Current() { return Dir(std::filesystem::current_path()); }
     static Dir temp() { return Dir(std::filesystem::temp_directory_path()); }
