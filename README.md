@@ -13,8 +13,8 @@
       6. [File](./youth/core/File.h)-----------文件；
       7. [FileInfo](./youth/core/FileInfo.h)-----------文件详情；
       8. [Object](./youth/core/Object.h)-----------拷贝<!--值语义-->和不可拷贝<!--对象语义-->类，用于继承；  
-      9. [ProcessMsg](./youth/core/ProcessMsg.h)-----------进程信息；  
-      10. [string](./youth/core/string.h)-----------std::string处理；  
+      9. [Process](./youth/core/Process.h)-----------进程信息类； 
+      10. [StringFunction](./youth/core/StringFunction.h)-----------字符串处理；
       11. [Thread](./youth/core/Thread.hpp)-----------线程/互斥量/条件变量封装类；  
       12. [WeakCallback](./youth/core/WeakCallback.h)-----------弱引用模板，解决std::shared_ptr缺陷<!--循环引用成环-->；  
       13. [tests](./youth/core/tests)-----------测试;  
@@ -23,7 +23,9 @@
           3. [DateTime_unittext](./youth/core/tests/DateTime_unittext.cc)-----------时间日期类测试；
           4. [ElapsedTimer_unittext](./youth/core/tests/ElapsedTimer_unittext.cc)-----------计时器类测试；
           5. [File_unittext](./youth/core/tests/File_unittext.cc)-----------文件类测试；  
-          6. [StringTest](./youth/core/tests/StringTest.cpp)-----------std::string处理测试；  
+          6. [FileInfo_unittext](./youth/core/tests/FileInfo_unittext.cc)-----------文件详情类测试；
+          7. [Process_unittext](./youth/core/tests/Process_unittext.cc)-----------进程信息类测试；
+          8. [StringFunction_unittext](./youth/core/tests/StringFunction_unittext.cc)-----------字符串处理类测试；
    2. [net](./youth/net)  
       1. [Acceptor](./youth/net/Acceptor.h)-----------TCP服务器请求接受处理类；
       2. [Buffer](./youth/net/Buffer.h)-----------IO缓冲区类；  

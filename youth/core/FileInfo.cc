@@ -11,7 +11,18 @@ FileInfo::FileInfo(const Dir &dir, const std::string &name)
 
 Dir FileInfo::absoluteDir() const
 {
-    return Dir(m_path.parent_path());
+    return Dir(absolutePath());
+}
+
+std::filesystem::path FileInfo::symlinkTarget() const
+{
+    try {
+        return std::filesystem::read_symlink(m_path);
+    } catch (const std::filesystem::filesystem_error &) {
+        return std::filesystem::path();
+    } catch (const std::exception &) {
+        return std::filesystem::path();
+    }
 }
 
 bool FileInfo::isHidden() const
@@ -37,6 +48,16 @@ bool FileInfo::makeAbsolute()
     }
     m_path = std::filesystem::absolute(m_path);
     return isAbsolute();
+}
+
+bool FileInfo::makeAbsolute(const std::filesystem::path &path, std::filesystem::path &absolutePath)
+{
+    if (path.is_absolute()) {
+        absolutePath = path;
+        return true;
+    }
+    absolutePath = std::filesystem::absolute(path);
+    return absolutePath.is_absolute();
 }
 
 } // namespace core

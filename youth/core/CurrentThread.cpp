@@ -1,5 +1,5 @@
 #include "CurrentThread.h"
-#include "ProcessMsg.h"
+#include "Process.hpp"
 
 namespace youth {
 
@@ -13,7 +13,7 @@ static_assert(std::is_same<int, pid_t>::value, "pid_t should be int");
 void CurrentThread::cacheTid()
 {
     if (tidCache == 0) {
-        tidCache = ProcessMsg::getTid();
+        tidCache = Process::getTid();
         tidStringLength_ = snprintf(tidString_, sizeof tidString_, "%5d ", tidCache);
     }
 }

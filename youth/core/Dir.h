@@ -26,41 +26,29 @@ public:
         SortType_DirsLast,
     };
     enum FilterType {
-        FilterType_All = 1,
-        FilterType_Dir = 2,
-        FilterType_File = 4,
-        FilterType_Hidden = 8,
-        FilterType_NoDot = 16,
-        FilterType_NoDotDot = 32,
-        FilterType_NoDotAndDotDot = FilterType_NoDot | FilterType_NoDotDot
+        FilterType_Dir = 1,
+        FilterType_File = 2,
+        FilterType_Hidden = 4,
+        FilterType_NoDot = 8,
+        FilterType_NoDotDot = 16,
+        FilterType_NoDotAndDotDot = FilterType_NoDot | FilterType_NoDotDot,
+        FilterType_All = FilterType_Dir | FilterType_File
     };
 
     using NameFilterList = std::vector<std::string>;
 
-    explicit Dir(const std::filesystem::path &path,
-                 const NameFilterList &nameFilters = {},
-                 SortType sortType = SortType_None,
-                 FilterType filterType = FilterType_All)
+    explicit Dir(const std::filesystem::path &path)
         : m_path(path)
-        , m_nameFilters(nameFilters)
-        , m_sortType(sortType)
-        , m_filterType(filterType)
     {}
 
     Dir(const Dir &other)
         : m_path(other.m_path)
-        , m_nameFilters(other.m_nameFilters)
-        , m_sortType(other.m_sortType)
-        , m_filterType(other.m_filterType)
     {}
 
     Dir &operator=(const Dir &other)
     {
         if (this != &other) {
             m_path = other.m_path;
-            m_nameFilters = other.m_nameFilters;
-            m_sortType = other.m_sortType;
-            m_filterType = other.m_filterType;
         }
         return *this;
     }
@@ -69,20 +57,13 @@ public:
     {
         if (this != &other) {
             m_path = std::move(other.m_path);
-            m_nameFilters = std::move(other.m_nameFilters);
-            m_sortType = other.m_sortType;
-            m_filterType = other.m_filterType;
         }
         return *this;
     }
 
     ~Dir() = default;
 
-    bool operator==(const Dir &other) const
-    {
-        return m_path == other.m_path && m_nameFilters == other.m_nameFilters
-               && m_sortType == other.m_sortType && m_filterType == other.m_filterType;
-    }
+    bool operator==(const Dir &other) const { return m_path == other.m_path; }
 
     bool operator!=(const Dir &other) const { return !operator==(other); }
 
@@ -90,33 +71,17 @@ public:
     {
         if (this != &other) {
             std::swap(m_path, other.m_path);
-            std::swap(m_nameFilters, other.m_nameFilters);
-            std::swap(m_sortType, other.m_sortType);
-            std::swap(m_filterType, other.m_filterType);
         }
     }
-
-    NameFilterList nameFilters() const { return m_nameFilters; }
-    void setNameFilters(const NameFilterList &nameFilters) { m_nameFilters = nameFilters; }
-
-    SortType sortType() const { return m_sortType; }
-    void setSortType(SortType sortType) { m_sortType = sortType; }
-
-    FilterType filterType() const { return m_filterType; }
-    void setFilterType(FilterType filterType) { m_filterType = filterType; }
 
     std::filesystem::path path() const { return m_path; }
     void setPath(const std::filesystem::path &path) { m_path = path; }
 
-    std::filesystem::path absoluteFilePath(const std::filesystem::path &filepath) const
+    std::filesystem::path absoluteFilePath(const std::string &filename) const
     {
-        if (exists()) {
-            return m_path / filepath;
-        }
-        return filepath;
+        return absolutePath() / filename;
     }
-
-    std::filesystem::path absolutePath() const { return m_path; }
+    std::filesystem::path absolutePath() const;
     std::filesystem::path canonicalPath() const { return std::filesystem::canonical(m_path); }
     std::string dirname() { return m_path.filename().string(); }
 
@@ -131,10 +96,12 @@ public:
 
     bool mkdir(const std::string &name);
     bool rmdir(const std::string &name);
+    bool removeFile(const std::string &name);
 
     static bool mkdirs(const std::filesystem::path &path);
     static bool mkdirs(const std::filesystem::path &path, std::filesystem::perms perms);
     static bool rmdirs(const std::filesystem::path &path);
+    static bool removeFile(const std::filesystem::path &path, const std::string &filename);
 
     static Dir Current() { return Dir(std::filesystem::current_path()); }
     static Dir temp() { return Dir(std::filesystem::temp_directory_path()); }
@@ -161,9 +128,6 @@ public:
 
 private:
     std::filesystem::path m_path;
-    NameFilterList m_nameFilters;
-    SortType m_sortType = SortType_None;
-    FilterType m_filterType = FilterType_All;
 };
 
 } // namespace core

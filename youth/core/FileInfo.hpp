@@ -45,14 +45,19 @@ public:
     void swap(FileInfo &other) { m_path.swap(other.m_path); }
 
     Dir absoluteDir() const;
-    std::filesystem::path absoluteFilePath() const { return m_path; }
-    std::filesystem::path absolutePath() const { return m_path.parent_path(); }
+    std::filesystem::path absoluteFilePath() const
+    {
+        std::filesystem::path absolutePath;
+        makeAbsolute(m_path, absolutePath);
+        return absolutePath;
+    }
+    std::filesystem::path absolutePath() const { return absoluteFilePath().parent_path(); }
     std::filesystem::path canonicalFilePath() const { return std::filesystem::canonical(m_path); }
     std::filesystem::path canonicalPath() const
     {
         return std::filesystem::canonical(m_path.parent_path());
     }
-    std::filesystem::path symlinkTarget() const { return std::filesystem::read_symlink(m_path); }
+    std::filesystem::path symlinkTarget() const;
 
     std::string fileName() const { return m_path.filename().string(); }
     std::string bundleName() const { return m_path.stem().string(); }
@@ -78,9 +83,16 @@ public:
     bool makeAbsolute();
 
     void setFile(const std::filesystem::path &path) { m_path = path; }
-    int64_t size() const { return std::filesystem::file_size(m_path); }
+    int64_t size() const
+    {
+        if (isDir()) {
+            return 0;
+        }
+        return std::filesystem::file_size(m_path);
+    }
 
     static bool exists(const std::filesystem::path &path) { return std::filesystem::exists(path); }
+    static bool makeAbsolute(const std::filesystem::path &path, std::filesystem::path &absolutePath);
 
 private:
     std::filesystem::path m_path;

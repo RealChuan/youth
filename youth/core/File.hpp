@@ -38,7 +38,7 @@ public:
     void setFileName(const std::filesystem::path &filename) { m_filePath = filename; }
 
     std::filesystem::path filesystemFileName() const { return m_filePath; }
-    std::string fileName() const { return m_filePath.string(); }
+    std::string fileName() const { return m_filePath.filename(); }
 
     void setOpenMode(OpenMode mode) { m_openMode = mode; }
     OpenMode openMode() const { return m_openMode; }
@@ -59,6 +59,8 @@ public:
     bool atEnd();
 
     int64_t size() const;
+
+    bool remove();
 
     int error() const { return m_fstream.rdstate(); }
     std::string errorString() const;

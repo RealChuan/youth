@@ -1,8 +1,10 @@
 #include "LogFile.h"
 
+#include <youth/core/DateTime.hpp>
 #include <youth/core/Dir.h>
 #include <youth/core/File.hpp>
-#include <youth/core/ProcessMsg.h>
+#include <youth/core/FileInfo.hpp>
+#include <youth/core/Process.hpp>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -32,17 +34,6 @@ LogFile *LogFile::instance()
     static LogFile logFile;
     return &logFile;
 }
-
-//void LogFile::setDelLogFileDays(uint days)
-//{
-//    delLogFileDays = days;
-//    char pathBuf[64] = {0};
-//    snprintf(pathBuf, sizeof pathBuf, "%s/%s", Dir::currentPath().c_str(), "Log");
-//    char cmd[128] = {0};
-//    sprintf(cmd, "find %s/* -mtime +%d -exec rm -rf {} \\;", pathBuf, delLogFileDays);    //删除上一次修改时间超过3天的文件
-//    //printf("Record: %s.\n", cmd);
-//    deleteCmd = cmd;
-//}
 
 void LogFile::setBaseFileName(const std::string &basename_)
 {
@@ -100,8 +91,8 @@ std::string LogFile::getFileName(time_t *now)
     *now = time(NULL);
     gmtime_r(now, &tm);
     strftime(buf, sizeof buf, "%Y-%m-%d.", &tm);
-    fileName = "/Log/" + m_basename + buf + ProcessMsg::hostname();
-    snprintf(buf, sizeof buf, ".%d", ProcessMsg::getPid());
+    fileName = "/Log/" + m_basename + buf + Process::hostname();
+    snprintf(buf, sizeof buf, ".%d", Process::getPid());
     fileName = fileName + buf + ".log";
 
     auto dir = Dir::Current();
@@ -111,6 +102,7 @@ std::string LogFile::getFileName(time_t *now)
 
 bool LogFile::rollFile(int count)
 {
+    delLogFile();
     time_t now = 0;
     std::string fileName = getFileName(&now);
     if (count) {
@@ -130,11 +122,18 @@ bool LogFile::rollFile(int count)
     return false;
 }
 
-//void LogFile::delLogFiles()
-//{
-//    system(deleteCmd.c_str());
-//    //perror("Delete LogFile Failed!");
-//}
+void LogFile::delLogFile()
+{
+    auto now = DateTime::currentDateTime();
+    now.addDays(-m_delLogFileDays);
+    auto dir = Dir::Current();
+    auto list = dir.entryInfoList({});
+    for (auto &file : list) {
+        if (file.isFile() && file.lastModified() < now) {
+            dir.removeFile(file.fileName());
+        }
+    }
+}
 
 } // namespace utils
 

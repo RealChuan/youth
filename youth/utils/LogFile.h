@@ -24,8 +24,9 @@ public:
     static void flushFunc(void);
 
     void setRollSize(off_t size) { m_rollSize = size; }
-    //void setDelLogFileDays(uint);   //delete log files
     void setBaseFileName(const std::string &);
+    void setMaxFileSize(off_t size) { m_rollSize = size; }
+    void setDelLogFileDays(uint days) { m_delLogFileDays = days; }
 
     //这个方法是用来将日志写入Log文件
     void outputLogFile(const char *, int);
@@ -36,12 +37,12 @@ private:
     ~LogFile();
 
     bool rollFile(int);
-    //void delLogFiles();
     std::string getFileName(time_t *);
+    void delLogFile();
 
     int m_count;
     off_t m_rollSize = 1000 * 1000 * 1000; //1G
-    //uint m_delLogFileDays;
+    uint m_delLogFileDays = 7;
     std::string m_deleteCmd;
     std::string m_basename;
     time_t m_startTime;

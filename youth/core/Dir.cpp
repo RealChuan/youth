@@ -1,19 +1,24 @@
 #include "Dir.h"
 #include "FileInfo.hpp"
-#include "String.h"
+#include "StringFunction.hpp"
 
-#include <filesystem>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <algorithm>
 
 namespace youth {
 
 namespace core {
 
+std::filesystem::path Dir::absolutePath() const
+{
+    std::filesystem::path absolutePath;
+    FileInfo::makeAbsolute(m_path, absolutePath);
+    return absolutePath.parent_path();
+}
+
 bool Contains(const std::string &filename, const Dir::NameFilterList &nameFilters)
 {
-    for (auto &filter : nameFilters) {
-        if (filename.find(filter) != std::string::npos) {
+    for (const auto &nameFilter : nameFilters) {
+        if (string::contains(filename, nameFilter)) {
             return true;
         }
     }
@@ -22,43 +27,75 @@ bool Contains(const std::string &filename, const Dir::NameFilterList &nameFilter
 
 bool isFilterType(const std::filesystem::path &path, Dir::FilterType filterType)
 {
-    bool isAll = (filterType & Dir::FilterType::FilterType_All) == Dir::FilterType::FilterType_All;
-    if (isAll) {
-        return true;
-    }
-    bool isDir = (filterType & Dir::FilterType::FilterType_Dir) == Dir::FilterType::FilterType_Dir;
-    bool isFile = (filterType & Dir::FilterType::FilterType_File)
-                  == Dir::FilterType::FilterType_File;
-    bool isHidden = (filterType & Dir::FilterType::FilterType_Hidden)
-                    == Dir::FilterType::FilterType_Hidden;
-    bool isNoDot = (filterType & Dir::FilterType::FilterType_NoDot)
-                   == Dir::FilterType::FilterType_NoDot;
-    bool isNoDotDot = (filterType & Dir::FilterType::FilterType_NoDotDot)
-                      == Dir::FilterType::FilterType_NoDotDot;
     auto filename = path.filename().string();
-    if (isDir && std::filesystem::is_directory(path)) {
-        if (isNoDotDot && filename.size() == 2 && filename[0] == '.' && filename[1] == '.') {
+    bool isHidden = filename[0] == '.';
+    bool isDir = std::filesystem::is_directory(path);
+    bool isFile = std::filesystem::is_regular_file(path);
+    bool isNoDot = filename == ".";
+    bool isNoDotDot = filename == "..";
+
+    if (filterType & Dir::FilterType_NoDot) {
+        if (isNoDot) {
             return false;
-        }
-        if (isNoDot && filename.size() == 1 && filename[0] == '.') {
-            return false;
-        }
-        if (isHidden && !filename.empty() && filename[0] == '.') {
-            return true;
         }
     }
-    if (isFile && std::filesystem::is_regular_file(path)) {
-        if (isNoDotDot && filename.size() == 2 && filename[0] == '.' && filename[1] == '.') {
+    if (filterType & Dir::FilterType_NoDotDot) {
+        if (isNoDotDot) {
             return false;
-        }
-        if (isNoDot && filename.size() == 1 && filename[0] == '.') {
-            return false;
-        }
-        if (isHidden && !filename.empty() && filename[0] == '.') {
-            return true;
         }
     }
+    if (filterType & Dir::FilterType_Dir) {
+        if (isDir) {
+            if (filterType & Dir::FilterType_Hidden) {
+                if (isHidden) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    if (filterType & Dir::FilterType_File) {
+        if (isFile) {
+            if (filterType & Dir::FilterType_Hidden) {
+                if (isHidden) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+
     return false;
+}
+
+void sort(FileInfoList &list, Dir::SortType sortType)
+{
+    if (sortType == Dir::SortType_None) {
+        return;
+    }
+    if (sortType == Dir::SortType_Name) {
+        std::sort(list.begin(), list.end(), [](const FileInfo &a, const FileInfo &b) {
+            return a.fileName() < b.fileName();
+        });
+    } else if (sortType == Dir::SortType_Time) {
+        std::sort(list.begin(), list.end(), [](const FileInfo &a, const FileInfo &b) {
+            return a.lastModified() < b.lastModified();
+        });
+    } else if (sortType == Dir::SortType_Size) {
+        std::sort(list.begin(), list.end(), [](const FileInfo &a, const FileInfo &b) {
+            return a.size() < b.size();
+        });
+    } else if (sortType == Dir::SortType_DirsFirst) {
+        std::sort(list.begin(), list.end(), [](const FileInfo &a, const FileInfo &b) {
+            return a.isDir() < b.isDir();
+        });
+    } else if (sortType == Dir::SortType_DirsLast) {
+        std::sort(list.begin(), list.end(), [](const FileInfo &a, const FileInfo &b) {
+            return a.isDir() > b.isDir();
+        });
+    }
 }
 
 FileInfoList Dir::entryInfoList(const NameFilterList &nameFilters,
@@ -69,8 +106,7 @@ FileInfoList Dir::entryInfoList(const NameFilterList &nameFilters,
     if (!exists(m_path)) {
         return list;
     }
-
-    for (auto &iter : std::filesystem::directory_iterator(m_path)) {
+    for (const auto &iter : std::filesystem::directory_iterator(m_path)) {
         auto path = iter.path();
         auto filename = path.string();
         if (Contains(filename, nameFilters)) {
@@ -81,7 +117,7 @@ FileInfoList Dir::entryInfoList(const NameFilterList &nameFilters,
         }
         list.emplace_back(iter.path());
     }
-
+    sort(list, sortType);
     return list;
 }
 
@@ -121,6 +157,11 @@ bool Dir::rmdir(const std::string &name)
     return false;
 }
 
+bool Dir::removeFile(const std::string &name)
+{
+    return removeFile(m_path, name);
+}
+
 bool Dir::mkdirs(const std::filesystem::path &path)
 {
     if (std::filesystem::exists(path)) {
@@ -144,6 +185,24 @@ bool Dir::rmdirs(const std::filesystem::path &path)
         return std::filesystem::remove_all(path);
     }
     return false;
+}
+
+bool Dir::removeFile(const std::filesystem::path &path, const std::string &filename)
+{
+    if (!std::filesystem::exists(path)) {
+        return false;
+    }
+    if (!std::filesystem::is_directory(path)) {
+        return false;
+    }
+    std::filesystem::path filepath = path / filename;
+    if (!std::filesystem::exists(filepath)) {
+        return false;
+    }
+    if (!std::filesystem::is_regular_file(filepath)) {
+        return false;
+    }
+    return std::filesystem::remove(filepath);
 }
 
 bool Dir::matchPath(const std::filesystem::path &path, const NameFilterList &namefilters)

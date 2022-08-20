@@ -3,31 +3,27 @@
 # Имя процесса Билдится на всех типах 📦 🐍
 name: CMake Build Matrix
 
-# Controls when the action will run. Triggers the workflow on push
 on: 
   push:
+    paths-ignore: 
+      - 'LICENSE'
+      - '.gitignore'
+      - 'README.md'
   pull_request:
-  release:
-      paths-ignore: # 下列文件的变更不触发部署，可以自行添加
-        - 'LICENSE'
-        - '.gitignore'
-        - 'README.md'
-    # tags:
-    # - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    paths-ignore: 
+      - 'LICENSE'
+      - '.gitignore'
+      - 'README.md'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }} # будет запускаться по очереди на всех типах машин
+    name: Build
+    runs-on: ${{ matrix.config.os }} 
     strategy:
       fail-fast: false
       matrix:
         config: 
         - {
-            name: "Ubuntu_Latest_GCC",
             os: ubuntu-latest,
             artifact: "ubuntu_gcc.7z",
             build_type: "Release",
@@ -38,19 +34,8 @@ jobs:
           }
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Print env
+      - name: Install dependencies
         run: |
-          echo github.event.action: ${{ github.event.action }}
-          echo github.event_name: ${{ github.event_name }}
-
-      - name: Install dependencies on ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
-        run: |
-          sudo apt-get update
           sudo apt-get install ninja-build
           ninja --version
           cmake --version
@@ -75,6 +60,10 @@ jobs:
         run: |
           vcpkg install curl[ssl,http2,tool] protobuf
           
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
       - name: Configure
         shell: bash
         run: |

@@ -108,6 +108,14 @@ int64_t File::size() const
     return s;
 }
 
+bool File::remove()
+{
+    if (!isOpen()) {
+        return false;
+    }
+    return remove(m_filePath);
+}
+
 std::string File::errorString() const
 {
     std::string err;
