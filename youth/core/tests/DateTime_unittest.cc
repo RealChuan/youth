@@ -66,18 +66,18 @@ void addTest()
     std::cout << (addWeeks > dateTime) << std::endl;
 
     std::cout << "add months--------------------" << std::endl;
-    auto addMonths = dateTime.addMonths(1);
+    auto addMonths = dateTime.addMonths(10);
     std::cout << addMonths.toStandardFormat() << std::endl;
     std::cout << (addMonths > dateTime) << std::endl;
-    addMonths = dateTime.addMonths(-1);
+    addMonths = dateTime.addMonths(-10);
     std::cout << addMonths.toStandardFormat() << std::endl;
     std::cout << (addMonths > dateTime) << std::endl;
 
     std::cout << "add years---------------------" << std::endl;
-    auto addYears = dateTime.addYears(1);
+    auto addYears = dateTime.addYears(10);
     std::cout << addYears.toStandardFormat() << std::endl;
     std::cout << (addYears > dateTime) << std::endl;
-    addYears = dateTime.addYears(-1);
+    addYears = dateTime.addYears(-10);
     std::cout << addYears.toStandardFormat() << std::endl;
     std::cout << (addYears > dateTime) << std::endl;
 }

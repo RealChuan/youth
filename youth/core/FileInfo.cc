@@ -37,7 +37,8 @@ bool FileInfo::isHidden() const
 DateTime FileInfo::lastModified() const
 {
     auto time = std::filesystem::last_write_time(m_path);
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch());
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+        toSystemClockTimePoint(time).time_since_epoch());
     return DateTime(duration.count());
 }
 

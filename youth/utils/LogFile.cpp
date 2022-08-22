@@ -22,39 +22,19 @@ LogFile::LogFile()
 {
     //rollFile();
     //setDelLogFileDays(7);
+    Dir::mkdirs("./Log");
 }
 
 LogFile::~LogFile() {}
 
-static Mutex g_logFileMutex;
-
-LogFile *LogFile::instance()
+void LogFile::setBaseFileName(const std::string &basename)
 {
-    MutexLock lock(g_logFileMutex);
-    static LogFile logFile;
-    return &logFile;
-}
-
-void LogFile::setBaseFileName(const std::string &basename_)
-{
-    if (basename_.empty()) {
-        m_basename = Dir::Current().absolutePath().string();
+    if (basename.empty()) {
+        m_basename = Dir::Current().dirname();
     } else {
-        m_basename = basename_;
+        m_basename = basename;
     }
     rollFile(0);
-}
-
-void LogFile::outputFunc(const char *msg, int len)
-{
-    LogFile *logFile = LogFile::instance();
-    logFile->outputLogFile(msg, len);
-}
-
-void LogFile::flushFunc()
-{
-    LogFile *logFile = LogFile::instance();
-    logFile->flushLogFile();
 }
 
 void LogFile::outputLogFile(const char *msg, int len)
@@ -65,14 +45,13 @@ void LogFile::outputLogFile(const char *msg, int len)
     if (m_filePtr->size() > m_rollSize) {
         rollFile(++m_count);
     } else {
-        time_t now = ::time(NULL);
-        time_t thisPeriod = now / kRollPerSeconds_ * kRollPerSeconds_;
+        auto now = DateTime::currentSecondsSinceEpoch();
+        auto thisPeriod = now / kRollPerSeconds_ * kRollPerSeconds_;
         if (thisPeriod != m_startTime) {
             m_count = 0;
             rollFile(0);
         }
     }
-
     m_filePtr->write(msg, len);
 }
 
@@ -82,39 +61,28 @@ void LogFile::flushLogFile()
     m_filePtr->flush();
 }
 
-std::string LogFile::getFileName(time_t *now)
+std::string LogFile::getFileName(const DateTime &dateTime)
 {
-    std::string fileName;
-
-    char buf[32] = {0};
-    struct tm tm;
-    *now = time(NULL);
-    gmtime_r(now, &tm);
-    strftime(buf, sizeof buf, "%Y-%m-%d.", &tm);
-    fileName = "/Log/" + m_basename + buf + Process::hostname();
-    snprintf(buf, sizeof buf, ".%d", Process::getPid());
-    fileName = fileName + buf + ".log";
-
-    auto dir = Dir::Current();
-    dir.mkdir("Log");
-    return dir.absolutePath().string() + fileName;
+    return "./Log/" + m_basename + dateTime.toString("%Y%m%d-%H%M%S") + Process::hostname() + "."
+           + std::to_string(Process::getPid()) + ".log";
 }
 
 bool LogFile::rollFile(int count)
 {
-    delLogFile();
-    time_t now = 0;
-    std::string fileName = getFileName(&now);
+    auto now = DateTime::currentDateTime();
+    std::string fileName = getFileName(now);
     if (count) {
         char buf[32] = {0};
         snprintf(buf, sizeof buf, ".%d", count);
         fileName += buf;
+    } else {
+        delLogFile(now);
     }
-    time_t start = now / kRollPerSeconds_ * kRollPerSeconds_;
-    if (now > m_lastRoll) {
-        //delLogFiles();
+    int64_t seconds = now.secondsSinceEpoch();
+    auto start = seconds / kRollPerSeconds_ * kRollPerSeconds_;
+    if (seconds > m_lastRoll) {
         m_startTime = start;
-        m_lastRoll = now;
+        m_lastRoll = seconds;
         m_filePtr.reset(new File(fileName));
         m_filePtr->open(File::Append);
         return true;
@@ -122,14 +90,13 @@ bool LogFile::rollFile(int count)
     return false;
 }
 
-void LogFile::delLogFile()
+void LogFile::delLogFile(const DateTime &dateTime)
 {
-    auto now = DateTime::currentDateTime();
-    now.addDays(-m_delLogFileDays);
-    auto dir = Dir::Current();
+    auto expired = dateTime.addDays(-m_delLogFileDays);
+    Dir dir("./Log");
     auto list = dir.entryInfoList({});
     for (auto &file : list) {
-        if (file.isFile() && file.lastModified() < now) {
+        if (file.isFile() && file.lastModified() < expired) {
             dir.removeFile(file.fileName());
         }
     }

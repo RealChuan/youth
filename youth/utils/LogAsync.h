@@ -2,6 +2,7 @@
 #define LOGASYNC_H
 
 #include "LogBuffer.h"
+#include "Singleton.h"
 
 #include <youth/core/DateTime.hpp>
 #include <youth/core/Thread.hpp>
@@ -15,9 +16,8 @@ namespace utils {
 
 class LogAsync : noncopyable
 {
+    SINGLETON(LogAsync)
 public:
-    static LogAsync *instance();
-
     void setFlushInterval(int flushInterval) { m_refreshTime = flushInterval; }
 
     void append(const char *logline, int len);
@@ -26,9 +26,6 @@ public:
     void stop();
 
 private:
-    LogAsync(int flushInterval = 5);
-    ~LogAsync();
-
     void threadFunc();
 
     DateTime m_dateTime;
@@ -37,7 +34,7 @@ private:
     typedef std::vector<std::unique_ptr<Buffer>> BufferVector;
     typedef BufferVector::value_type BufferPtr;
 
-    int m_refreshTime;
+    int m_refreshTime = 5;
     bool m_running = false;
     Thread m_thread;
     Mutex m_mutex;

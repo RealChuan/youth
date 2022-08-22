@@ -110,7 +110,7 @@ int64_t File::size() const
 
 bool File::remove()
 {
-    if (!isOpen()) {
+    if (isOpen()) {
         return false;
     }
     return remove(m_filePath);

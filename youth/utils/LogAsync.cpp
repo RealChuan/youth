@@ -10,13 +10,12 @@ namespace utils {
 
 void asyncOutput(const char *msg, int len)
 {
-    LogAsync *logAsync = LogAsync::instance();
-    logAsync->append(msg, len);
+    LogAsync::instance().append(msg, len);
 }
 
-LogAsync::LogAsync(int flushInterval)
+LogAsync::LogAsync()
     : m_dateTime(DateTime::currentDateTime())
-    , m_refreshTime(flushInterval)
+    , m_refreshTime(5)
     , m_running(false)
     , m_thread(std::bind(&LogAsync::threadFunc, this))
     , m_mutex()
@@ -36,15 +35,6 @@ LogAsync::~LogAsync()
     if (m_running) {
         stop();
     }
-}
-
-static Mutex g_logAsyncMutex;
-
-LogAsync *LogAsync::instance()
-{
-    MutexLock lock(g_logAsyncMutex);
-    static LogAsync logAsync;
-    return &logAsync;
 }
 
 void LogAsync::append(const char *buf, int len)

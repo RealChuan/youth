@@ -35,6 +35,8 @@ public:
     pid_t tid() const { return m_tid; }
     std::string name() const { return m_name; }
 
+    static std::thread::id currentThreadId() { return std::this_thread::get_id(); }
+
     static void usleep(int64_t microseconds)
     {
         std::this_thread::sleep_for(std::chrono::microseconds(microseconds));

@@ -13,45 +13,47 @@ using namespace core;
 
 namespace utils {
 
-class ThreadPool : noncopyable {
-  typedef std::function<void()> Task;
-
+class ThreadPool : noncopyable
+{
 public:
-  ThreadPool();
-  ~ThreadPool();
+    using Task = std::function<void()>;
 
-  void setTaskNum(int maxTaskNum) { m_maxTaskNum = maxTaskNum; }
-  void setThreadInitCallback(const Task &cb) { m_threadInitCallback = cb; }
+    ThreadPool(const std::string &name = std::string());
+    ~ThreadPool();
 
-  void start(int numThreads);
-  void stop();
+    void setTaskNum(int maxTaskNum) { m_maxTaskNum = maxTaskNum; }
+    void setThreadInitCallback(const Task &cb) { m_threadInitCallback = cb; }
 
-  size_t queueSize() const {
-    MutexLock lock(m_mutex);
-    return m_queue.size();
-  }
+    void start(int numThreads);
+    void stop();
+    void waitForAllDone();
 
-  void run(Task f);
+    size_t queueSize() const
+    {
+        MutexLock lock(m_mutex);
+        return m_queue.size();
+    }
+
+    void run(Task f);
 
 private:
-  bool isFull() const {
-    MutexLock lock(m_mutex);
-    return m_maxTaskNum > 0 && m_queue.size() >= m_maxTaskNum;
-  }
+    // must lock
+    bool isFull() const { return m_maxTaskNum > 0 && m_queue.size() >= m_maxTaskNum; }
 
-  void threadFunc();
-  Task take();
+    void threadFunc();
+    Task take();
 
-  Task m_threadInitCallback;
-  size_t m_maxTaskNum;
-  bool m_running;
-  mutable Mutex m_mutex;
+    std::string m_name;
+    Task m_threadInitCallback;
+    size_t m_maxTaskNum;
+    bool m_running;
 
-  Condition m_notEmpty;
-  Condition m_notFull;
+    mutable Mutex m_mutex;
+    Condition m_notEmpty;
+    Condition m_notFull;
 
-  std::vector<std::unique_ptr<Thread>> m_threadVec;
-  std::deque<Task> m_queue;
+    std::vector<std::unique_ptr<Thread>> m_threadVec;
+    std::deque<Task> m_queue;
 };
 
 } // namespace utils

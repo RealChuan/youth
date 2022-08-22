@@ -8,26 +8,16 @@ namespace youth {
 
 namespace utils {
 
-const static char *arrLevel[] = {"[DEBUG] ", "[INFO] ", "[WARN] ", "[ERROR] ", "[FATAL] "};
+Logging::LogLevel Logging::s_logLevel = Logging::INFO; //默认的日志等级为INFO
+int Logging::s_outputModel = LOGGER_MODE_STDOUT; //默认的输出模式为输出到标准输出
 
-Logging::LogLevel static g_LogLevel = Logging::INFO; //默认的日志等级为INFO
-int static g_OutputMode = LOGGER_MODE_STDOUT;        //默认的输出模式为输出到标准输出
+const char *Logging::s_arrLevel[] = {"[DEBUG] ", "[INFO] ", "[WARN] ", "[ERROR] ", "[FATAL] "};
 
-void DefauleOutout(const char *pMsg, int Len)
-{
-    ::fwrite(pMsg, 1, static_cast<size_t>(Len), stdout);
-}
-
-void DefauleFlush(void)
-{
-    ::fflush(stdout);
-}
-
-Logging::outputFunc static g_OutputFunc = DefauleOutout; //默认的日志输出到标准输出
-Logging::flushFunc static g_FlushFunc = DefauleFlush;
+Logging::outputFunc Logging::s_outputFunc = Logging::defaultOutputFunc; //默认的日志输出到标准输出
+Logging::flushFunc Logging::s_flushFunc = Logging::defaultFlushFunc;
 
 Logging::Logging(LogLevel level, const char *file, int line, bool outError)
-    : m_logOutPtr(new LogOut(arrLevel[level], file, line, outError))
+    : m_logOutPtr(new LogOut(s_arrLevel[level], file, line, outError))
     , m_logLevel(level)
 {}
 
@@ -35,13 +25,16 @@ Logging::~Logging()
 {
     //当调用析构的时候，日志流填充下文件名和行号，就是完整的一条日志了
     m_logOutPtr->finishLog();
-    g_OutputFunc(m_logOutPtr->getLogStreamBuff(), m_logOutPtr->getLogStreamBuffLen());
-    if (m_logLevel == FATAL) {
-        //如果发生了FATAL错误，那么就终止程序。
-        //以便之后重启程序。
-        DefauleFlush(); //在此之前先冲刷缓冲区
-        abort();
+    s_outputFunc(m_logOutPtr->getLogStreamBuff(), m_logOutPtr->getLogStreamBuffLen());
+    if (m_logLevel != FATAL) {
+        return;
     }
+    //如果发生了FATAL错误，那么就终止程序。
+    //以便之后重启程序。
+    if (s_flushFunc) {
+        s_flushFunc(); //在此之前先冲刷缓冲区
+    }
+    abort();
 }
 
 LogStream &Logging::stream()
@@ -49,28 +42,17 @@ LogStream &Logging::stream()
     return m_logOutPtr->stream();
 }
 
-void Logging::setLogLevel(LogLevel level)
-{
-    g_LogLevel = level;
-}
-
-Logging::LogLevel Logging::getLogLevel()
-{
-    return g_LogLevel;
-}
-
 void Logging::setOutputMode(int iMode)
 {
-    g_OutputMode = iMode;
+    s_outputModel = iMode;
 
-    if (g_OutputMode == LOGGER_MODE_STDOUT) {
-        //事实上，默认的输出就是输出到标准输出，不做处理
-        return;
-    } else if (g_OutputMode == LOGGER_MODE_LOGFILE) {
+    if (s_outputModel == LOGGER_MODE_STDOUT) {
+        return; //事实上，默认的输出就是输出到标准输出，不做处理
+    } else if (s_outputModel == LOGGER_MODE_LOGFILE) {
         //仅输出到日志文件
         setOutputFunc(LogFile::outputFunc);
         setFlushFunc(LogFile::flushFunc);
-    } else if (g_OutputMode == (LOGGER_MODE_STDOUT | LOGGER_MODE_LOGFILE)) {
+    } else if (s_outputModel == (LOGGER_MODE_STDOUT | LOGGER_MODE_LOGFILE)) {
         //输出到标准输出和log中去
         setOutputFunc(outputOutAndLog);
         setFlushFunc(flushAll);
@@ -83,29 +65,29 @@ void Logging::setFileBaseName(const char *_basename)
 {
     std::string baseName = Process::fileBaseName(_basename);
     baseName += ".";
-    LogFile::instance()->setBaseFileName(baseName);
+    LogFile::instance().setBaseFileName(baseName);
 }
 
-void Logging::setOutputFunc(outputFunc Output)
+void Logging::defaultOutputFunc(const char *pMsg, int Len)
 {
-    g_OutputFunc = Output;
+    ::fwrite(pMsg, 1, static_cast<size_t>(Len), stdout);
 }
 
-void Logging::setFlushFunc(flushFunc Flush)
+void Logging::defaultFlushFunc()
 {
-    g_FlushFunc = Flush;
+    ::fflush(stdout);
 }
 
 void Logging::outputOutAndLog(const char *pMsg, int Len)
 {
-    DefauleOutout(pMsg, Len);                      //输出到标准输出
-    LogFile::instance()->outputLogFile(pMsg, Len); //输出到日志中
+    defaultOutputFunc(pMsg, Len);                 //输出到标准输出
+    LogFile::instance().outputLogFile(pMsg, Len); //输出到日志中
 }
 
 void Logging::flushAll()
 {
-    DefauleFlush();
-    LogFile::instance()->flushLogFile();
+    defaultFlushFunc();
+    LogFile::instance().flushLogFile();
 }
 
 __thread char t_errnobuf[512];

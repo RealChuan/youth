@@ -1,19 +1,15 @@
 #ifndef TASKQUEUE_H
 #define TASKQUEUE_H
 
-#include "Thread.h"
-
-#include <youth/core/Mutex.h>
+#include <youth/core/Thread.hpp>
 
 #include <deque>
 
-namespace youth
-{
+namespace youth {
 
 using namespace core;
 
-namespace utils
-{
+namespace utils {
 
 template<typename T>
 class TaskQueue : copyable
@@ -24,13 +20,13 @@ public:
         , m_queue()
     {}
 
-    void append(const T& t)
+    void append(const T &t)
     {
         MutexLock lock(m_mutex);
         m_queue.push_back(t);
     }
 
-    void append(const T&& t)
+    void append(const T &&t)
     {
         MutexLock lock(m_mutex);
         m_queue.push_back(std::move(t));
@@ -39,7 +35,7 @@ public:
     T take()
     {
         MutexLock lock(m_mutex);
-        if(m_queue.empty())
+        if (m_queue.empty())
             return T();
         T t(std::move(m_queue.front()));
         m_queue.pop_front();
@@ -54,11 +50,11 @@ public:
 
 private:
     mutable Mutex m_mutex;
-    std::deque<T> m_queue GUARDED_BY(m_mutex);
+    std::deque<T> m_queue;
 };
 
-}
+} // namespace utils
 
-}
+} // namespace youth
 
 #endif // TASKQUEUE_H

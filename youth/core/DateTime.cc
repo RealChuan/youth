@@ -1,8 +1,6 @@
 #include "DateTime.hpp"
 
-#include <chrono>
 #include <iomanip>
-#include <iostream>
 #include <string.h>
 
 namespace youth {
@@ -53,8 +51,15 @@ DateTime DateTime::addMonths(int64_t months) const
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
     std::tm tm = *std::localtime(&t);
     tm.tm_mon += months;
-    tm.tm_year += tm.tm_mon / 12;
-    tm.tm_mon %= 12;
+    if (months > 0) {
+        tm.tm_year += tm.tm_mon / 12;
+        tm.tm_mon %= 12;
+    } else {
+        while (tm.tm_mon < 0) {
+            tm.tm_mon += 12;
+            tm.tm_year--;
+        }
+    }
     tm.tm_mday = std::min(tm.tm_mday, daysOfMonth(tm.tm_year + 1900, tm.tm_mon + 1));
     t = std::mktime(&tm);
     auto microSecondsSinceEpoch = std::chrono::duration_cast<std::chrono::microseconds>(

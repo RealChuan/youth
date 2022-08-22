@@ -235,7 +235,7 @@ void TcpConnection::handleError()
 {
     int err = SocketFunc::getSocketError(m_channelPtr->fd());
     LOG_ERROR << "TcpConnection::handleError [" << m_name << "] - SO_ERROR = " << err << " "
-              << strerror_tl(err);
+              << youth::utils::strerror_tl(err);
 }
 
 void TcpConnection::sendInLoop(const void *data, size_t len)

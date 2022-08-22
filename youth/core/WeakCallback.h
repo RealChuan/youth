@@ -23,7 +23,6 @@ public:
     ~WeakCallback() {}
 
     // Default dtor, copy ctor and assignment are okay
-
     void operator()(ARGS &&...args) const
     {
         std::shared_ptr<CLASS> ptr(object_.lock());

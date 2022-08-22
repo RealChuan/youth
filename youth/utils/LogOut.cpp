@@ -1,7 +1,8 @@
 #include "LogOut.h"
 #include "LogAsync.h"
 #include "LogFile.h"
-#include "youth/core/CurrentThread.h"
+
+#include <youth/core/CurrentThread.h>
 
 #include <error.h>
 
@@ -21,8 +22,9 @@ LogOut::LogOut(const char *level, const char *file, int line, bool outError)
     //其次，输出日志等级
     m_logStream << m_dateTime.toStandardFormat() << " " << CurrentThread::tidString() << " "
                 << level;
-    if (outError)
+    if (outError) {
         m_logStream << " Error: " << errno << " " << strerror(errno) << ". ";
+    }
 }
 
 LogOut::~LogOut() {}

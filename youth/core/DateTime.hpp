@@ -2,12 +2,20 @@
 
 #include "Object.h"
 
+#include <chrono>
 #include <string>
 #include <string_view>
 
 namespace youth {
 
 namespace core {
+
+// 不同类型的time_point转化为system_clock
+template<typename T>
+std::chrono::system_clock::time_point toSystemClockTimePoint(T t)
+{
+    return t - T::clock::now() + std::chrono::system_clock::now();
+}
 
 class DateTime : copyable
 {

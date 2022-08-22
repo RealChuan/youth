@@ -12,7 +12,7 @@ std::filesystem::path Dir::absolutePath() const
 {
     std::filesystem::path absolutePath;
     FileInfo::makeAbsolute(m_path, absolutePath);
-    return absolutePath.parent_path();
+    return absolutePath;
 }
 
 bool Contains(const std::string &filename, const Dir::NameFilterList &nameFilters)

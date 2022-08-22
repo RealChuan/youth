@@ -13,30 +13,36 @@ using namespace core;
 
 namespace utils {
 
-template <typename T> class Singleton : noncopyable {
+template<typename T>
+class Singleton : noncopyable
+{
 public:
-  static T &getInstance() {
-    static T t; // C++11 thread safe
-    return t;
-  }
+    static T &getInstance()
+    {
+        static T t; // C++11 thread safe
+        return t;
+    }
 
 private:
-  Singleton() = delete;
-  ~Singleton() = delete;
+    Singleton() = delete;
+    ~Singleton() = delete;
 };
 
-#define SINGLETON(Class)                                                       \
-private:                                                                       \
-  Class();                                                                     \
-  ~Class();                                                                    \
-  Class(const Class &other) = delete;                                          \
-  Class &operator=(const Class &other) = delete;                               \
-  Class(Class &&other) = delete;                                               \
-  Class &operator=(Class &&other) = delete;                                    \
-  friend class Singleton<Class>;                                               \
-                                                                               \
-public:                                                                        \
-  static Class &instance() { return Singleton<Class>::getInstance(); }
+#define SINGLETON(Class) \
+private: \
+    Class(); \
+    ~Class(); \
+    Class(const Class &other) = delete; \
+    Class &operator=(const Class &other) = delete; \
+    Class(Class &&other) = delete; \
+    Class &operator=(Class &&other) = delete; \
+    friend class Singleton<Class>; \
+\
+public: \
+    static Class &instance() \
+    { \
+        return Singleton<Class>::getInstance(); \
+    }
 
 } // namespace utils
 

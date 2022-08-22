@@ -22,5 +22,8 @@ target_link_libraries(StringFunction_unittest youth_core)
 ADD_EXECUTABLE(FileInfo_unittest FileInfo_unittest.cc)
 target_link_libraries(FileInfo_unittest youth_core)
 
+ADD_EXECUTABLE(Thread_unittest Thread_unittest.cc)
+target_link_libraries(Thread_unittest youth_core)
+
 ADD_EXECUTABLE(Process_unittest Process_unittest.cc)
 target_link_libraries(Process_unittest youth_core)

@@ -1,41 +1,33 @@
-#include <youth/utils/ThreadPool.h>
+#include <youth/core/Thread.hpp>
 #include <youth/utils/Logging.h>
+#include <youth/utils/ThreadPool.h>
+
+#include <iostream>
+#include <sstream>
 
 using namespace youth::utils;
+using namespace youth::core;
 
-//打印带参数
-void printBuf(char* buf)
+std::atomic_int64_t count = 0;
+
+void test(int i)
 {
-    for (int i = 0; i < 1000; i++)
-    {
-        LOG_INFO << i << buf;
-    }
+    count.fetch_add(1);
+    std::ostringstream oss;
+    oss << Thread::currentThreadId();
+    LOG_INFO << i << " " << oss.str();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    ThreadPool threadPool;
-
-    //设置任务队列最大数量
-    threadPool.setTaskNum(5);
-
-    //开始跑5条线程
-    threadPool.start(10);
-
-    //放入任务
-    //threadPool.run(print);
-
-    for (int i = 0; i < 100; i++)
-    {
-        char buf[32];
-        snprintf(buf, sizeof buf, "task %d", i);
-        threadPool.run(std::bind(printBuf, buf));
+    ThreadPool threadPool("TestThreadPool");
+    threadPool.setTaskNum(8);
+    threadPool.start(2);
+    for (int i = 0; i < 100; i++) {
+        threadPool.run([=] { test(i); });
     }
+    threadPool.waitForAllDone();
 
-    //缓冲
-    //sleep(1);
-
-    //threadPool.stop();
-
+    LOG_INFO << count;
     return 0;
 }

@@ -5,11 +5,9 @@
 
 #include "LogBuffer.h"
 
-namespace youth
-{
+namespace youth {
 
-namespace utils
-{
+namespace utils {
 
 class LogStream : noncopyable
 {
@@ -38,16 +36,15 @@ public:
     LogStream &operator<<(unsigned char *pChar);
     LogStream &operator<<(const unsigned char *pChar);
     LogStream &operator<<(std::string strString);
-    LogStream &operator<<(const void*);
+    LogStream &operator<<(const void *);
 
 private:
     typedef LogBuffer<normalBuffer> buffer;
     buffer m_logBuffer; //这个就是具体的Buffer
-
 };
 
-}
+} // namespace utils
 
-}
+} // namespace youth
 
 #endif /* LOGSTREAM_H */
