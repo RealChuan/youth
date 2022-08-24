@@ -63,8 +63,10 @@
       8. [TaskQueue](./youth/utils/TaskQueue.h)-----------线程安全队列模板；
       9. [ThreadPool](./youth/utils/ThreadPool.h)-----------线程池封装类；  
       10. [tests](./youth/utils/tests)-----------测试;
-          1. [LogAsyncTest](./youth/utils/tests/LogAsyncTest.cpp)-----------异步日志测试；
-          2. [LogSpeed_unitTest](./youth/utils/tests/LogSpeed_unitTest.cc)-----------日志速度测试；
-          3. [LogTest](./youth/utils/tests/LogTest.cpp)-----------日志测试；
-          4. [SingletonTest](./youth/utils/tests/SingletonTest.cpp)-----------单例模板测试；  
-          5. [ThreadPoolTest](./youth/utils/tests/ThreadPoolTest.cpp)-----------线程池测试；  
+          1. [Log_benchmark](./youth/utils/tests/Log_benchmark.cc)-----------性能测试；
+          2. [LogAsyncTest](./youth/utils/tests/LogAsyncTest.cpp)-----------异步日志测试；
+          3. [LogMulti_unittest](./youth/utils/tests/LogMulti_unittest.cc)-----------多线程日志测试；
+          4. [LogSpeed_unitTest](./youth/utils/tests/LogSpeed_unitTest.cc)-----------日志速度测试；
+          5. [LogTest](./youth/utils/tests/LogTest.cpp)-----------日志测试；
+          6. [SingletonTest](./youth/utils/tests/SingletonTest.cpp)-----------单例模板测试；  
+          7. [ThreadPoolTest](./youth/utils/tests/ThreadPoolTest.cpp)-----------线程池测试；  

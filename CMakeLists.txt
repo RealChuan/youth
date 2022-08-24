@@ -52,11 +52,15 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib${CURRENT_PLATFORM}/${CMAKE_BUILD_TYPE
 
 find_package(ZLIB REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
+find_package(benchmark CONFIG REQUIRED)
 if(PROTOBUF_FOUND)
   message(STATUS "found protobuf")
 endif()
 if(ZLIB_FOUND)
   message(STATUS "found zlib")
+endif()
+if(benchmark_FOUND)
+  message(STATUS "found benchmark")
 endif()
 
 include_directories( ${PROJECT_SOURCE_DIR} )

@@ -11,5 +11,13 @@ target_link_libraries(LogAsyncTest youth_utils)
 ADD_EXECUTABLE(ThreadPoolTest ThreadPoolTest.cpp)
 target_link_libraries(ThreadPoolTest youth_utils)
 
+ADD_EXECUTABLE(LogMulti_unittest LogMulti_unittest.cc)
+target_link_libraries(LogMulti_unittest youth_utils)
+
+if(benchmark_FOUND)
 ADD_EXECUTABLE(LogSpeed_unitest LogSpeed_unitest.cc)
-target_link_libraries(LogSpeed_unitest youth_utils)
+target_link_libraries(LogSpeed_unitest youth_utils benchmark::benchmark benchmark::benchmark_main)
+
+ADD_EXECUTABLE(Log_benchmark Log_benchmark.cc)
+target_link_libraries(Log_benchmark youth_utils benchmark::benchmark benchmark::benchmark_main)
+endif()

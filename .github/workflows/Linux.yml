@@ -45,20 +45,20 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /usr/local/share/vcpkg/downloads
-          key: ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-${{ github.sha }}
+          key: ${{ runner.os }}-vcpkg-download-${{ matrix.config.os }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-
+            ${{ runner.os }}-vcpkg-download-${{ matrix.config.os }}-
             ${{ runner.os }}-vcpkg-download-
       - uses: actions/cache@v3
         with:
           path: /usr/local/share/vcpkg/installed
-          key: ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-${{ github.sha }}
+          key: ${{ runner.os }}-vcpkg-installed-${{ matrix.config.os }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-
+            ${{ runner.os }}-vcpkg-installed-${{ matrix.config.os }}-
             ${{ runner.os }}-vcpkg-installed-
       - name: Install libraries with vcpkg
         run: |
-          vcpkg install curl[ssl,http2,tool] protobuf
+          vcpkg install curl[ssl,http2,tool] protobuf benchmark
           
       - uses: actions/checkout@v3
         with:
