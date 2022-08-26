@@ -1,6 +1,7 @@
 #include "StringFunction.hpp"
+
+#include <algorithm>
 #include <string>
-#include <string_view>
 
 namespace youth {
 
@@ -22,62 +23,52 @@ std::vector<std::string> split(const std::string &text, const std::string &s)
     return result;
 }
 
-bool remove(std::string &text, const std::string &s)
+void remove(std::string &text, const std::string &s)
 {
-    std::string::size_type pos = text.find(s);
-    if (pos != std::string::npos) {
+    std::string::size_type pos = std::string::npos;
+    while ((pos = text.find(s)) != std::string::npos) {
         text.erase(pos, s.length());
-        return true;
     }
-    return false;
 }
 
-bool replace(std::string &text, const std::string &s, const std::string &r)
+void replace(std::string &text, const std::string &s, const std::string &r)
 {
-    std::string::size_type pos = text.find(s);
-    if (pos != std::string::npos) {
+    std::string::size_type pos = std::string::npos;
+    while ((pos = text.find(s)) != std::string::npos) {
         text.replace(pos, s.length(), r);
-        return true;
     }
-    return false;
 }
 
-bool trimmed(const std::string &text)
+std::string trimmed(const std::string &text)
 {
-    if (text.empty()) {
-        return false;
-    }
-    std::string::size_type pos = text.find_first_not_of(" \t\n\r");
-    if (pos == std::string::npos) {
-        return false;
-    }
-    std::string::size_type pos2 = text.find_last_not_of(" \t\n\r");
-    if (pos2 == std::string::npos) {
-        return false;
-    }
-    return true;
+    std::string str(text);
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](unsigned char ch) {
+                  return !std::isspace(ch);
+              }));
+    str.erase(std::find_if(str.rbegin(),
+                           str.rend(),
+                           [](unsigned char ch) { return !std::isspace(ch); })
+                  .base(),
+              str.end());
+    return str;
 }
 
-bool toLower(std::string &text)
+std::string toLower(const std::string &text)
 {
-    if (text.empty()) {
-        return false;
+    std::string str(text);
+    for (std::string::size_type i = 0; i < str.length(); i++) {
+        str[i] = std::tolower(str[i]);
     }
-    for (std::string::size_type i = 0; i < text.length(); i++) {
-        text[i] = tolower(text[i]);
-    }
-    return true;
+    return str;
 }
 
-bool toUpper(std::string &text)
+std::string toUpper(const std::string &text)
 {
-    if (text.empty()) {
-        return false;
+    std::string str(text);
+    for (std::string::size_type i = 0; i < str.length(); i++) {
+        str[i] = std::toupper(str[i]);
     }
-    for (std::string::size_type i = 0; i < text.length(); i++) {
-        text[i] = toupper(text[i]);
-    }
-    return true;
+    return str;
 }
 
 bool startsWith(const std::string &text, const std::string &str)

@@ -1,174 +1,138 @@
 #include <youth/core/StringFunction.hpp>
 
-#include <assert.h>
-#include <iostream>
+#include <gtest/gtest.h>
 
 using namespace youth::core;
 
-void test_string_split()
+TEST(splitTest, Positive)
 {
-    std::cout << "test_string_split" << std::endl;
     std::string str = "a,b,c,d";
-    std::vector<std::string> result = string::split(str, ",");
-    assert(result.size() == 4);
-    assert(result[0] == "a");
-    assert(result[1] == "b");
-    assert(result[2] == "c");
-    assert(result[3] == "d");
-    std::cout << "test_string_split OK" << std::endl;
+    auto result = string::split(str, ",");
+
+    EXPECT_EQ(result.size(), 4);
+    EXPECT_EQ(result[0], "a");
+    EXPECT_EQ(result[1], "b");
+    EXPECT_EQ(result[2], "c");
+    EXPECT_EQ(result[3], "d");
 }
 
-void test_string_remove()
+TEST(removeTest, Positive)
 {
-    std::cout << "test_remove" << std::endl;
     std::string str = "a,b,c,d";
-    assert(string::remove(str, ",") == true);
-    assert(str == "a,b,c,d");
-    assert(string::remove(str, "a") == true);
-    assert(str == "b,c,d");
-    assert(string::remove(str, "b") == true);
-    assert(str == "c,d");
-    assert(string::remove(str, "c") == true);
-    assert(str == "d");
-    assert(string::remove(str, "d") == true);
-    assert(str == "");
-    std::cout << "test_remove OK" << std::endl;
+    string::remove(str, ",");
+    EXPECT_EQ(str, "abcd");
+    string::remove(str, ".");
+    EXPECT_EQ(str, "abcd");
+    string::remove(str, "a");
+    EXPECT_EQ(str, "bcd");
+    string::remove(str, "z");
+    EXPECT_EQ(str, "bcd");
+    string::remove(str, "b");
+    EXPECT_EQ(str, "cd");
+    string::remove(str, "c");
+    EXPECT_EQ(str, "d");
+    string::remove(str, "d");
+    EXPECT_TRUE(str.empty());
 }
 
-void test_string_replace()
+TEST(replaceTest, Positive)
 {
-    std::cout << "test_replace" << std::endl;
     std::string str = "a,b,c,d";
-    assert(string::replace(str, ",", ":") == true);
-    assert(str == "a,b,c,d");
-    assert(string::replace(str, "a", "A") == true);
-    assert(str == "A,b,c,d");
-    assert(string::replace(str, "b", "B") == true);
-    assert(str == "A,B,c,d");
-    assert(string::replace(str, "c", "C") == true);
-    assert(str == "A,B,C,d");
-    assert(string::replace(str, "d", "D") == true);
-    assert(str == "A,B,C,D");
-    std::cout << "test_replace OK" << std::endl;
+    string::replace(str, ",", ":");
+    EXPECT_EQ(str, "a:b:c:d");
+    string::replace(str, "a", "A");
+    EXPECT_EQ(str, "A:b:c:d");
+    string::replace(str, "b", "B");
+    EXPECT_EQ(str, "A:B:c:d");
+    string::replace(str, "c", "C");
+    EXPECT_EQ(str, "A:B:C:d");
+    string::replace(str, "d", "D");
+    EXPECT_EQ(str, "A:B:C:D");
 }
 
-void test_string_trimmed()
+TEST(trimmedTest, Positive)
 {
-    std::cout << "test_trimmed" << std::endl;
     std::string str = " a,b,c,d ";
-    assert(string::trimmed(str) == true);
-    assert(str == "a,b,c,d");
-    assert(string::trimmed(str) == true);
-    assert(str == "a,b,c,d");
+    str = string::trimmed(str);
+    EXPECT_EQ(str, "a,b,c,d");
+    str = string::trimmed(str);
+    EXPECT_EQ(str, "a,b,c,d");
     str = "\ta,b,c,d\t";
-    assert(string::trimmed(str) == true);
-    assert(str == "a,b,c,d");
+    str = string::trimmed(str);
+    EXPECT_EQ(str, "a,b,c,d");
     str = "\na,b,c,d\n";
-    assert(string::trimmed(str) == true);
-    assert(str == "a,b,c,d");
+    str = string::trimmed(str);
+    EXPECT_EQ(str, "a,b,c,d");
     str = "\ra,b,c,d\r";
-    assert(string::trimmed(str) == true);
-    assert(str == "a,b,c,d");
-    std::cout << "test_trimmed OK" << std::endl;
+    str = string::trimmed(str);
+    EXPECT_EQ(str, "a,b,c,d");
 }
 
-void test_string_toLower()
+TEST(toLowerTest, Positive)
 {
-    std::cout << "test_toLower" << std::endl;
     std::string str = "a,b,c,d";
-    assert(string::toLower(str) == true);
-    assert(str == "a,b,c,d");
-    assert(string::toLower(str) == true);
-    assert(str == "a,b,c,d");
+    str = string::toLower(str);
+    EXPECT_EQ(str, "a,b,c,d");
     str = "A,b,c,d";
-    assert(string::toLower(str) == true);
-    assert(str == "a,b,c,d");
-    str = "a,B,c,d";
-    assert(string::toLower(str) == true);
-    assert(str == "a,b,c,d");
-    str = "a,b,C,d";
-    assert(string::toLower(str) == true);
-    assert(str == "a,b,c,d");
-    str = "a,b,c,D";
-    assert(string::toLower(str) == true);
-    assert(str == "a,b,c,d");
-    std::cout << "test_toLower OK" << std::endl;
+    str = string::toLower(str);
+    EXPECT_EQ(str, "a,b,c,d");
+    str = "A,B,c,d";
+    str = string::toLower(str);
+    EXPECT_EQ(str, "a,b,c,d");
+    str = "A,B,C,d";
+    str = string::toLower(str);
+    EXPECT_EQ(str, "a,b,c,d");
+    str = "A,B,C,D";
+    str = string::toLower(str);
+    EXPECT_EQ(str, "a,b,c,d");
 }
 
-void test_string_toUpper()
+TEST(toUpperTest, Positive)
 {
-    std::cout << "test_toUpper" << std::endl;
     std::string str = "a,b,c,d";
-    assert(string::toUpper(str) == true);
-    assert(str == "A,B,C,D");
-    std::cout << "test_toUpper OK" << std::endl;
+    str = string::toUpper(str);
+    EXPECT_EQ(str, "A,B,C,D");
 }
 
-void test_string_startsWith()
+TEST(startsWithTest, Positive)
 {
-    std::cout << "test_string_startsWith" << std::endl;
     std::string text = "abcdef";
     std::string str = "abc";
-    assert(string::startsWith(text, str));
+    EXPECT_TRUE(string::startsWith(text, str));
     str = "def";
-    assert(!string::startsWith(text, str));
-    std::cout << "test_string_startsWith OK" << std::endl;
+    EXPECT_FALSE(string::startsWith(text, str));
 }
 
-void test_string_endsWith()
+TEST(endsWithTest, Positive)
 {
-    std::cout << "test_string_endsWith" << std::endl;
     std::string text = "abcdef";
-    std::string str = "def";
-    assert(string::endsWith(text, str));
-    str = "abc";
-    assert(!string::endsWith(text, str));
-    std::cout << "test_string_endsWith OK" << std::endl;
+    std::string str = "abc";
+    EXPECT_FALSE(string::endsWith(text, str));
+    str = "def";
+    EXPECT_TRUE(string::endsWith(text, str));
 }
 
-void test_string_contains()
+TEST(containsTest, Positive)
 {
-    std::cout << "test_string_contains" << std::endl;
     std::string text = "abcdef";
-    std::string str = "def";
-    assert(string::contains(text, str));
+    std::string str = "abc";
+    EXPECT_TRUE(string::contains(text, str));
     str = "ac";
-    assert(!string::contains(text, str));
-    std::cout << "test_string_contains OK" << std::endl;
+    EXPECT_FALSE(string::contains(text, str));
 }
 
-void test_string_isLower()
+TEST(isLowerTest, Positive)
 {
-    std::cout << "test_isLower" << std::endl;
     std::string str = "a";
-    assert(string::isLower(str));
+    EXPECT_TRUE(string::isLower(str));
     str = "A";
-    assert(!string::isLower(str));
-    std::cout << "test_isLower OK" << std::endl;
+    EXPECT_FALSE(string::isLower(str));
 }
 
-void test_string_isUpper()
+TEST(isUppeTest, Positive)
 {
-    std::cout << "test_isUpper" << std::endl;
-    std::string str = "A";
-    assert(string::isUpper(str));
-    str = "a";
-    assert(!string::isUpper(str));
-    std::cout << "test_isUpper OK" << std::endl;
-}
-
-int main()
-{
-    test_string_split();
-    test_string_remove();
-    test_string_replace();
-    test_string_trimmed();
-    test_string_toLower();
-    test_string_toUpper();
-    test_string_startsWith();
-    test_string_endsWith();
-    test_string_contains();
-    test_string_isLower();
-    test_string_isUpper();
-    return 0;
+    std::string str = "a";
+    EXPECT_FALSE(string::isUpper(str));
+    str = "A";
+    EXPECT_TRUE(string::isUpper(str));
 }

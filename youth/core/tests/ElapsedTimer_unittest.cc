@@ -1,24 +1,23 @@
 #include <youth/core/ElapsedTimer.h>
 
+#include <gtest/gtest.h>
+
 #include <iostream>
 
 using namespace youth::core;
 
-int main()
+TEST(ElapsedTimerTest, void)
 {
     ElapsedTimer timer;
-    std::cout << "begin: " << timer.isVaid() << std::endl;
+    EXPECT_FALSE(timer.isVaid());
     timer.start();
-    while (1) {
-        if (timer.hasExpired(1000 * 1000)) {
-            std::cout << "time out: " << timer.elapsed() << std::endl;
-            break;
-        }
+    EXPECT_TRUE(timer.isVaid());
+    while (!timer.hasExpired(1000 * 1000)) {}
+    std::cout << "time out: " << timer.elapsed() << std::endl;
+    timer.reStart();
+    int sum = 0;
+    for (int i = 1; i < 10000; i++) {
+        sum += i;
     }
-    for (int i = 0; i < 1000; i++) {
-        std::cout << "1234567890qwertyuiopasdfghjklzxcvbnm " << i << std::endl;
-    }
-    std::cout << timer.elapsed() << std::endl;
-    std::cout << "end: " << timer.isVaid() << std::endl;
-    return 0;
+    std::cout << timer.elapsed() << " " << sum << std::endl;
 }

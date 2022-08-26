@@ -13,9 +13,9 @@ int main(int argc, char **argv)
     logAsync->setFlushInterval(3); //3秒打印一次
     logAsync->start();
 
-    for (int i = 0; i < 1000 * 1000; i++)
+    for (int i = 0; i < 1000 * 1000; i++) {
         LOG_INFO << "1234567890qwertyuiopasdfghjklzxcvbnm" << i;
-
+    }
     logAsync->stop();
     return 0;
 }

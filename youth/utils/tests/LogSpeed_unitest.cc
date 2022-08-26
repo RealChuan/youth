@@ -25,7 +25,7 @@ static void benchmark_test(benchmark::State &state)
 }
 
 // Register the function as a benchmark
-BENCHMARK(benchmark_test)->Arg(1000 * 10)->Arg(1000 * 100)->Arg(1000 * 1000)->Arg(1000 * 1000 * 10);
+BENCHMARK(benchmark_test)->Arg(1000 * 10)->Arg(1000 * 100)->Arg(1000 * 1000);
 
 int main(int argc, char **argv)
 {

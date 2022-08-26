@@ -58,7 +58,7 @@ jobs:
             ${{ runner.os }}-vcpkg-installed-
       - name: Install libraries with vcpkg
         run: |
-          vcpkg install curl[ssl,http2,tool] protobuf benchmark
+          vcpkg install curl[ssl,http2,tool] protobuf benchmark gtest
           
       - uses: actions/checkout@v3
         with:
