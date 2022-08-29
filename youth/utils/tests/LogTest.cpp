@@ -4,7 +4,7 @@ using namespace youth::utils;
 
 int main(int argc, char **argv)
 {
-    Logging::setFileBaseName(argv[0]); // must
+    Logging::setDirectoryAndBaseName("/tmp/Youth/", argv[0]); // must
 
     //日志的报警等级为DEBUG
     Logging::setLogLevel(Logging::DEBUG);

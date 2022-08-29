@@ -15,10 +15,10 @@ namespace net {
 class EventLoop;
 class Channel : noncopyable
 {
-    typedef std::function<void()> EventCallback;
-    typedef std::function<void(DateTime)> ReadEventCallback;
-
 public:
+    using EventCallback = std::function<void()>;
+    using ReadEventCallback = std::function<void(DateTime)>;
+
     Channel(EventLoop *loop, int fd);
     ~Channel();
 

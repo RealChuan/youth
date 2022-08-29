@@ -36,6 +36,7 @@ public:
     std::string name() const { return m_name; }
 
     static std::thread::id currentThreadId() { return std::this_thread::get_id(); }
+    static std::string threadIdString(const std::thread::id &id);
 
     static void usleep(int64_t microseconds)
     {

@@ -49,9 +49,8 @@ Channel::~Channel()
 
 void Channel::handleEvent(DateTime receiveTime)
 {
-    std::shared_ptr<void> guard;
     if (m_tied) {
-        guard = m_tie.lock();
+        auto guard = m_tie.lock();
         if (guard) {
             handleEventWithGuard(receiveTime);
         }
@@ -81,8 +80,9 @@ void Channel::handleEventWithGuard(DateTime receiveTime)
         if (m_logHup) {
             LOG_WARN << "fd = " << m_fd << " Channel::handle_event() POLLHUP";
         }
-        if (m_closeCallback)
+        if (m_closeCallback) {
             m_closeCallback();
+        }
     }
 
     if (m_revents & POLLNVAL) {
@@ -90,16 +90,19 @@ void Channel::handleEventWithGuard(DateTime receiveTime)
     }
 
     if (m_revents & (EPOLLERR | POLLNVAL)) {
-        if (m_errorCallback)
+        if (m_errorCallback) {
             m_errorCallback();
+        }
     }
     if (m_revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
-        if (m_readCallback)
+        if (m_readCallback) {
             m_readCallback(receiveTime);
+        }
     }
     if (m_revents & EPOLLOUT) {
-        if (m_writeCallback)
+        if (m_writeCallback) {
             m_writeCallback();
+        }
     }
     m_eventHandling = false;
 }

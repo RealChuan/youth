@@ -5,13 +5,11 @@
 
 struct tcp_info;
 
-namespace youth
-{
+namespace youth {
 
 using namespace core;
 
-namespace net
-{
+namespace net {
 
 class TcpAddressInfo;
 class Socket : noncopyable
@@ -22,10 +20,10 @@ public:
 
     int fd() const { return m_sockfd; }
 
-    bool getTcpInfo(struct tcp_info*) const;
-    bool getTcpInfoString(char* buf, int len) const;
+    bool getTcpInfo(struct tcp_info *) const;
+    bool getTcpInfoString(char *buf, int len) const;
 
-    void bindAddress(const TcpAddressInfo&);
+    void bindAddress(const TcpAddressInfo &);
 
     void listen();
 
@@ -33,7 +31,7 @@ public:
     /// a descriptor for the accepted socket, which has been
     /// set to non-blocking and close-on-exec. *peeraddr is assigned.
     /// On error, -1 is returned, and *peeraddr is untouched.
-    int accept(TcpAddressInfo* peeraddr);
+    int accept(TcpAddressInfo *peeraddr);
 
     void shutdownWrite();
 
@@ -62,7 +60,7 @@ private:
     int m_sockfd;
 };
 
-}
+} // namespace net
 
 } // namespace youth
 

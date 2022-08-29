@@ -61,11 +61,11 @@ void Logging::setOutputMode(int iMode)
     }
 }
 
-void Logging::setFileBaseName(const char *_basename)
+void Logging::setDirectoryAndBaseName(const std::string &directory, const std::string &_basename)
 {
     std::string baseName = Process::fileBaseName(_basename);
     baseName += ".";
-    LogFile::instance().setBaseFileName(baseName);
+    LogFile::instance().setDirectoryAndBaseName(directory, baseName);
 }
 
 void Logging::defaultOutputFunc(const char *pMsg, int Len)

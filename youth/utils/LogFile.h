@@ -20,8 +20,9 @@ class LogFile : noncopyable
 {
     SINGLETON(LogFile)
 public:
+    void setDirectoryAndBaseName(const std::string &directory, const std::string &basename);
+
     void setRollSize(off_t size) { m_rollSize = size; }
-    void setBaseFileName(const std::string &);
     void setMaxFileSize(off_t size) { m_rollSize = size; }
     void setDelLogFileDays(uint days) { m_delLogFileDays = days; }
 
@@ -40,6 +41,7 @@ private:
     std::string getFileName(const DateTime &);
     void delLogFile(const DateTime &dateTime);
 
+    std::string m_directory;
     int m_count;
     off_t m_rollSize = 1000 * 1000 * 1000; //1G
     int64_t m_delLogFileDays = 7;

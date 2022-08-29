@@ -18,9 +18,9 @@ class EventLoop;
 class Channel;
 class Epoll : noncopyable
 {
-    typedef std::vector<Channel *> ChannelList;
-
 public:
+    using ChannelList = std::vector<Channel *>;
+
     Epoll(EventLoop *eventLoop);
     ~Epoll();
 

@@ -5,9 +5,9 @@
 #include <youth/core/File.hpp>
 #include <youth/core/FileInfo.hpp>
 #include <youth/core/Process.hpp>
+#include <youth/core/StringFunction.hpp>
 
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <cassert>
 
 namespace youth {
 
@@ -22,18 +22,20 @@ LogFile::LogFile()
 {
     //rollFile();
     //setDelLogFileDays(7);
-    Dir::mkdirs("./Log");
 }
 
 LogFile::~LogFile() {}
 
-void LogFile::setBaseFileName(const std::string &basename)
+void LogFile::setDirectoryAndBaseName(const std::string &directory, const std::string &basename)
 {
-    if (basename.empty()) {
-        m_basename = Dir::Current().dirname();
-    } else {
-        m_basename = basename;
+    assert(!m_directory.empty());
+    m_directory = directory;
+    if (!string::endsWith(m_directory, "/")) {
+        m_directory += "/";
     }
+    assert(!basename.empty());
+    m_basename = basename;
+    Dir::mkdirs(m_directory);
     rollFile(0);
 }
 
@@ -63,7 +65,9 @@ void LogFile::flushLogFile()
 
 std::string LogFile::getFileName(const DateTime &dateTime)
 {
-    return "./Log/" + m_basename + dateTime.toString("%Y%m%d-%H%M%S") + Process::hostname() + "."
+    assert(!basename.empty());
+    assert(!m_directory.empty());
+    return m_directory + m_basename + dateTime.toString("%Y%m%d-%H%M%S") + Process::hostname() + "."
            + std::to_string(Process::getPid()) + ".log";
 }
 
@@ -93,7 +97,7 @@ bool LogFile::rollFile(int count)
 void LogFile::delLogFile(const DateTime &dateTime)
 {
     auto expired = dateTime.addDays(-m_delLogFileDays);
-    Dir dir("./Log");
+    Dir dir(m_directory);
     auto list = dir.entryInfoList({});
     for (auto &file : list) {
         if (file.isFile() && file.lastModified() < expired) {

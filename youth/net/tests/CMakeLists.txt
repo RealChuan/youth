@@ -10,3 +10,6 @@ target_link_libraries(TcpClientTest youth_net)
 
 ADD_EXECUTABLE(TcpServerTest TcpServerTest.cpp)
 target_link_libraries(TcpServerTest youth_net)
+
+ADD_EXECUTABLE(Resolve_unittest Resolve_unittest.cc)
+target_link_libraries(Resolve_unittest youth_net)

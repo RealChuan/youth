@@ -1,39 +1,17 @@
 #include "SocketFunc.h"
 #include "youth/utils/Logging.h"
 
-#include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/uio.h>
+#include <unistd.h>
 
-namespace youth
-{
+namespace youth {
 
 using namespace utils;
 
-namespace net
-{
+namespace net {
 
-#if VALGRIND || defined (NO_ACCEPT4)
-void setNonBlockAndCloseOnExec(int sockfd)
-{
-    // non-block
-    int flags = ::fcntl(sockfd, F_GETFL, 0);
-    flags |= O_NONBLOCK;
-    int ret = ::fcntl(sockfd, F_SETFL, flags);
-    // FIXME check
-
-    // close-on-exec
-    flags = ::fcntl(sockfd, F_GETFD, 0);
-    flags |= FD_CLOEXEC;
-    ret = ::fcntl(sockfd, F_SETFD, flags);
-    // FIXME check
-
-    (void)ret;
-}
-#endif
-
-void SocketFunc::setServerAddress(uint16_t port, sockaddr_in *serverAddr,
-                                  bool loopbackOnly)
+void SocketFunc::setServerAddress(uint16_t port, sockaddr_in *serverAddr, bool loopbackOnly)
 {
     memset(serverAddr, 0, sizeof(struct sockaddr_in));
     serverAddr->sin_family = AF_INET;
@@ -42,8 +20,7 @@ void SocketFunc::setServerAddress(uint16_t port, sockaddr_in *serverAddr,
     serverAddr->sin_addr.s_addr = htobe32(ip);
 }
 
-void SocketFunc::setServerAddress(uint16_t port, sockaddr_in6 *serverAddr6,
-                                  bool loopbackOnly)
+void SocketFunc::setServerAddress(uint16_t port, sockaddr_in6 *serverAddr6, bool loopbackOnly)
 {
     memset(serverAddr6, 0, sizeof(struct sockaddr_in6));
     serverAddr6->sin6_family = AF_INET6;
@@ -52,56 +29,41 @@ void SocketFunc::setServerAddress(uint16_t port, sockaddr_in6 *serverAddr6,
     serverAddr6->sin6_addr = ip;
 }
 
-void SocketFunc::setServerAddress(const char *ip, uint16_t port,
-                                  sockaddr_in *serverAddr)
+void SocketFunc::setServerAddress(const char *ip, uint16_t port, sockaddr_in *serverAddr)
 {
     memset(serverAddr, 0, sizeof(struct sockaddr_in));
     serverAddr->sin_family = AF_INET;
     serverAddr->sin_port = hostToNetwork16(port);
-    if (::inet_pton(AF_INET, ip, &serverAddr->sin_addr) <= 0)
-    {
+    if (::inet_pton(AF_INET, ip, &serverAddr->sin_addr) <= 0) {
         LOG_ERROR << "SocketFunc::setServerAddr";
     }
 }
 
-void SocketFunc::setServerAddress(const char *ip, uint16_t port,
-                                  sockaddr_in6 *serverAddr6)
+void SocketFunc::setServerAddress(const char *ip, uint16_t port, sockaddr_in6 *serverAddr6)
 {
     memset(serverAddr6, 0, sizeof(struct sockaddr_in6));
     serverAddr6->sin6_family = AF_INET;
     serverAddr6->sin6_port = hostToNetwork16(port);
-    if (::inet_pton(AF_INET6, ip, &serverAddr6->sin6_addr) <= 0)
-    {
+    if (::inet_pton(AF_INET6, ip, &serverAddr6->sin6_addr) <= 0) {
         LOG_ERROR << "SocketFunc::serServerAddr";
     }
 }
 
 int SocketFunc::createNonblockingOrDie(sa_family_t family)
 {
-#if VALGRIND
-    int sockfd = ::socket(family, SOCK_STREAM, IPPROTO_TCP);
-    if (sockfd < 0)
-    {
-        LOG_FATAL << "SocketFunc::createNonblockingOrDie";
-    }
-
-    setNonBlockAndCloseOnExec(sockfd);
-#else
     int sockfd = ::socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
-    if (sockfd < 0)
-    {
+    if (sockfd < 0) {
         LOG_FATAL << "SocketFunc::createNonblockingOrDie";
     }
-#endif
     return sockfd;
 }
 
 void SocketFunc::bind(const int fd, const sockaddr *addr)
 {
-    int ret = ::bind(fd, reinterpret_cast<const sockaddr *>(addr),
+    int ret = ::bind(fd,
+                     reinterpret_cast<const sockaddr *>(addr),
                      socklen_t(sizeof(struct sockaddr_in)));
-    if (ret < 0)
-    {
+    if (ret < 0) {
         LOG_FATAL << "bind error:" << errno;
         return;
     }
@@ -110,8 +72,7 @@ void SocketFunc::bind(const int fd, const sockaddr *addr)
 void SocketFunc::listen(const int serverfd)
 {
     int ret_ = ::listen(serverfd, SOMAXCONN);
-    if (ret_ < 0)
-    {
+    if (ret_ < 0) {
         LOG_FATAL << "listen error:" << errno;
         return;
     }
@@ -121,23 +82,14 @@ void SocketFunc::listen(const int serverfd)
 int SocketFunc::accept(const int serverfd, sockaddr_in6 *clientAddr)
 {
     socklen_t addrlen = socklen_t(sizeof *clientAddr);
-#if VALGRIND || defined (NO_ACCEPT4)
-    int connfd = ::accept(sockfd,
-                          reinterpret_cast<sockaddr*>(clientAddr),
-                          &addrlen);
-    setNonBlockAndCloseOnExec(connfd);
-#else
     int connfd = ::accept4(serverfd,
-                           reinterpret_cast<sockaddr*>(clientAddr),
+                           reinterpret_cast<sockaddr *>(clientAddr),
                            &addrlen,
                            SOCK_NONBLOCK | SOCK_CLOEXEC);
-#endif
-    if (connfd < 0)
-    {
+    if (connfd < 0) {
         int savedErrno = errno;
         LOG_ERROR << "Socket::accept";
-        switch (savedErrno)
-        {
+        switch (savedErrno) {
         case EAGAIN:
         case ECONNABORTED:
         case EINTR:
@@ -158,47 +110,40 @@ int SocketFunc::accept(const int serverfd, sockaddr_in6 *clientAddr)
             // unexpected errors
             LOG_FATAL << "unexpected error of ::accept " << savedErrno;
             break;
-        default:
-            LOG_FATAL << "unknown error of ::accept " << savedErrno;
-            break;
+        default: LOG_FATAL << "unknown error of ::accept " << savedErrno; break;
         }
+        return connfd;
     }
-    LOG_DEBUG << "Client Online: "
-              << SocketFunc::getIpAndPort(
-                     reinterpret_cast<const sockaddr*>(clientAddr));
+    LOG_INFO << "Client Online: "
+             << SocketFunc::getIpAndPort(reinterpret_cast<const sockaddr *>(clientAddr));
     return connfd;
 }
 
 int SocketFunc::connect(int sockfd, const sockaddr *addr)
 {
-
     int ret = ::connect(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
-    if (ret == -1)
-    {
+    if (ret == -1) {
         // 115 Operation now in progress
         // 原因 createNonblockingOrDie函数  参数SOCK_NONBLOCK
         LOG_ERROR << "connect Server error";
         return ret;
     }
 
-    LOG_DEBUG << "Successfully connected to the server: " << SocketFunc::getIpAndPort(addr);
+    LOG_INFO << "Successfully connected to the server: " << SocketFunc::getIpAndPort(addr);
     return ret;
 }
 
 void SocketFunc::shutdownWrite(int sockfd)
 {
-    if (::shutdown(sockfd, SHUT_WR) < 0)
-    {
+    if (::shutdown(sockfd, SHUT_WR) < 0) {
         LOG_ERROR << "SocketFunc::shutdownWrite";
     }
 }
 
 void SocketFunc::close(int sockfd)
 {
-    if (sockfd > 0)
-    {
-        if (::close(sockfd) < 0)
-        {
+    if (sockfd > 0) {
+        if (::close(sockfd) < 0) {
             LOG_ERROR << "SocketFunc::close";
         }
     }
@@ -206,22 +151,15 @@ void SocketFunc::close(int sockfd)
 
 std::string SocketFunc::getIp(const sockaddr *addr)
 {
-    char buf[64];   //INET_ADDRSTRLEN INET6_ADDRSTRLEN
-    if(addr->sa_family == AF_INET)
-    {
-        const struct sockaddr_in* addr4 =
-                reinterpret_cast<const struct sockaddr_in*>(addr);
-        if(nullptr == ::inet_ntop(AF_INET, &addr4->sin_addr, buf,
-                                  socklen_t(sizeof buf))){
+    char buf[64]; //INET_ADDRSTRLEN INET6_ADDRSTRLEN
+    if (addr->sa_family == AF_INET) {
+        const struct sockaddr_in *addr4 = reinterpret_cast<const struct sockaddr_in *>(addr);
+        if (nullptr == ::inet_ntop(AF_INET, &addr4->sin_addr, buf, socklen_t(sizeof buf))) {
             LOG_ERROR << "SocketFunc::getIp" << buf;
         }
-    }
-    else if(addr->sa_family == AF_INET6)
-    {
-        const struct sockaddr_in6* addr6 =
-                reinterpret_cast<const struct sockaddr_in6*>(addr);
-        if(nullptr == ::inet_ntop(AF_INET6, &addr6->sin6_addr, buf,
-                                  socklen_t(sizeof buf))){
+    } else if (addr->sa_family == AF_INET6) {
+        const struct sockaddr_in6 *addr6 = reinterpret_cast<const struct sockaddr_in6 *>(addr);
+        if (nullptr == ::inet_ntop(AF_INET6, &addr6->sin6_addr, buf, socklen_t(sizeof buf))) {
             LOG_ERROR << "SocketFunc::getIp" << buf;
         }
     }
@@ -230,8 +168,7 @@ std::string SocketFunc::getIp(const sockaddr *addr)
 
 uint16_t SocketFunc::getPort(const sockaddr *addr)
 {
-    const struct sockaddr_in* addr4 =
-            reinterpret_cast<const struct sockaddr_in*>(addr);
+    const struct sockaddr_in *addr4 = reinterpret_cast<const struct sockaddr_in *>(addr);
     return be16toh(addr4->sin_port);
 }
 
@@ -264,8 +201,7 @@ int SocketFunc::getSocketError(int sockfd)
     int optval;
     socklen_t optlen = static_cast<socklen_t>(sizeof optval);
 
-    if (::getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0)
-    {
+    if (::getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0) {
         return errno;
     }
     return optval;
@@ -275,17 +211,15 @@ bool SocketFunc::isSelfConnect(int sockfd)
 {
     struct sockaddr_in6 localaddr = getLocalAddr(sockfd);
     struct sockaddr_in6 peeraddr = getPeerAddr(sockfd);
-    if (localaddr.sin6_family == AF_INET)
-    {
-        const struct sockaddr_in* laddr4 = reinterpret_cast<struct sockaddr_in*>(&localaddr);
-        const struct sockaddr_in* raddr4 = reinterpret_cast<struct sockaddr_in*>(&peeraddr);
+    if (localaddr.sin6_family == AF_INET) {
+        const struct sockaddr_in *laddr4 = reinterpret_cast<struct sockaddr_in *>(&localaddr);
+        const struct sockaddr_in *raddr4 = reinterpret_cast<struct sockaddr_in *>(&peeraddr);
         return laddr4->sin_port == raddr4->sin_port
-                && laddr4->sin_addr.s_addr == raddr4->sin_addr.s_addr;
-    }
-    else if (localaddr.sin6_family == AF_INET6)
-    {
+               && laddr4->sin_addr.s_addr == raddr4->sin_addr.s_addr;
+    } else if (localaddr.sin6_family == AF_INET6) {
         return localaddr.sin6_port == peeraddr.sin6_port
-                && memcmp(&localaddr.sin6_addr, &peeraddr.sin6_addr, sizeof localaddr.sin6_addr) == 0;
+               && memcmp(&localaddr.sin6_addr, &peeraddr.sin6_addr, sizeof localaddr.sin6_addr)
+                      == 0;
     }
     return false;
 }
@@ -295,8 +229,7 @@ sockaddr_in6 SocketFunc::getLocalAddr(int sockfd)
     struct sockaddr_in6 localaddr;
     memset(&localaddr, 0, sizeof localaddr);
     socklen_t addrlen = static_cast<socklen_t>(sizeof localaddr);
-    if (::getsockname(sockfd, reinterpret_cast<struct sockaddr*>(&localaddr), &addrlen) < 0)
-    {
+    if (::getsockname(sockfd, reinterpret_cast<struct sockaddr *>(&localaddr), &addrlen) < 0) {
         LOG_ERROR << "SocketFunc::getLocalAddr";
     }
     return localaddr;
@@ -307,8 +240,7 @@ sockaddr_in6 SocketFunc::getPeerAddr(int sockfd)
     struct sockaddr_in6 peeraddr;
     memset(&peeraddr, 0, sizeof peeraddr);
     socklen_t addrlen = static_cast<socklen_t>(sizeof peeraddr);
-    if (::getpeername(sockfd, reinterpret_cast<struct sockaddr*>(&peeraddr), &addrlen) < 0)
-    {
+    if (::getpeername(sockfd, reinterpret_cast<struct sockaddr *>(&peeraddr), &addrlen) < 0) {
         LOG_ERROR << "SocketFunc::getPeerAddr";
     }
     return peeraddr;
@@ -344,6 +276,6 @@ uint16_t SocketFunc::networkToHost16(uint16_t net16)
     return be16toh(net16);
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth

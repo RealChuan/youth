@@ -24,8 +24,7 @@ int createEventfd()
 {
     int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (evtfd < 0) {
-        LOG_ERROR << "Failed in eventfd";
-        abort();
+        LOG_FATAL << "Failed in eventfd";
     }
     return evtfd;
 }

@@ -6,28 +6,37 @@
 #include <assert.h>
 #include <netdb.h>
 
-namespace youth
-{
+namespace youth {
 
 using namespace utils;
 
-namespace net
-{
+namespace net {
 
 TcpAddressInfo::TcpAddressInfo(uint16_t port, bool loopbackOnly, bool ipv6)
 {
-    if(ipv6)
+    if (ipv6) {
         SocketFunc::setServerAddress(port, &m_serveraddr6, loopbackOnly);
-    else
+    } else {
         SocketFunc::setServerAddress(port, &m_serveraddr, loopbackOnly);
+    }
 }
 
 TcpAddressInfo::TcpAddressInfo(const char *ip, uint16_t port, bool ipv6)
 {
-    if(ipv6)
+    if (ipv6) {
         SocketFunc::setServerAddress(ip, port, &m_serveraddr6);
-    else
+    } else {
         SocketFunc::setServerAddress(ip, port, &m_serveraddr);
+    }
+}
+
+bool TcpAddressInfo::operator==(const TcpAddressInfo &other) const
+{
+    if (m_serveraddr.sin_family != other.m_serveraddr.sin_family) {
+        return false;
+    }
+
+    return ipAndPort() == other.ipAndPort();
 }
 
 std::string TcpAddressInfo::ip() const
@@ -45,34 +54,60 @@ std::string TcpAddressInfo::ipAndPort() const
     return SocketFunc::getIpAndPort(sockAddr());
 }
 
-static __thread char t_resolveBuf[64 * 1024];
-
-bool TcpAddressInfo::resolve(std::string hostname, TcpAddressInfo *out)
+std::vector<TcpAddressInfo> TcpAddressInfo::resolve(const std::string &hostname)
 {
-    assert(out != NULL);
-    struct hostent hent;
-    struct hostent* he = NULL;
-    int herrno = 0;
-    memset(&hent, 0, sizeof(hent));
-
-    int ret = gethostbyname_r(hostname.c_str(), &hent, t_resolveBuf,
-                              sizeof t_resolveBuf, &he, &herrno);
-    if (ret == 0 && he != NULL)
-    {
-        assert(he->h_addrtype == AF_INET && he->h_length == sizeof(uint32_t));
-        out->m_serveraddr.sin_addr = *reinterpret_cast<struct in_addr*>(he->h_addr);
-        return true;
-    }
-    else
-    {
-        if (ret)
-        {
-            LOG_ERROR << "TcpAddressInfo::resolve";
+    std::vector<TcpAddressInfo> infos;
+    addrinfo *res = nullptr;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    int result = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
+    if (result == 0) {
+        addrinfo *node = res;
+        while (node) {
+            LOG_DEBUG << "getaddrinfo node: flags:" << node->ai_flags
+                      << "family:" << node->ai_family << "ai_socktype:" << node->ai_socktype
+                      << "ai_protocol:" << node->ai_protocol << "ai_addrlen:" << node->ai_addrlen;
+            switch (node->ai_family) {
+            case AF_INET: {
+                TcpAddressInfo info(*reinterpret_cast<sockaddr_in *>(node->ai_addr));
+                if (infos.end() == std::find(infos.begin(), infos.end(), info)) {
+                    infos.push_back(info);
+                }
+                break;
+            }
+            case AF_INET6: {
+                TcpAddressInfo info(*reinterpret_cast<sockaddr_in6 *>(node->ai_addr));
+                if (infos.end() == std::find(infos.begin(), infos.end(), info)) {
+                    infos.push_back(info);
+                }
+                break;
+            }
+            default: LOG_ERROR << "TcpAddressInfo::resolve"; break;
+            }
+            node = node->ai_next;
         }
-        return false;
+        freeaddrinfo(res);
+    } else {
+        switch (result) {
+#ifdef Q_OS_WIN
+        case WSAHOST_NOT_FOUND: //authoritative not found
+        case WSATRY_AGAIN:      //non authoritative not found
+        case WSANO_DATA:        //valid name, no associated address
+#else
+        case EAI_NONAME:
+        case EAI_FAIL:
+#ifdef EAI_NODATA // EAI_NODATA is deprecated in RFC 3493
+        case EAI_NODATA:
+#endif
+#endif
+            LOG_ERROR << "Host not found: " << gai_strerror(result);
+            break;
+        }
     }
+    return infos;
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth

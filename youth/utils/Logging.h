@@ -4,6 +4,7 @@
 #include "LogStream.h"
 
 #include <memory>
+#include <string>
 
 namespace youth {
 
@@ -36,7 +37,8 @@ public:
     static LogLevel getLogLevel() { return s_logLevel; }
     //设置输出模式的，支持3种输出模式
     static void setOutputMode(int iMode);
-    static void setFileBaseName(const char *);
+
+    static void setDirectoryAndBaseName(const std::string &directory, const std::string &basename);
 
     static void setOutputFunc(outputFunc Func) { s_outputFunc = Func; }
 

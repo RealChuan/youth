@@ -6,7 +6,7 @@ using namespace youth::utils;
 int main(int argc, char **argv)
 {
     //设置日志名字
-    Logging::setFileBaseName(argv[0]);
+    Logging::setDirectoryAndBaseName("/tmp/Youth/", argv[0]); // must
 
     //异步模式设置
     LogAsync *logAsync = &LogAsync::instance();

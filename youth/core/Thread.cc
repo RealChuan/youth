@@ -2,6 +2,7 @@
 #include "CurrentThread.h"
 
 #include <assert.h>
+#include <sstream>
 
 namespace youth {
 
@@ -44,6 +45,13 @@ void Thread::join()
     if (m_thread.joinable()) {
         m_thread.join();
     }
+}
+
+std::string Thread::threadIdString(const std::thread::id &id)
+{
+    std::ostringstream oss;
+    oss << id;
+    return oss.str();
 }
 
 void Thread::threadFunc()

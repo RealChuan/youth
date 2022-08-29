@@ -1,13 +1,13 @@
-#include <assert.h>
-#include <sys/epoll.h>
-#include <unistd.h>
-
-#include "Channel.h"
 #include "Epoll.h"
+#include "Channel.h"
 #include "EventLoop.h"
 #include "Socket.h"
 
 #include <youth/utils/Logging.h>
+
+#include <assert.h>
+#include <sys/epoll.h>
+#include <unistd.h>
 
 namespace youth {
 
@@ -38,7 +38,7 @@ DateTime Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
     int numEvents = ::epoll_wait(m_epollfd, m_eventVec.data(), int(m_eventVec.size()), timeoutMs);
     int savedErrno = errno;
-    DateTime timestamp(DateTime::currentDateTime());
+    auto timestamp(DateTime::currentDateTime());
     if (numEvents > 0) {
         LOG_DEBUG << numEvents << " events happened";
         fillActiveChannels(numEvents, activeChannels);
@@ -124,7 +124,6 @@ void Epoll::fillActiveChannels(int numEvents, ChannelList *activeChannels) const
 {
     assert(numEvents <= int(m_eventVec.size()));
     for (int i = 0; i < numEvents; ++i) {
-        // why can Conversion ?
         Channel *channel = static_cast<Channel *>(m_eventVec[i].data.ptr);
 #ifndef NDEBUG
         int fd = channel->fd();
@@ -152,7 +151,7 @@ void Epoll::update(int operation, Channel *channel)
     struct epoll_event event;
     memset(&event, 0, sizeof event);
     event.events = channel->events();
-    event.data.ptr = channel;
+    event.data.ptr = channel; // save channel to ptr
     int fd = channel->fd();
     LOG_DEBUG << "epoll_ctl op = " << operationToString(operation) << " fd = " << fd
               << " event = { " << channel->eventsToString() << " }";

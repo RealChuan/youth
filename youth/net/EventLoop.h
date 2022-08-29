@@ -21,11 +21,12 @@ namespace net {
 class TimerQueue;
 class Channel;
 class Epoll;
+
 class EventLoop : noncopyable
 {
-    typedef std::function<void()> Functor;
-
 public:
+    using Functor = std::function<void()>;
+
     EventLoop();
     ~EventLoop();
 
