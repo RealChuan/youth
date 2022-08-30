@@ -13,6 +13,7 @@ class Buffer;
 }
 
 namespace http {
+
 class HttpResponse : core::noncopyable
 {
 public:
@@ -55,6 +56,7 @@ private:
     bool m_closeConnection;
     std::string m_body;
 };
+
 } // namespace http
 
 } // namespace youth

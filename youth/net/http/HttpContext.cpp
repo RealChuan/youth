@@ -7,6 +7,7 @@
 namespace youth {
 
 namespace http {
+
 bool HttpContext::parseRequest(net::Buffer *buf, DateTime receiveTime)
 {
     bool ok = true;
@@ -80,6 +81,7 @@ bool HttpContext::processRequestLine(const char *begin, const char *end)
     }
     return succeed;
 }
+
 } // namespace http
 
 } // namespace youth

@@ -3,6 +3,7 @@
 #include <youth/core/CountDownLatch.h>
 
 #include <assert.h>
+#include <unistd.h>
 
 namespace youth {
 
@@ -89,6 +90,12 @@ void ThreadPool::run(Task task)
         m_queue.push_back(std::move(task));
         m_notEmpty.notify_one();
     }
+}
+
+long ThreadPool::cpuCores()
+{
+    //sysconf(_SC_NPROCESSORS_ONLN);
+    return sysconf(_SC_NPROCESSORS_CONF);
 }
 
 ThreadPool::Task ThreadPool::take()

@@ -36,10 +36,10 @@ private:
     // FIXME: use unique_ptr<Timer> instead of raw pointers.
     // This requires heterogeneous comparison lookup (N3465) from C++14
     // so that we can find an T* in a set<unique_ptr<T>>.
-    typedef std::pair<DateTime, Timer *> Entry;
-    typedef std::set<Entry> TimerList;
-    typedef std::pair<Timer *, int64_t> ActiveTimer;
-    typedef std::set<ActiveTimer> ActiveTimerSet;
+    using Entry = std::pair<DateTime, Timer *>;
+    using TimerList = std::set<Entry>;
+    using ActiveTimer = std::pair<Timer *, int64_t>;
+    using ActiveTimerSet = std::set<ActiveTimer>;
 
     void addTimerInLoop(Timer *timer);
     void cancelInLoop(TimerId timerId);

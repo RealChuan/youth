@@ -37,9 +37,9 @@
       7. [EventLoop](./youth/net/EventLoop.h)-----------事件循环类；  
       8. [EventLoopThread](./youth/net/EventLoopThread.h)-----------绑定事件循环的线程；  
       9. [EventLoopThreadPool](./youth/net/EventLoopThreadPool.h)-----------绑定事件循环的线程池；  
-      10. [Socket](./youth/net/Socket.h)-----------TCP服务建立类；  
-      11. [SocketFunc](./youth/net/SocketFunc.h)-----------TCP相关函数封装；  
-      12. [TcpAddressInfo](./youth/net/TcpAddressInfo.h)-----------TCP地址相关信息类；  
+      10. [HostAddress](./youth/net/HostAddress.hpp)-----------主机地址信息类；  
+      11. [Socket](./youth/net/Socket.h)-----------TCP服务建立类；  
+      12. [SocketFunc](./youth/net/SocketFunc.h)-----------TCP相关函数封装；    
       13. [TcpClient](./youth/net/TcpClient.h)-----------TCP客户端类；  
       14. [TcpConnection](./youth/net/TcpConnection.h)-----------TCP连接处理类；  
       15. [TcpServer](./youth/net/TcpServer.h)-----------TCP服务端类；  

@@ -11,7 +11,7 @@ using namespace core;
 
 namespace net {
 
-class TcpAddressInfo;
+class HostAddress;
 class Socket : noncopyable
 {
 public:
@@ -23,7 +23,7 @@ public:
     bool getTcpInfo(struct tcp_info *) const;
     bool getTcpInfoString(char *buf, int len) const;
 
-    void bindAddress(const TcpAddressInfo &);
+    void bindAddress(const HostAddress &);
 
     void listen();
 
@@ -31,7 +31,7 @@ public:
     /// a descriptor for the accepted socket, which has been
     /// set to non-blocking and close-on-exec. *peeraddr is assigned.
     /// On error, -1 is returned, and *peeraddr is untouched.
-    int accept(TcpAddressInfo *peeraddr);
+    int accept(HostAddress *peeraddr);
 
     void shutdownWrite();
 

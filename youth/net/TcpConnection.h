@@ -6,7 +6,7 @@
 
 #include "Buffer.h"
 #include "Callbacks.h"
-#include "TcpAddressInfo.h"
+#include "HostAddress.hpp"
 
 struct tcp_info;
 
@@ -23,14 +23,14 @@ public:
     TcpConnection(EventLoop *loop,
                   const std::string &name,
                   int sockfd,
-                  const TcpAddressInfo &localAddr,
-                  const TcpAddressInfo &peerAddr);
+                  const HostAddress &localAddr,
+                  const HostAddress &peerAddr);
     ~TcpConnection();
 
     EventLoop *eventLoop() const { return m_eventLoop; }
     const std::string &name() const { return m_name; }
-    const TcpAddressInfo &localAddress() const { return m_localAddr; }
-    const TcpAddressInfo &peerAddress() const { return m_peerAddr; }
+    const HostAddress &localAddress() const { return m_localAddr; }
+    const HostAddress &peerAddress() const { return m_peerAddr; }
     bool connected() const { return m_state == kConnected; }
     bool disconnected() const { return m_state == kDisconnected; }
     // return true if success.
@@ -109,8 +109,8 @@ private:
     // we don't expose those classes to client.
     std::unique_ptr<Socket> m_socketPtr;
     std::unique_ptr<Channel> m_channelPtr;
-    const TcpAddressInfo m_localAddr;
-    const TcpAddressInfo m_peerAddr;
+    const HostAddress m_localAddr;
+    const HostAddress m_peerAddr;
     ConnectionCallback m_connectionCallback;
     MessageCallback m_messageCallback;
     WriteCompleteCallback m_writeCompleteCallback;

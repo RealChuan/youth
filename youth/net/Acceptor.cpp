@@ -1,26 +1,22 @@
 #include "Acceptor.h"
-#include "SocketFunc.h"
-#include "TcpAddressInfo.h"
 #include "Channel.h"
-#include "Socket.h"
 #include "EventLoop.h"
+#include "HostAddress.hpp"
+#include "Socket.h"
+#include "SocketFunc.h"
 
 #include <youth/utils/Logging.h>
 
-#include <fcntl.h>
 #include <assert.h>
+#include <fcntl.h>
 
-namespace youth
-{
+namespace youth {
 
 using namespace utils;
 
-namespace net
-{
+namespace net {
 
-Acceptor::Acceptor(EventLoop *loop,
-                   const TcpAddressInfo &listenAddr,
-                   bool reuseport)
+Acceptor::Acceptor(EventLoop *loop, const HostAddress &listenAddr, bool reuseport)
     : m_eventLoop(loop)
     , m_acceptSocketPtr(new Socket(SocketFunc::createNonblockingOrDie(listenAddr.family())))
     , m_acceptChannelPtr(new Channel(loop, m_acceptSocketPtr->fd()))
@@ -53,30 +49,23 @@ void Acceptor::listen()
 void Acceptor::handleRead()
 {
     m_eventLoop->assertInLoopThread();
-    TcpAddressInfo peerAddr;
+    HostAddress peerAddr;
     //FIXME loop until no more
     int connfd = m_acceptSocketPtr->accept(&peerAddr);
-    if (connfd >= 0)
-    {
+    if (connfd >= 0) {
         // string hostport = peerAddr.toIpPort();
         // LOG_TRACE << "Accepts of " << hostport;
-        if (m_newConnectionCallback)
-        {
+        if (m_newConnectionCallback) {
             m_newConnectionCallback(connfd, peerAddr);
-        }
-        else
-        {
+        } else {
             SocketFunc::close(connfd);
         }
-    }
-    else
-    {
+    } else {
         LOG_ERROR << "in Acceptor::handleRead";
         // Read the section named "The special problem of
         // accept()ing when you can't" in libev's doc.
         // By Marc Lehmann, author of libev.
-        if (errno == EMFILE)
-        {
+        if (errno == EMFILE) {
             SocketFunc::close(m_idleFd);
             m_idleFd = ::accept(m_acceptSocketPtr->fd(), NULL, NULL);
             SocketFunc::close(m_idleFd);
@@ -85,6 +74,6 @@ void Acceptor::handleRead()
     }
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth

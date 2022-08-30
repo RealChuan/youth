@@ -31,8 +31,8 @@ void defaultMessageCallback(const TcpConnectionPtr &, Buffer *buf, DateTime)
 TcpConnection::TcpConnection(EventLoop *loop,
                              const std::string &name,
                              int sockfd,
-                             const TcpAddressInfo &localAddr,
-                             const TcpAddressInfo &peerAddr)
+                             const HostAddress &localAddr,
+                             const HostAddress &peerAddr)
     : m_eventLoop(CHECK_NOTNULL(loop))
     , m_name(name)
     , m_state(kConnecting)
@@ -188,30 +188,33 @@ void TcpConnection::handleRead(DateTime receiveTime)
 void TcpConnection::handleWrite()
 {
     m_eventLoop->assertInLoopThread();
-    if (m_channelPtr->isWriting()) {
-        ssize_t n = SocketFunc::write(m_channelPtr->fd(),
-                                      m_outputBuffer.peek(),
-                                      m_outputBuffer.readableBytes());
-        if (n > 0) {
-            m_outputBuffer.retrieve(n);
-            if (m_outputBuffer.readableBytes() == 0) {
-                m_channelPtr->disableWriting();
-                if (m_writeCompleteCallback) {
-                    m_eventLoop->queueInLoop(std::bind(m_writeCompleteCallback, shared_from_this()));
-                }
-                if (m_state == kDisconnecting) {
-                    shutdownInLoop();
-                }
-            }
-        } else {
-            LOG_ERROR << "TcpConnection::handleWrite";
-            // if (state_ == kDisconnecting)
-            // {
-            //   shutdownInLoop();
-            // }
-        }
-    } else {
-        LOG_DEBUG << "Connection fd = " << m_channelPtr->fd() << " is down, no more writing";
+    if (!m_channelPtr->isWriting()) {
+        LOG_WARN << "Connection fd = " << m_channelPtr->fd() << " is down, no more writing";
+        return;
+    }
+
+    ssize_t n = SocketFunc::write(m_channelPtr->fd(),
+                                  m_outputBuffer.peek(),
+                                  m_outputBuffer.readableBytes());
+    if (n <= 0) {
+        LOG_ERROR << "TcpConnection::handleWrite";
+        // if (state_ == kDisconnecting)
+        // {
+        //   shutdownInLoop();
+        // }
+    }
+
+    m_outputBuffer.retrieve(n);
+    if (m_outputBuffer.readableBytes() != 0) {
+        return;
+    }
+
+    m_channelPtr->disableWriting();
+    if (m_writeCompleteCallback) {
+        m_eventLoop->queueInLoop(std::bind(m_writeCompleteCallback, shared_from_this()));
+    }
+    if (m_state == kDisconnecting) {
+        shutdownInLoop();
     }
 }
 

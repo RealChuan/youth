@@ -1,5 +1,5 @@
 #include <youth/net/EventLoop.h>
-#include <youth/net/TcpAddressInfo.h>
+#include <youth/net/HostAddress.hpp>
 #include <youth/net/http/HttpRequest.h>
 #include <youth/net/http/HttpResponse.h>
 #include <youth/net/http/HttpServer.h>
@@ -99,7 +99,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 int main()
 {
     EventLoop loop;
-    HttpServer server(&loop, TcpAddressInfo(8000), "Test");
+    HttpServer server(&loop, HostAddress(8000), "Test");
     server.setHttpCallback(onRequest);
     server.setThreadNum(4);
     server.start();

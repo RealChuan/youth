@@ -14,64 +14,62 @@ using namespace core;
 namespace net {
 
 class Connector;
-typedef std::shared_ptr<Connector> ConnectorPtr;
+using ConnectorPtr = std::shared_ptr<Connector>;
 
 class EventLoop;
-class TcpAddressInfo;
-class TcpClient : noncopyable {
+class HostAddress;
+class TcpClient : noncopyable
+{
 public:
-  TcpClient(EventLoop *loop, const TcpAddressInfo &serverAddr,
-            const std::string &name);
-  ~TcpClient();
+    TcpClient(EventLoop *loop, const HostAddress &serverAddr, const std::string &name);
+    ~TcpClient();
 
-  void connect();
-  void disconnect();
-  void stop();
+    void connect();
+    void disconnect();
+    void stop();
 
-  TcpConnectionPtr connection() const {
-    MutexLock lock(m_mutex);
-    return m_tcpConnectionPtr;
-  }
+    TcpConnectionPtr connection() const
+    {
+        MutexLock lock(m_mutex);
+        return m_tcpConnectionPtr;
+    }
 
-  EventLoop *eventLoop() const { return m_eventLoop; }
-  bool retry() const { return m_retry; }
-  void enableRetry() { m_retry = true; }
+    EventLoop *eventLoop() const { return m_eventLoop; }
+    bool retry() const { return m_retry; }
+    void enableRetry() { m_retry = true; }
 
-  const std::string &name() const { return m_name; }
+    const std::string &name() const { return m_name; }
 
-  /// Not thread safe.
-  void setConnectionCallback(ConnectionCallback cb) {
-    m_connectionCallback = std::move(cb);
-  }
+    /// Not thread safe.
+    void setConnectionCallback(ConnectionCallback cb) { m_connectionCallback = std::move(cb); }
 
-  /// Not thread safe.
-  void setMessageCallback(MessageCallback cb) {
-    m_messageCallback = std::move(cb);
-  }
+    /// Not thread safe.
+    void setMessageCallback(MessageCallback cb) { m_messageCallback = std::move(cb); }
 
-  /// Not thread safe.
-  void setWriteCompleteCallback(WriteCompleteCallback cb) {
-    m_writeCompleteCallback = std::move(cb);
-  }
+    /// Not thread safe.
+    void setWriteCompleteCallback(WriteCompleteCallback cb)
+    {
+        m_writeCompleteCallback = std::move(cb);
+    }
 
 private:
-  /// Not thread safe, but in loop
-  void newConnection(int sockfd);
-  /// Not thread safe, but in loop
-  void removeConnection(const TcpConnectionPtr &conn);
+    /// Not thread safe, but in loop
+    void newConnection(int sockfd);
+    /// Not thread safe, but in loop
+    void removeConnection(const TcpConnectionPtr &conn);
 
-  EventLoop *m_eventLoop;
-  ConnectorPtr m_connectorPtr; // avoid revealing Connector
-  const std::string m_name;
-  ConnectionCallback m_connectionCallback;
-  MessageCallback m_messageCallback;
-  WriteCompleteCallback m_writeCompleteCallback;
-  bool m_retry;   // atomic
-  bool m_connect; // atomic
-  // always in loop thread
-  int m_nextConnId;
-  mutable Mutex m_mutex;
-  TcpConnectionPtr m_tcpConnectionPtr;
+    EventLoop *m_eventLoop;
+    ConnectorPtr m_connectorPtr; // avoid revealing Connector
+    const std::string m_name;
+    ConnectionCallback m_connectionCallback;
+    MessageCallback m_messageCallback;
+    WriteCompleteCallback m_writeCompleteCallback;
+    bool m_retry;   // atomic
+    bool m_connect; // atomic
+    // always in loop thread
+    int m_nextConnId;
+    mutable Mutex m_mutex;
+    TcpConnectionPtr m_tcpConnectionPtr;
 };
 
 } // namespace net

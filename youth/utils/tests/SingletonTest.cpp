@@ -7,11 +7,11 @@
 using namespace youth::utils;
 using namespace youth::core;
 
+static std::atomic_int64_t s_num = 0;
+
 class Sing
 {
     SINGLETON(Sing)
-
-    bool m_state = false;
 
 public:
     void print() { LOG_INFO << "Hello World!"; }
@@ -19,13 +19,13 @@ public:
 
 Sing::Sing()
 {
-    EXPECT_FALSE(m_state);
-    m_state = true;
+    EXPECT_EQ(s_num.load(), 0);
+    s_num++;
     LOG_INFO << "Sing";
 }
 Sing::~Sing()
 {
-    EXPECT_TRUE(m_state);
+    EXPECT_EQ(s_num.load(), 1);
     LOG_INFO << "~Sing";
 }
 

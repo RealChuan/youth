@@ -14,7 +14,7 @@ namespace youth {
 
 namespace rpc {
 
-typedef std::shared_ptr<google::protobuf::Message> MessagePtr;
+using MessagePtr = std::shared_ptr<google::protobuf::Message>;
 
 class ProtobufCodecLite : core::noncopyable
 {
@@ -30,18 +30,18 @@ public:
         kCheckSumError,
         kInvalidNameLen,
         kUnknownMessageType,
-        kParseError,
+        kParseError
     };
 
     // return false to stop parsing protobuf message
-    typedef std::function<bool(const net::TcpConnectionPtr &, std::string_view, core::DateTime)>
-        RawMessageCallback;
+    using RawMessageCallback
+        = std::function<bool(const net::TcpConnectionPtr &, std::string_view, core::DateTime)>;
 
-    typedef std::function<void(const net::TcpConnectionPtr &, const MessagePtr &, DateTime)>
-        ProtobufMessageCallback;
+    using ProtobufMessageCallback
+        = std::function<void(const net::TcpConnectionPtr &, const MessagePtr &, DateTime)>;
 
-    typedef std::function<void(const net::TcpConnectionPtr &, net::Buffer *, DateTime, ErrorCode)>
-        ErrorCallback;
+    using ErrorCallback
+        = std::function<void(const net::TcpConnectionPtr &, net::Buffer *, DateTime, ErrorCode)>;
 
     ProtobufCodecLite(const ::google::protobuf::Message *prototype,
                       std::string_view tagArg,

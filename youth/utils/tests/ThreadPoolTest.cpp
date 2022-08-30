@@ -14,9 +14,12 @@ void test(int i)
 
 int main(int argc, char **argv)
 {
+    auto cpuCores = ThreadPool::cpuCores();
+    LOG_INFO << "CPU cores: " << cpuCores;
+
     ThreadPool threadPool("TestThreadPool");
     threadPool.setTaskNum(8);
-    threadPool.start(4);
+    threadPool.start(cpuCores * 2);
     for (int i = 0; i < 1000; i++) {
         threadPool.run([=] { test(i); });
     }

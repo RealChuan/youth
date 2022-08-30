@@ -1,39 +1,35 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
+#include "HostAddress.hpp"
 #include "Socket.h"
-#include "TcpAddressInfo.h"
 
-#include <memory>
 #include <functional>
+#include <memory>
 
-namespace youth
-{
+namespace youth {
 
 using namespace core;
 
-namespace net
-{
+namespace net {
 
 class Channel;
 class EventLoop;
-class Connector : noncopyable ,
-        public std::enable_shared_from_this<Connector>
+class Connector : noncopyable, public std::enable_shared_from_this<Connector>
 {
-    typedef std::function<void (int sockfd)> NewConnectionCallback;
 public:
-    Connector(EventLoop* loop, const TcpAddressInfo& serverAddr);
+    using NewConnectionCallback = std::function<void(int sockfd)>;
+
+    Connector(EventLoop *loop, const HostAddress &serverAddr);
     ~Connector();
 
-    void setNewConnectionCallback(const NewConnectionCallback& cb)
-    { m_newConnectionCallback = cb; }
+    void setNewConnectionCallback(const NewConnectionCallback &cb) { m_newConnectionCallback = cb; }
 
-    void start();  // can be called in any thread
-    void restart();  // must be called in loop thread
-    void stop();  // can be called in any thread
+    void start();   // can be called in any thread
+    void restart(); // must be called in loop thread
+    void stop();    // can be called in any thread
 
-    const TcpAddressInfo& serverAddress() const
-    { return m_serverAddr; }
+    const HostAddress &serverAddress() const { return m_serverAddr; }
 
 private:
     void startInLoop();
@@ -49,27 +45,22 @@ private:
     int removeAndResetChannel();
     void resetChannel();
 
-    enum States
-    {
-        kDisconnected,
-        kConnecting,
-        kConnected
-    };
+    enum States { kDisconnected, kConnecting, kConnected };
 
-    static const int kMaxRetryDelayMs = 30*1000;
+    static const int kMaxRetryDelayMs = 30 * 1000;
     static const int kInitRetryDelayMs = 500;
 
     States m_state = kDisconnected;
     bool m_connect = false; // atomic
     EventLoop *m_eventLoop;
     std::unique_ptr<Channel> m_channelPtr;
-    TcpAddressInfo m_serverAddr;
-    int m_retryDelayMs = kInitRetryDelayMs;   // 500ms
+    HostAddress m_serverAddr;
+    int m_retryDelayMs = kInitRetryDelayMs; // 500ms
     NewConnectionCallback m_newConnectionCallback;
 };
 
-}
+} // namespace net
 
-}
+} // namespace youth
 
 #endif // CONNECTOR_H

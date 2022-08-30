@@ -4,7 +4,7 @@
 #include "HttpResponse.h"
 
 #include <youth/net/EventLoop.h>
-#include <youth/net/TcpAddressInfo.h>
+#include <youth/net/HostAddress.hpp>
 #include <youth/net/TcpConnection.h>
 #include <youth/utils/Logging.h>
 
@@ -24,7 +24,7 @@ void defaultHttpCallback(const HttpRequest &, HttpResponse *resp)
 }
 
 HttpServer::HttpServer(net::EventLoop *loop,
-                       const net::TcpAddressInfo &listenAddr,
+                       const net::HostAddress &listenAddr,
                        const std::string &name,
                        net::TcpServer::Option option)
     : m_server(loop, listenAddr, name, option)

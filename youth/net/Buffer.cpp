@@ -1,17 +1,15 @@
 #include "Buffer.h"
 #include "SocketFunc.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 #include <memory>
 #include <string.h>
 #include <string_view>
 
-namespace youth
-{
+namespace youth {
 
-namespace net
-{
+namespace net {
 
 const char Buffer::kCRLF[] = "\r\n";
 
@@ -35,7 +33,7 @@ void Buffer::swap(Buffer &rhs)
 const char *Buffer::findCRLF() const
 {
     // FIXME: replace with memmem()?
-    const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF+2);
+    const char *crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
     return crlf == beginWrite() ? NULL : crlf;
 }
 
@@ -44,33 +42,30 @@ const char *Buffer::findCRLF(const char *start) const
     assert(peek() <= start);
     assert(start <= beginWrite());
     // FIXME: replace with memmem()?
-    const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF+2);
+    const char *crlf = std::search(start, beginWrite(), kCRLF, kCRLF + 2);
     return crlf == beginWrite() ? NULL : crlf;
 }
 
 const char *Buffer::findEOL() const
 {
-    const void* eol = memchr(peek(), '\n', readableBytes());
-    return static_cast<const char*>(eol);
+    const void *eol = memchr(peek(), '\n', readableBytes());
+    return static_cast<const char *>(eol);
 }
 
 const char *Buffer::findEOL(const char *start) const
 {
     assert(peek() <= start);
     assert(start <= beginWrite());
-    const void* eol = memchr(start, '\n', beginWrite() - start);
-    return static_cast<const char*>(eol);
+    const void *eol = memchr(start, '\n', beginWrite() - start);
+    return static_cast<const char *>(eol);
 }
 
 void Buffer::retrieve(size_t len)
 {
     assert(len <= readableBytes());
-    if (len < readableBytes())
-    {
+    if (len < readableBytes()) {
         m_readerIndex += len;
-    }
-    else
-    {
+    } else {
         retrieveAll();
     }
 }
@@ -93,14 +88,13 @@ std::string Buffer::retrieveAsString(size_t len)
 void Buffer::append(const char *data, size_t len)
 {
     ensureWritableBytes(len);
-    std::copy(data, data+len, beginWrite());
+    std::copy(data, data + len, beginWrite());
     hasWritten(len);
 }
 
 void Buffer::ensureWritableBytes(size_t len)
 {
-    if (writableBytes() < len)
-    {
+    if (writableBytes() < len) {
         makeSpace(len);
     }
     assert(writableBytes() >= len);
@@ -217,15 +211,15 @@ void Buffer::prepend(const void *data, size_t len)
 {
     assert(len <= prependableBytes());
     m_readerIndex -= len;
-    const char* d = static_cast<const char*>(data);
-    std::copy(d, d+len, begin()+m_readerIndex);
+    const char *d = static_cast<const char *>(data);
+    std::copy(d, d + len, begin() + m_readerIndex);
 }
 
 void Buffer::shrink(size_t reserve)
 {
     // FIXME: use vector::shrink_to_fit() in C++ 11 if possible.
     Buffer other;
-    other.ensureWritableBytes(readableBytes()+reserve);
+    other.ensureWritableBytes(readableBytes() + reserve);
     other.append(toStringPiece());
     swap(other);
 }
@@ -236,7 +230,7 @@ ssize_t Buffer::readFd(int fd, int *savedErrno)
     char extrabuf[65536];
     struct iovec vec[2];
     const size_t writable = writableBytes();
-    vec[0].iov_base = begin()+m_writerIndex;
+    vec[0].iov_base = begin() + m_writerIndex;
     vec[0].iov_len = writable;
     vec[1].iov_base = extrabuf;
     vec[1].iov_len = sizeof extrabuf;
@@ -244,47 +238,33 @@ ssize_t Buffer::readFd(int fd, int *savedErrno)
     // when extrabuf is used, we read 128k-1 bytes at most.
     const int iovcnt = (writable < sizeof extrabuf) ? 2 : 1;
     const ssize_t n = SocketFunc::readv(fd, vec, iovcnt);
-    if (n < 0)
-    {
+    if (n < 0) {
         *savedErrno = errno;
-    }
-    else if (static_cast<size_t>(n) <= writable)
-    {
+    } else if (static_cast<size_t>(n) <= writable) {
         m_writerIndex += n;
-    }
-    else
-    {
+    } else {
         m_writerIndex = m_bufferVec.size();
         append(extrabuf, n - writable);
     }
-    // if (n == writable + sizeof extrabuf)
-    // {
-    //   goto line_30;
-    // }
     return n;
 }
 
 void Buffer::makeSpace(size_t len)
 {
-    if (writableBytes() + prependableBytes() < len + kCheapPrepend)
-    {
+    if (writableBytes() + prependableBytes() < len + kCheapPrepend) {
         // FIXME: move readable data
         m_bufferVec.resize(m_writerIndex + len);
-    }
-    else
-    {
+    } else {
         // move readable data to the front, make space inside buffer
         assert(kCheapPrepend < m_readerIndex);
         size_t readable = readableBytes();
-        std::copy(begin() + m_readerIndex,
-                  begin() + m_writerIndex,
-                  begin() + kCheapPrepend);
+        std::copy(begin() + m_readerIndex, begin() + m_writerIndex, begin() + kCheapPrepend);
         m_readerIndex = kCheapPrepend;
         m_writerIndex = m_readerIndex + readable;
         assert(readable == readableBytes());
     }
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth

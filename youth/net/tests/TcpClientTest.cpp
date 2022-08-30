@@ -1,6 +1,6 @@
 #include <youth/core/CurrentThread.h>
 #include <youth/net/EventLoop.h>
-#include <youth/net/TcpAddressInfo.h>
+#include <youth/net/HostAddress.hpp>
 #include <youth/net/TcpClient.h>
 #include <youth/utils/Logging.h>
 
@@ -11,7 +11,7 @@ using namespace youth::net;
 class EchoTcpCLient : noncopyable
 {
 public:
-    EchoTcpCLient(EventLoop *loop, const TcpAddressInfo &serverAddr)
+    EchoTcpCLient(EventLoop *loop, const HostAddress &serverAddr)
         : m_eventLoop(loop)
         , m_tcpClientPtr(new TcpClient(loop, serverAddr, "EchoClient"))
     {
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
     LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
     EventLoop loop;
-    TcpAddressInfo address("127.0.0.1", 65533);
+    HostAddress address("127.0.0.1", 65533);
     EchoTcpCLient echoTcpCLient(&loop, address);
     loop.loop();
     return 0;

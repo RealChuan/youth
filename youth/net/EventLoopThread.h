@@ -10,25 +10,26 @@ using namespace core;
 namespace net {
 
 class EventLoop;
-class EventLoopThread : noncopyable {
-  typedef std::function<void(EventLoop *)> ThreadInitCallback;
-
+class EventLoopThread : noncopyable
+{
 public:
-  EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback(),
-                  const std::string &name = std::string());
-  ~EventLoopThread();
+    using ThreadInitCallback = std::function<void(EventLoop *)>;
 
-  EventLoop *startLoop();
+    EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback(),
+                    const std::string &name = std::string());
+    ~EventLoopThread();
+
+    EventLoop *startLoop();
 
 private:
-  void threadFunc();
+    void threadFunc();
 
-  bool m_exit;
-  Mutex m_mutex;
-  Condition m_cond;
-  EventLoop *m_loop;
-  Thread m_thread;
-  ThreadInitCallback m_callback;
+    bool m_exit;
+    Mutex m_mutex;
+    Condition m_cond;
+    EventLoop *m_loop;
+    Thread m_thread;
+    ThreadInitCallback m_callback;
 };
 
 } // namespace net

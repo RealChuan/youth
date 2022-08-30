@@ -36,6 +36,8 @@ public:
 
     void run(Task f);
 
+    static long cpuCores();
+
 private:
     // must lock
     bool isFull() const { return m_maxTaskNum > 0 && m_queue.size() >= m_maxTaskNum; }

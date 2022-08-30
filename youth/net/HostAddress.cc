@@ -1,4 +1,4 @@
-#include "TcpAddressInfo.h"
+#include "HostAddress.hpp"
 #include "SocketFunc.h"
 
 #include <youth/utils/Logging.h>
@@ -12,7 +12,7 @@ using namespace utils;
 
 namespace net {
 
-TcpAddressInfo::TcpAddressInfo(uint16_t port, bool loopbackOnly, bool ipv6)
+HostAddress::HostAddress(uint16_t port, bool loopbackOnly, bool ipv6)
 {
     if (ipv6) {
         SocketFunc::setServerAddress(port, &m_serveraddr6, loopbackOnly);
@@ -21,7 +21,7 @@ TcpAddressInfo::TcpAddressInfo(uint16_t port, bool loopbackOnly, bool ipv6)
     }
 }
 
-TcpAddressInfo::TcpAddressInfo(const char *ip, uint16_t port, bool ipv6)
+HostAddress::HostAddress(const char *ip, uint16_t port, bool ipv6)
 {
     if (ipv6) {
         SocketFunc::setServerAddress(ip, port, &m_serveraddr6);
@@ -30,7 +30,7 @@ TcpAddressInfo::TcpAddressInfo(const char *ip, uint16_t port, bool ipv6)
     }
 }
 
-bool TcpAddressInfo::operator==(const TcpAddressInfo &other) const
+bool HostAddress::operator==(const HostAddress &other) const
 {
     if (m_serveraddr.sin_family != other.m_serveraddr.sin_family) {
         return false;
@@ -39,24 +39,24 @@ bool TcpAddressInfo::operator==(const TcpAddressInfo &other) const
     return ipAndPort() == other.ipAndPort();
 }
 
-std::string TcpAddressInfo::ip() const
+std::string HostAddress::ip() const
 {
     return SocketFunc::getIp(sockAddr());
 }
 
-uint16_t TcpAddressInfo::port() const
+uint16_t HostAddress::port() const
 {
     return SocketFunc::getPort(sockAddr());
 }
 
-std::string TcpAddressInfo::ipAndPort() const
+std::string HostAddress::ipAndPort() const
 {
     return SocketFunc::getIpAndPort(sockAddr());
 }
 
-std::vector<TcpAddressInfo> TcpAddressInfo::resolve(const std::string &hostname)
+std::vector<HostAddress> HostAddress::resolve(const std::string &hostname)
 {
-    std::vector<TcpAddressInfo> infos;
+    std::vector<HostAddress> infos;
     addrinfo *res = nullptr;
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
@@ -70,39 +70,34 @@ std::vector<TcpAddressInfo> TcpAddressInfo::resolve(const std::string &hostname)
                       << "ai_protocol:" << node->ai_protocol << "ai_addrlen:" << node->ai_addrlen;
             switch (node->ai_family) {
             case AF_INET: {
-                TcpAddressInfo info(*reinterpret_cast<sockaddr_in *>(node->ai_addr));
+                HostAddress info(*reinterpret_cast<sockaddr_in *>(node->ai_addr));
                 if (infos.end() == std::find(infos.begin(), infos.end(), info)) {
                     infos.push_back(info);
                 }
                 break;
             }
             case AF_INET6: {
-                TcpAddressInfo info(*reinterpret_cast<sockaddr_in6 *>(node->ai_addr));
+                HostAddress info(*reinterpret_cast<sockaddr_in6 *>(node->ai_addr));
                 if (infos.end() == std::find(infos.begin(), infos.end(), info)) {
                     infos.push_back(info);
                 }
                 break;
             }
-            default: LOG_ERROR << "TcpAddressInfo::resolve"; break;
+            default: LOG_ERROR << "HostAddress::resolve"; break;
             }
             node = node->ai_next;
         }
         freeaddrinfo(res);
     } else {
         switch (result) {
-#ifdef Q_OS_WIN
-        case WSAHOST_NOT_FOUND: //authoritative not found
-        case WSATRY_AGAIN:      //non authoritative not found
-        case WSANO_DATA:        //valid name, no associated address
-#else
         case EAI_NONAME:
         case EAI_FAIL:
 #ifdef EAI_NODATA // EAI_NODATA is deprecated in RFC 3493
         case EAI_NODATA:
 #endif
-#endif
             LOG_ERROR << "Host not found: " << gai_strerror(result);
             break;
+        default: LOG_ERROR << "Host not found: " << gai_strerror(result); break;
         }
     }
     return infos;

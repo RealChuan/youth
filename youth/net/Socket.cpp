@@ -1,6 +1,6 @@
 #include "Socket.h"
+#include "HostAddress.hpp"
 #include "SocketFunc.h"
-#include "TcpAddressInfo.h"
 
 #include <youth/utils/Logging.h>
 
@@ -55,7 +55,7 @@ bool Socket::getTcpInfoString(char *buf, int len) const
     return ok;
 }
 
-void Socket::bindAddress(const TcpAddressInfo &addrInfo)
+void Socket::bindAddress(const HostAddress &addrInfo)
 {
     SocketFunc::bind(m_sockfd, addrInfo.sockAddr());
 }
@@ -65,7 +65,7 @@ void Socket::listen()
     SocketFunc::listen(m_sockfd);
 }
 
-int Socket::accept(TcpAddressInfo *peeraddr)
+int Socket::accept(HostAddress *peeraddr)
 {
     struct sockaddr_in6 addr6;
     memset(&addr6, 0, sizeof addr6);

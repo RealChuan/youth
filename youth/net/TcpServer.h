@@ -3,65 +3,54 @@
 
 #include "Callbacks.h"
 
-#include <map>
-#include <string>
-#include <memory>
 #include <atomic>
+#include <map>
+#include <memory>
+#include <string>
 
-namespace youth
-{
+namespace youth {
 
-namespace net
-{
+namespace net {
 
-class TcpAddressInfo;
+class HostAddress;
 class Acceptor;
 class EventLoop;
 class EventLoopThreadPool;
 class TcpServer : noncopyable
 {
 public:
-    typedef std::function<void(EventLoop*)> ThreadInitCallback;
-    enum Option
-    {
-        kNoReusePort,
-        kReusePort,
-    };
+    using ThreadInitCallback = std::function<void(EventLoop *)>;
+    enum Option { kNoReusePort, kReusePort };
 
-    TcpServer(EventLoop* loop,
-              const TcpAddressInfo& listenAddr,
-              const std::string& nameArg,
+    TcpServer(EventLoop *loop,
+              const HostAddress &listenAddr,
+              const std::string &nameArg,
               Option option = kNoReusePort);
-    ~TcpServer();  // force out-line dtor, for std::unique_ptr members.
+    ~TcpServer(); // force out-line dtor, for std::unique_ptr members.
 
-    const std::string& ipPort() const { return m_ipPort; }
-    const std::string& name() const { return m_name; }
-    EventLoop* getLoop() const { return m_eventLoop; }
+    const std::string &ipPort() const { return m_ipPort; }
+    const std::string &name() const { return m_name; }
+    EventLoop *getLoop() const { return m_eventLoop; }
 
     void setThreadNum(int numThreads);
-    void setThreadInitCallback(const ThreadInitCallback& cb)
-    { m_threadInitCallback = cb; }
+    void setThreadInitCallback(const ThreadInitCallback &cb) { m_threadInitCallback = cb; }
 
-    std::shared_ptr<EventLoopThreadPool> threadPool()
-    { return m_threadPoolPtr; }
+    std::shared_ptr<EventLoopThreadPool> threadPool() { return m_threadPoolPtr; }
 
     void start();
 
-    void setConnectionCallback(const ConnectionCallback& cb)
-    { m_connectionCallback = cb; }
+    void setConnectionCallback(const ConnectionCallback &cb) { m_connectionCallback = cb; }
 
-    void setMessageCallback(const MessageCallback& cb)
-    { m_messageCallback = cb; }
+    void setMessageCallback(const MessageCallback &cb) { m_messageCallback = cb; }
 
-    void setWriteCompleteCallback(const WriteCompleteCallback& cb)
-    { m_writeCompleteCallback = cb; }
+    void setWriteCompleteCallback(const WriteCompleteCallback &cb) { m_writeCompleteCallback = cb; }
 
 private:
-    void newConnection(int sockfd, const TcpAddressInfo& peerAddr);
-    void removeConnection(const TcpConnectionPtr& conn);
-    void removeConnectionInLoop(const TcpConnectionPtr& conn);
+    void newConnection(int sockfd, const HostAddress &peerAddr);
+    void removeConnection(const TcpConnectionPtr &conn);
+    void removeConnectionInLoop(const TcpConnectionPtr &conn);
 
-    EventLoop* m_eventLoop;  // the acceptor loop
+    EventLoop *m_eventLoop; // the acceptor loop
     const std::string m_ipPort;
     const std::string m_name;
     std::unique_ptr<Acceptor> m_acceptorPtr; // avoid revealing Acceptor
@@ -77,8 +66,8 @@ private:
     std::map<std::string, TcpConnectionPtr> m_connectionMap;
 };
 
-}
+} // namespace net
 
-}
+} // namespace youth
 
 #endif // TCPSERVER_H

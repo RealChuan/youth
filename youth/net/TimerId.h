@@ -5,20 +5,18 @@
 
 #include <stdint.h>
 
-namespace youth
-{
+namespace youth {
 
 using namespace core;
 
-namespace net
-{
+namespace net {
 
 class Timer;
 class TimerId : copyable
 {
 public:
     TimerId() {}
-    TimerId(Timer* timer, int64_t seq)
+    TimerId(Timer *timer, int64_t seq)
         : m_timer(timer)
         , m_sequence(seq)
     {}
@@ -28,12 +26,12 @@ public:
     friend class TimerQueue;
 
 private:
-    Timer* m_timer = nullptr;
+    Timer *m_timer = nullptr;
     int64_t m_sequence = 0;
 };
 
-}
+} // namespace net
 
-}
+} // namespace youth
 
 #endif // TIMERID_H

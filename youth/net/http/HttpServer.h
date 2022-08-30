@@ -5,22 +5,25 @@
 #include <youth/net/TcpServer.h>
 
 namespace youth {
+
 namespace net {
 class EventLoop;
-class TcpAddressInfo;
+class HostAddress;
 class Buffer;
 } // namespace net
 
 namespace http {
+
 class HttpRequest;
 class HttpResponse;
+
 class HttpServer : core::noncopyable
 {
 public:
     typedef std::function<void(const HttpRequest &, HttpResponse *)> HttpCallback;
 
     HttpServer(net::EventLoop *loop,
-               const net::TcpAddressInfo &listenAddr,
+               const net::HostAddress &listenAddr,
                const std::string &name,
                net::TcpServer::Option option = net::TcpServer::kNoReusePort);
 
@@ -42,6 +45,7 @@ private:
     net::TcpServer m_server;
     HttpCallback m_httpCallback;
 };
+
 } // namespace http
 
 } // namespace youth

@@ -1,5 +1,4 @@
-#ifndef TCPADDRESSINFO_H
-#define TCPADDRESSINFO_H
+#pragma once
 
 #include <youth/core/Object.h>
 
@@ -13,20 +12,20 @@ using namespace core;
 
 namespace net {
 
-class TcpAddressInfo : copyable
+class HostAddress : copyable
 {
 public:
-    explicit TcpAddressInfo(uint16_t port = 0, bool loopbackOnly = false, bool ipv6 = false);
-    explicit TcpAddressInfo(const char *ip, uint16_t port = 0, bool ipv6 = false);
-    explicit TcpAddressInfo(const struct sockaddr_in &addr)
+    explicit HostAddress(uint16_t port = 0, bool loopbackOnly = false, bool ipv6 = false);
+    explicit HostAddress(const char *ip, uint16_t port = 0, bool ipv6 = false);
+    explicit HostAddress(const struct sockaddr_in &addr)
         : m_serveraddr(addr)
     {}
-    explicit TcpAddressInfo(const struct sockaddr_in6 &addr)
+    explicit HostAddress(const struct sockaddr_in6 &addr)
         : m_serveraddr6(addr)
     {}
 
-    bool operator==(const TcpAddressInfo &other) const;
-    bool operator!=(const TcpAddressInfo &other) const { return !operator==(other); }
+    bool operator==(const HostAddress &other) const;
+    bool operator!=(const HostAddress &other) const { return !operator==(other); }
 
     const struct sockaddr *sockAddr() const
     {
@@ -39,7 +38,7 @@ public:
 
     void setSockAddrInet6(const struct sockaddr_in6 &addr6) { m_serveraddr6 = addr6; }
 
-    static std::vector<TcpAddressInfo> resolve(const std::string &hostname);
+    static std::vector<HostAddress> resolve(const std::string &hostname);
 
 private:
     union {
@@ -51,5 +50,3 @@ private:
 } // namespace net
 
 } // namespace youth
-
-#endif // TCPADDRESSINFO_H

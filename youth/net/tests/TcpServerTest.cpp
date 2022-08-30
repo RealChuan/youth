@@ -1,9 +1,10 @@
 #include <youth/core/CurrentThread.h>
 #include <youth/net/EventLoop.h>
-#include <youth/net/TcpAddressInfo.h>
+#include <youth/net/HostAddress.hpp>
 #include <youth/net/TcpConnection.h>
 #include <youth/net/TcpServer.h>
 #include <youth/utils/Logging.h>
+#include <youth/utils/ThreadPool.h>
 
 using namespace youth::core;
 using namespace youth::utils;
@@ -12,7 +13,7 @@ using namespace youth::net;
 class EchoTcpServer : noncopyable
 {
 public:
-    EchoTcpServer(EventLoop *loop, const TcpAddressInfo &localAddr)
+    EchoTcpServer(EventLoop *loop, const HostAddress &localAddr)
         : m_eventLoop(loop)
         , m_tcpServerPtr(new TcpServer(loop, localAddr, "EchoServer"))
     {
@@ -66,9 +67,9 @@ int main(int argc, char **argv)
 
     LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
     EventLoop loop;
-    TcpAddressInfo address(65533, true);
+    HostAddress address(65533, true);
     EchoTcpServer echoTcpServer(&loop, address);
-    echoTcpServer.start(5);
+    echoTcpServer.start(ThreadPool::cpuCores() * 2);
     loop.loop();
     return 0;
 }

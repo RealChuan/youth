@@ -1,23 +1,21 @@
 #include "Connector.h"
+#include "Channel.h"
 #include "EventLoop.h"
 #include "SocketFunc.h"
-#include "Channel.h"
 
 #include <youth/utils/Logging.h>
 
 #include <assert.h>
 
-namespace youth
-{
+namespace youth {
 
 using namespace utils;
 
-namespace net
-{
+namespace net {
 
 const int Connector::kMaxRetryDelayMs;
 
-Connector::Connector(EventLoop *loop, const TcpAddressInfo &serverAddr)
+Connector::Connector(EventLoop *loop, const HostAddress &serverAddr)
     : m_eventLoop(loop)
     , m_serverAddr(serverAddr)
 {
@@ -56,12 +54,9 @@ void Connector::startInLoop()
 {
     m_eventLoop->assertInLoopThread();
     assert(m_state == kDisconnected);
-    if (m_connect)
-    {
+    if (m_connect) {
         connect();
-    }
-    else
-    {
+    } else {
         LOG_DEBUG << "do not connect";
     }
 }
@@ -69,8 +64,7 @@ void Connector::startInLoop()
 void Connector::stopInLoop()
 {
     m_eventLoop->assertInLoopThread();
-    if (m_state == kConnecting)
-    {
+    if (m_state == kConnecting) {
         m_state = kDisconnected;
         int sockfd = removeAndResetChannel();
         retry(sockfd);
@@ -82,30 +76,25 @@ void Connector::connect()
     int sockfd = SocketFunc::createNonblockingOrDie(m_serverAddr.family());
     int ret = SocketFunc::connect(sockfd, m_serverAddr.sockAddr());
     int savedErrno = (ret == 0) ? 0 : errno;
-    switch (savedErrno)
-    {
+    switch (savedErrno) {
     case 0:
-    case EINPROGRESS:
     case EINTR:
     case EISCONN:
-        connecting(sockfd);
-        break;
+    case EINPROGRESS: connecting(sockfd); break;
 
     case EAGAIN:
     case EADDRINUSE:
     case EADDRNOTAVAIL:
-    case ECONNREFUSED:
     case ENETUNREACH:
-        retry(sockfd);
-        break;
+    case ECONNREFUSED: retry(sockfd); break;
 
-    case EACCES:
     case EPERM:
-    case EAFNOSUPPORT:
-    case EALREADY:
     case EBADF:
+    case EACCES:
     case EFAULT:
     case ENOTSOCK:
+    case EAFNOSUPPORT:
+    case EALREADY:
         LOG_ERROR << "connect error in Connector::startInLoop " << savedErrno;
         SocketFunc::close(sockfd);
         break;
@@ -123,10 +112,8 @@ void Connector::connecting(int sockfd)
     m_state = kConnecting;
     assert(!m_channelPtr);
     m_channelPtr.reset(new Channel(m_eventLoop, sockfd));
-    m_channelPtr->setWriteCallback(
-                std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
-    m_channelPtr->setErrorCallback(
-                std::bind(&Connector::handleError, this)); // FIXME: unsafe
+    m_channelPtr->setWriteCallback(std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
+    m_channelPtr->setErrorCallback(std::bind(&Connector::handleError, this)); // FIXME: unsafe
 
     // m_channel->tie(shared_from_this()); is not working,
     // as m_channel is not managed by shared_ptr
@@ -137,64 +124,47 @@ void Connector::retry(int sockfd)
 {
     SocketFunc::close(sockfd);
     m_state = kDisconnected;
-    if (m_connect)
-    {
-        LOG_INFO << "Connector::retry - Retry connecting to " << m_serverAddr.ipAndPort()
-                 << " in " << m_retryDelayMs << " milliseconds. ";
+    if (m_connect) {
+        LOG_INFO << "Connector::retry - Retry connecting to " << m_serverAddr.ipAndPort() << " in "
+                 << m_retryDelayMs << " milliseconds. ";
         m_eventLoop->runAfter(m_retryDelayMs / 1000.0,
                               std::bind(&Connector::startInLoop, shared_from_this()));
         m_retryDelayMs = std::min(m_retryDelayMs * 2, kMaxRetryDelayMs);
-    }
-    else
-    {
-        LOG_DEBUG << "do not connect";
+    } else {
+        LOG_WARN << "do not connect";
     }
 }
 
 void Connector::handleWrite()
 {
     LOG_DEBUG << "Connector::handleWrite " << m_state;
-
-    if (m_state == kConnecting)
-    {
-        int sockfd = removeAndResetChannel();
-        int err = SocketFunc::getSocketError(sockfd);
-        if (err)
-        {
-            LOG_WARN << "Connector::handleWrite - SO_ERROR = "
-                     << err << " " << strerror_tl(err);
-            retry(sockfd);
-        }
-        else if (SocketFunc::isSelfConnect(sockfd))
-        {
-            LOG_WARN << "Connector::handleWrite - Self connect";
-            retry(sockfd);
-        }
-        else
-        {
-            m_state = kConnected;
-            if (m_state)
-            {
-                m_newConnectionCallback(sockfd);
-            }
-            else
-            {
-                SocketFunc::close(sockfd);
-            }
-        }
-    }
-    else
-    {
+    if (m_state != kConnecting) {
         // what happened?
         assert(m_state == kDisconnected);
+    }
+
+    int sockfd = removeAndResetChannel();
+    int err = SocketFunc::getSocketError(sockfd);
+    if (err) {
+        LOG_WARN << "Connector::handleWrite - SO_ERROR = " << err << " " << strerror_tl(err);
+        retry(sockfd);
+    } else if (SocketFunc::isSelfConnect(sockfd)) {
+        LOG_WARN << "Connector::handleWrite - Self connect";
+        retry(sockfd);
+    } else {
+        m_state = kConnected;
+        if (m_state) {
+            m_newConnectionCallback(sockfd);
+        } else {
+            SocketFunc::close(sockfd);
+        }
     }
 }
 
 void Connector::handleError()
 {
     LOG_ERROR << "Connector::handleError state=" << m_state;
-    if (m_state == kConnecting)
-    {
+    if (m_state == kConnecting) {
         int sockfd = removeAndResetChannel();
         int err = SocketFunc::getSocketError(sockfd);
         LOG_DEBUG << "SO_ERROR = " << err << " " << strerror_tl(err);
@@ -217,6 +187,6 @@ void Connector::resetChannel()
     m_channelPtr.reset();
 }
 
-}
+} // namespace net
 
-}
+} // namespace youth
