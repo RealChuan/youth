@@ -21,7 +21,7 @@ class HostAddress;
 class TcpClient : noncopyable
 {
 public:
-    TcpClient(EventLoop *loop, const HostAddress &serverAddr, const std::string &name);
+    TcpClient(EventLoop *loop, const HostAddress &serverAddr, std::string_view name);
     ~TcpClient();
 
     void connect();

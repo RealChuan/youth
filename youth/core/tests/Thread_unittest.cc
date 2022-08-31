@@ -7,11 +7,11 @@
 
 using namespace youth::core;
 
-void test(const std::string &name)
+void test(std::string_view name)
 {
     std::ostringstream oss;
     oss << Thread::currentThreadId();
-    printf("%s Testing thread: %s.\n", name.c_str(), oss.str().c_str());
+    printf("%s Testing thread: %s.\n", name.data(), oss.str().c_str());
     Thread::sleep(1);
 }
 

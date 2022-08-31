@@ -29,7 +29,7 @@ void defaultMessageCallback(const TcpConnectionPtr &, Buffer *buf, DateTime)
 }
 
 TcpConnection::TcpConnection(EventLoop *loop,
-                             const std::string &name,
+                             std::string_view name,
                              int sockfd,
                              const HostAddress &localAddr,
                              const HostAddress &peerAddr)

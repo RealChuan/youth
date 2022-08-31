@@ -15,7 +15,7 @@ std::filesystem::path Dir::absolutePath() const
     return absolutePath;
 }
 
-bool Contains(const std::string &filename, const Dir::NameFilterList &nameFilters)
+bool Contains(std::string_view filename, const Dir::NameFilterList &nameFilters)
 {
     for (const auto &nameFilter : nameFilters) {
         if (string::contains(filename, nameFilter)) {
@@ -133,7 +133,7 @@ bool Dir::cd(const std::filesystem::path &path)
     return false;
 }
 
-bool Dir::mkdir(const std::string &name)
+bool Dir::mkdir(std::string_view name)
 {
     if (!exists()) {
         return false;
@@ -145,7 +145,7 @@ bool Dir::mkdir(const std::string &name)
     return false;
 }
 
-bool Dir::rmdir(const std::string &name)
+bool Dir::rmdir(std::string_view name)
 {
     if (!exists()) {
         return false;
@@ -157,7 +157,7 @@ bool Dir::rmdir(const std::string &name)
     return false;
 }
 
-bool Dir::removeFile(const std::string &name)
+bool Dir::removeFile(std::string_view name)
 {
     return removeFile(m_path, name);
 }
@@ -187,7 +187,7 @@ bool Dir::rmdirs(const std::filesystem::path &path)
     return false;
 }
 
-bool Dir::removeFile(const std::filesystem::path &path, const std::string &filename)
+bool Dir::removeFile(const std::filesystem::path &path, std::string_view filename)
 {
     if (!std::filesystem::exists(path)) {
         return false;

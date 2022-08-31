@@ -41,6 +41,7 @@ private:
         if (msg == "quit\n") {
             conn->send("bye\n");
             conn->shutdown();
+            m_eventLoop->runAfter(1, [=] { m_eventLoop->quit(); });
         } else if (msg == "shutdown\n") {
             conn->shutdown();
             m_eventLoop->runAfter(1, [=] { m_eventLoop->quit(); });
@@ -59,8 +60,7 @@ int main(int argc, char **argv)
 
     LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
     EventLoop loop;
-    HostAddress address("127.0.0.1", 65533);
-    EchoTcpCLient echoTcpCLient(&loop, address);
+    EchoTcpCLient echoTcpCLient(&loop, HostAddress(65533));
     loop.loop();
     return 0;
 }

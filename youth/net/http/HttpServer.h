@@ -24,7 +24,7 @@ public:
 
     HttpServer(net::EventLoop *loop,
                const net::HostAddress &listenAddr,
-               const std::string &name,
+               std::string_view name,
                net::TcpServer::Option option = net::TcpServer::kNoReusePort);
 
     ~HttpServer() {}

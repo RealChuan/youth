@@ -17,9 +17,9 @@ pid_t getPid();
 
 std::string hostname();
 
-std::string fileBaseName(const std::string &basename);
+std::string fileBaseName(std::string_view basename);
 
-int excute(const std::string &cmd);
+int excute(std::string_view cmd);
 
 bool kill(pid_t pid);
 bool kill(const std::string &name);
@@ -30,8 +30,8 @@ std::string getCwd();
 
 std::vector<std::string> systemEnvironment();
 
-bool setEnvironment(const std::string &name, const std::string &value);
-std::string getEnvironment(const std::string &name);
+bool setEnvironment(std::string name, std::string_view value);
+std::string getEnvironment(std::string_view name);
 
 File nullDevice();
 

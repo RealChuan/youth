@@ -45,7 +45,7 @@ void SocketFunc::setServerAddress(const char *ip, uint16_t port, sockaddr_in6 *s
     serverAddr6->sin6_family = AF_INET;
     serverAddr6->sin6_port = hostToNetwork16(port);
     if (::inet_pton(AF_INET6, ip, &serverAddr6->sin6_addr) <= 0) {
-        LOG_ERROR << "SocketFunc::serServerAddr";
+        LOG_ERROR << "SocketFunc::setServerAddress";
     }
 }
 

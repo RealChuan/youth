@@ -21,8 +21,8 @@ class ProtobufCodecLite : core::noncopyable
 public:
     const static int kHeaderLen = sizeof(int32_t);
     const static int kChecksumLen = sizeof(int32_t);
-    const static int kMaxMessageLen = 64 * 1024
-                                      * 1024; // same as m_codecstream.h kDefaultTotalBytesLimit
+    // same as m_codecstream.h kDefaultTotalBytesLimit
+    const static int kMaxMessageLen = 64 * 1024 * 1024;
 
     enum ErrorCode {
         kNoError = 0,
@@ -90,21 +90,19 @@ private:
     const int kMinMessageLen;
 };
 
-template<typename MSG,
-         const char *TAG,
-         typename CODEC = ProtobufCodecLite> // TAG must be a variable with external
-                                             // linkage, not a string literal
+// TAG must be a variable with external linkage, not a string literal
+template<typename MSG, const char *TAG, typename CODEC = ProtobufCodecLite>
 class ProtobufCodecLiteT
 {
     static_assert(std::is_base_of<ProtobufCodecLite, CODEC>::value,
                   "CODEC should be derived from ProtobufCodecLite");
 
 public:
-    typedef std::shared_ptr<MSG> ConcreteMessagePtr;
-    typedef std::function<void(const net::TcpConnectionPtr &, const ConcreteMessagePtr &, DateTime)>
-        ProtobufMessageCallback;
-    typedef ProtobufCodecLite::RawMessageCallback RawMessageCallback;
-    typedef ProtobufCodecLite::ErrorCallback ErrorCallback;
+    using ConcreteMessagePtr = std::shared_ptr<MSG>;
+    using ProtobufMessageCallback
+        = std::function<void(const net::TcpConnectionPtr &, const ConcreteMessagePtr &, DateTime)>;
+    using RawMessageCallback = ProtobufCodecLite::RawMessageCallback;
+    using ErrorCallback = ProtobufCodecLite::ErrorCallback;
 
     explicit ProtobufCodecLiteT(
         const ProtobufMessageCallback &messageCb,
@@ -121,6 +119,8 @@ public:
                   rawCb,
                   errorCb)
     {}
+
+    ~ProtobufCodecLiteT() {}
 
     const std::string &tag() const { return m_codec.tag(); }
 

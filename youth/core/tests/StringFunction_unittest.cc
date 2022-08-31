@@ -14,6 +14,15 @@ TEST(splitTest, Positive)
     EXPECT_EQ(result[1], "b");
     EXPECT_EQ(result[2], "c");
     EXPECT_EQ(result[3], "d");
+
+    str = "ac,bc,cc,cdc,";
+    result = string::split(str, "c,");
+    EXPECT_EQ(result.size(), 5);
+    EXPECT_EQ(result[0], "a");
+    EXPECT_EQ(result[1], "b");
+    EXPECT_EQ(result[2], "c");
+    EXPECT_EQ(result[3], "cd");
+    EXPECT_EQ(result[4], "");
 }
 
 TEST(removeTest, Positive)

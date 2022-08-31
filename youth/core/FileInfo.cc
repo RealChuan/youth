@@ -5,7 +5,7 @@ namespace youth {
 
 namespace core {
 
-FileInfo::FileInfo(const Dir &dir, const std::string &name)
+FileInfo::FileInfo(const Dir &dir, std::string_view name)
     : m_path(dir.absolutePath() / name)
 {}
 

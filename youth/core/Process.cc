@@ -32,9 +32,9 @@ std::string hostname()
     return "";
 }
 
-std::string fileBaseName(const std::string &basename)
+std::string fileBaseName(std::string_view basename)
 {
-    std::string name = basename;
+    std::string name(basename);
     size_t pos = name.find_last_of('/');
     if (pos != std::string::npos) {
         return name.substr(pos + 1);
@@ -42,9 +42,9 @@ std::string fileBaseName(const std::string &basename)
     return name;
 }
 
-int excute(const std::string &cmd)
+int excute(std::string_view cmd)
 {
-    return ::system(cmd.c_str());
+    return ::system(cmd.data());
 }
 
 bool kill(pid_t pid)
@@ -63,12 +63,12 @@ bool kill(const std::string &name)
 pid_t getPidFromName(const std::string &name)
 {
     pid_t pid = 0;
-    std::string cmd = "pidof " + name + " > ./pid.txt";
+    std::string cmd = "pidof " + name + " > /tmp/pid.txt";
     int ret = excute(cmd);
     if (ret != 0) {
         return pid;
     }
-    File file("./pid.txt");
+    File file("/tmp/pid.txt");
     if (!file.open(File::OpenMode::ReadOnly)) {
         return pid;
     }
@@ -79,7 +79,6 @@ pid_t getPidFromName(const std::string &name)
         break;
     }
     file.close();
-    file.remove();
     return pid;
 }
 
@@ -103,14 +102,14 @@ std::vector<std::string> systemEnvironment()
     return env;
 }
 
-bool setEnvironment(const std::string &name, const std::string &value)
+bool setEnvironment(std::string_view name, std::string_view value)
 {
-    return ::setenv(name.c_str(), value.c_str(), 1) == 0;
+    return ::setenv(name.data(), value.data(), 1) == 0;
 }
 
-std::string getEnvironment(const std::string &name)
+std::string getEnvironment(std::string_view name)
 {
-    char *env = ::getenv(name.c_str());
+    char *env = ::getenv(name.data());
     if (env == nullptr) {
         return "";
     } else {

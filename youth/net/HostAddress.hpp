@@ -38,7 +38,7 @@ public:
 
     void setSockAddrInet6(const struct sockaddr_in6 &addr6) { m_serveraddr6 = addr6; }
 
-    static std::vector<HostAddress> resolve(const std::string &hostname);
+    static std::vector<HostAddress> resolve(std::string_view hostname);
 
 private:
     union {

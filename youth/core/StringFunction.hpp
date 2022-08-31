@@ -9,27 +9,27 @@ namespace core {
 
 namespace string {
 
-std::vector<std::string> split(const std::string &text, const std::string &s);
+std::vector<std::string> split(std::string_view text, std::string_view s);
 
-void remove(std::string &text, const std::string &s);
+void remove(std::string &text, std::string_view s);
 
-void replace(std::string &text, const std::string &s, const std::string &r);
+void replace(std::string &text, std::string_view s, std::string_view r);
 
-std::string trimmed(const std::string &text);
+std::string trimmed(std::string_view text);
 
-std::string toLower(const std::string &text);
+std::string toLower(std::string_view text);
 
-std::string toUpper(const std::string &text);
+std::string toUpper(std::string_view text);
 
-bool startsWith(const std::string &text, const std::string &str);
+bool startsWith(std::string_view text, std::string_view str);
 
-bool endsWith(const std::string &text, const std::string &str);
+bool endsWith(std::string_view text, std::string_view str);
 
-bool contains(const std::string &text, const std::string &str);
+bool contains(std::string_view text, std::string_view str);
 
-bool isLower(const std::string &text);
+bool isLower(std::string_view text);
 
-bool isUpper(const std::string &text);
+bool isUpper(std::string_view text);
 
 } // namespace string
 

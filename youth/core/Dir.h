@@ -77,7 +77,7 @@ public:
     std::filesystem::path path() const { return m_path; }
     void setPath(const std::filesystem::path &path) { m_path = path; }
 
-    std::filesystem::path absoluteFilePath(const std::string &filename) const
+    std::filesystem::path absoluteFilePath(std::string_view filename) const
     {
         return absolutePath() / filename;
     }
@@ -94,27 +94,27 @@ public:
 
     bool exists() const { return std::filesystem::exists(m_path); }
 
-    bool mkdir(const std::string &name);
-    bool rmdir(const std::string &name);
-    bool removeFile(const std::string &name);
+    bool mkdir(std::string_view name);
+    bool rmdir(std::string_view name);
+    bool removeFile(std::string_view name);
 
     static bool mkdirs(const std::filesystem::path &path);
     static bool mkdirs(const std::filesystem::path &path, std::filesystem::perms perms);
     static bool rmdirs(const std::filesystem::path &path);
-    static bool removeFile(const std::filesystem::path &path, const std::string &filename);
+    static bool removeFile(const std::filesystem::path &path, std::string_view filename);
 
     static Dir Current() { return Dir(std::filesystem::current_path()); }
     static Dir temp() { return Dir(std::filesystem::temp_directory_path()); }
     static bool isAbsolute(const std::filesystem::path &path) { return path.is_absolute(); }
     static bool isRelative(const std::filesystem::path &path) { return path.is_relative(); }
 
-    static std::filesystem::path fromNativeSeparators(const std::string &path)
+    static std::filesystem::path fromNativeSeparators(std::string_view path)
     {
         return std::filesystem::path(path).make_preferred();
     }
     static std::string toNativeSeparators(std::filesystem::path &path) { return path.native(); }
 
-    static bool matchName(const std::filesystem::path &path, const std::string &namefilter)
+    static bool matchName(const std::filesystem::path &path, std::string_view namefilter)
     {
         return path.filename().string() == namefilter;
     }

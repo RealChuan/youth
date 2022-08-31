@@ -61,7 +61,7 @@ void Logging::setOutputMode(int iMode)
     }
 }
 
-void Logging::setDirectoryAndBaseName(const std::string &directory, const std::string &_basename)
+void Logging::setDirectoryAndBaseName(std::string_view directory, std::string_view _basename)
 {
     std::string baseName = Process::fileBaseName(_basename);
     baseName += ".";

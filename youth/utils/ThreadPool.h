@@ -18,7 +18,7 @@ class ThreadPool : noncopyable
 public:
     using Task = std::function<void()>;
 
-    ThreadPool(const std::string &name = std::string());
+    ThreadPool(std::string_view name = std::string_view());
     ~ThreadPool();
 
     void setTaskNum(int maxTaskNum) { m_maxTaskNum = maxTaskNum; }

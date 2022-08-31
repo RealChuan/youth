@@ -38,7 +38,7 @@ public:
     //设置输出模式的，支持3种输出模式
     static void setOutputMode(int iMode);
 
-    static void setDirectoryAndBaseName(const std::string &directory, const std::string &basename);
+    static void setDirectoryAndBaseName(std::string_view directory, std::string_view basename);
 
     static void setOutputFunc(outputFunc Func) { s_outputFunc = Func; }
 

@@ -14,7 +14,7 @@ class FileInfo : copyable
 {
 public:
     FileInfo() = default;
-    FileInfo(const Dir &dir, const std::string &name);
+    FileInfo(const Dir &dir, std::string_view name);
     FileInfo(const std::filesystem::path &path)
         : m_path(path)
     {}

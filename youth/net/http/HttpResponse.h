@@ -33,7 +33,7 @@ public:
 
     void setStatusCode(HttpStatusCode code) { m_statusCode = code; }
 
-    void setStatusMessage(const std::string &message) { m_statusMessage = message; }
+    void setStatusMessage(std::string_view message) { m_statusMessage = message; }
 
     void setCloseConnection(bool on) { m_closeConnection = on; }
 
@@ -44,7 +44,7 @@ public:
     // FIXME: replace string with StringPiece
     void addHeader(const std::string &key, const std::string &value) { m_headers[key] = value; }
 
-    void setBody(const std::string &body) { m_body = body; }
+    void setBody(std::string_view body) { m_body = body; }
 
     void appendToBuffer(net::Buffer *output) const;
 

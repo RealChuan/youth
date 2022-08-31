@@ -16,6 +16,7 @@ class HostAddress;
 class Acceptor;
 class EventLoop;
 class EventLoopThreadPool;
+
 class TcpServer : noncopyable
 {
 public:
@@ -24,7 +25,7 @@ public:
 
     TcpServer(EventLoop *loop,
               const HostAddress &listenAddr,
-              const std::string &nameArg,
+              std::string_view nameArg,
               Option option = kNoReusePort);
     ~TcpServer(); // force out-line dtor, for std::unique_ptr members.
 

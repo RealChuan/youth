@@ -20,7 +20,7 @@ class LogFile : noncopyable
 {
     SINGLETON(LogFile)
 public:
-    void setDirectoryAndBaseName(const std::string &directory, const std::string &basename);
+    void setDirectoryAndBaseName(std::string_view directory, std::string_view basename);
 
     void setRollSize(off_t size) { m_rollSize = size; }
     void setMaxFileSize(off_t size) { m_rollSize = size; }

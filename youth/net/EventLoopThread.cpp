@@ -8,7 +8,7 @@ namespace youth {
 namespace net {
 
 EventLoopThread::EventLoopThread(const EventLoopThread::ThreadInitCallback &cb,
-                                 const std::string &name)
+                                 std::string_view name)
     : m_exit(false)
     , m_mutex()
     , m_cond()

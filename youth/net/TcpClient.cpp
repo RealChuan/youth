@@ -23,7 +23,7 @@ void removeConnector(const ConnectorPtr &connector)
     // connector->stop();
 }
 
-TcpClient::TcpClient(EventLoop *loop, const HostAddress &serverAddr, const std::string &name)
+TcpClient::TcpClient(EventLoop *loop, const HostAddress &serverAddr, std::string_view name)
     : m_eventLoop(CHECK_NOTNULL(loop))
     , m_connectorPtr(new Connector(loop, serverAddr))
     , m_name(name)

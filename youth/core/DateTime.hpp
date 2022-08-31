@@ -89,9 +89,7 @@ public:
 
     std::string toStandardFormat() const;
     // %Y-%m-%d %H:%M:%S
-    std::string toString(const std::string &fmt) const { return toString(fmt.data()); }
-    std::string toString(const std::string_view &fmt) const { return toString(fmt.data()); }
-    std::string toString(const char *fmt) const;
+    std::string toString(const std::string_view &fmt) const;
 
     inline DateTime addMicroSeconds(int64_t microseconds) const
     {
@@ -113,19 +111,7 @@ public:
     static int64_t currentMicroSecondsSinceEpoch();
     static int64_t currentMilliSecondsSinceEpoch();
     static int64_t currentSecondsSinceEpoch();
-    static DateTime fromString(const std::string &dateTime, const std::string_view &format)
-    {
-        return fromString(dateTime.data(), format.data());
-    }
-    static DateTime fromString(std::string_view dateTime, std::string_view format)
-    {
-        return fromString(dateTime.data(), format.data());
-    }
-    static DateTime fromString(const std::string &dateTime, std::string_view format)
-    {
-        return fromString(dateTime.data(), format.data());
-    }
-    static DateTime fromString(const char *dateTime, const char *format);
+    static DateTime fromString(std::string_view dateTime, std::string_view format);
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
 

@@ -19,13 +19,13 @@ std::string DateTime::toStandardFormat() const
     return buf;
 }
 
-std::string DateTime::toString(const char *fmt) const
+std::string DateTime::toString(const std::string_view &fmt) const
 {
     char buf[32] = {0};
     std::chrono::time_point<std::chrono::system_clock> tp(
         (std::chrono::microseconds(m_microSecondsSinceEpoch)));
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
-    std::strftime(buf, sizeof(buf), fmt, std::localtime(&t));
+    std::strftime(buf, sizeof(buf), fmt.data(), std::localtime(&t));
     return buf;
 }
 
@@ -114,11 +114,11 @@ int64_t DateTime::currentSecondsSinceEpoch()
         .count();
 }
 
-DateTime DateTime::fromString(const char *dateTime, const char *format)
+DateTime DateTime::fromString(std::string_view dateTime, std::string_view format)
 {
     std::tm tm = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    std::istringstream is(dateTime);
-    is >> std::get_time(&tm, format);
+    std::istringstream is(dateTime.data());
+    is >> std::get_time(&tm, format.data());
     auto t = std::mktime(&tm);
     return DateTime(std::chrono::system_clock::from_time_t(t).time_since_epoch().count() / 1000);
 }

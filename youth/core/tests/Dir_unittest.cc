@@ -68,6 +68,6 @@ TEST(staticFunctionDir, Positive)
     std::cout << "isAbsolute: " << std::boolalpha << Dir::isAbsolute("./test") << std::endl;
     std::cout << "isRelative: " << std::boolalpha << Dir::isRelative("test") << std::endl;
     auto path = Dir::Current().path();
-    std::cout << "fromNativeSeparators: " << Dir::fromNativeSeparators(path) << std::endl;
+    std::cout << "fromNativeSeparators: " << Dir::fromNativeSeparators(path.string()) << std::endl;
     std::cout << "toNativeSeparators: " << Dir::toNativeSeparators(path) << std::endl;
 }

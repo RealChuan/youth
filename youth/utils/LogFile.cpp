@@ -26,7 +26,7 @@ LogFile::LogFile()
 
 LogFile::~LogFile() {}
 
-void LogFile::setDirectoryAndBaseName(const std::string &directory, const std::string &basename)
+void LogFile::setDirectoryAndBaseName(std::string_view directory, std::string_view basename)
 {
     assert(!m_directory.empty());
     m_directory = directory;

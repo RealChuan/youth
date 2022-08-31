@@ -11,7 +11,7 @@ namespace core {
 std::atomic<int64_t> Thread::s_numCreated = 0;
 std::atomic<int64_t> Thread::s_allThreadNum = 0;
 
-Thread::Thread(ThreadFunc threadFunc, const std::string &name)
+Thread::Thread(ThreadFunc threadFunc, std::string_view name)
     : m_running(false)
     , m_joined(false)
     , m_tid()

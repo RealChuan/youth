@@ -25,7 +25,7 @@ void defaultHttpCallback(const HttpRequest &, HttpResponse *resp)
 
 HttpServer::HttpServer(net::EventLoop *loop,
                        const net::HostAddress &listenAddr,
-                       const std::string &name,
+                       std::string_view name,
                        net::TcpServer::Option option)
     : m_server(loop, listenAddr, name, option)
     , m_httpCallback(defaultHttpCallback)
@@ -69,7 +69,7 @@ void HttpServer::onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, 
 
 void HttpServer::onRequest(const net::TcpConnectionPtr &conn, const HttpRequest &req)
 {
-    const std::string &connection = req.getHeader("Connection");
+    auto connection = req.getHeader("Connection");
     bool close = connection == "close"
                  || (req.getVersion() == HttpRequest::Http10 && connection != "Keep-Alive");
     HttpResponse response(close);

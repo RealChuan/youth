@@ -48,7 +48,7 @@ public:
     std::string readLine();
     std::string readAll();
 
-    void write(const std::string &str) { write(str.c_str(), str.size()); }
+    void write(std::string_view str) { write(str.data(), str.size()); }
     void write(const char *str, int len);
 
     void seek(int offset);

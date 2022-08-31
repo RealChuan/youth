@@ -39,6 +39,7 @@ private:
                  << " is " << (conn->connected() ? "UP" : "DOWN");
         LOG_INFO << conn->getTcpInfoString();
         conn->send("Hello Client, I am server\n");
+        m_eventLoop->runAfter(10, [=] { conn->send("quit\n"); });
     }
 
     void message(const TcpConnectionPtr &conn, Buffer *buffer, DateTime timestamp)
@@ -67,8 +68,7 @@ int main(int argc, char **argv)
 
     LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
     EventLoop loop;
-    HostAddress address(65533, true);
-    EchoTcpServer echoTcpServer(&loop, address);
+    EchoTcpServer echoTcpServer(&loop, HostAddress(65533));
     echoTcpServer.start(ThreadPool::cpuCores() * 2);
     loop.loop();
     return 0;

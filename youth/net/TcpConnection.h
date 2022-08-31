@@ -21,7 +21,7 @@ class TcpConnection : noncopyable, public std::enable_shared_from_this<TcpConnec
 {
 public:
     TcpConnection(EventLoop *loop,
-                  const std::string &name,
+                  std::string_view name,
                   int sockfd,
                   const HostAddress &localAddr,
                   const HostAddress &peerAddr);
@@ -37,8 +37,6 @@ public:
     bool getTcpInfo(struct tcp_info *tcpi) const;
     std::string getTcpInfoString() const;
 
-    //    void send(const std::string &&message)
-    //    { send(std::string_view(message.data(), message.size())); }
     void send(const void *data, int len)
     {
         send(std::string_view(static_cast<const char *>(data), len));

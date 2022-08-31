@@ -46,7 +46,14 @@
       16. [Timer](./youth/net/Timer.h)-----------定时器类；  
       17. [TimerId](./youth/net/TimerId.h)-----------定时器ID类；  
       18. [TimerQueue](./youth/net/TimerQueue.h)-----------定时器队列；  
-      19. [tests](./youth/net/tests)-----------测试;  
+      19. [http](./youth/net/http)
+          1.  [HttpContext](./youth/net/http/HttpContext.h)-----------Http上下文；
+          2.  [HttpRequest](./youth/net/http/HttpRequest.h)-----------Http请求头封装；
+          3.  [HttpReponse](./youth/net/http/HttpResponse.h)-----------Http响应头和body封装；
+          4.  [HttpServer](./youth/net/http/HttpServer.h)-----------HttpServer；
+          5.  [tests](./youth/net/http/tests)
+              1.  [HttpServerTest](./youth/net/http/tests/HttpServerTest.cpp)-----------HttpServer测试；
+      20. [tests](./youth/net/tests)-----------测试;  
           1. [EventLoopTest](./youth/net/tests/EventLoopTest.cpp)------------事件循环测试；  
           2. [Resolve_unittest](./youth/net/tests/Resolve_unittest.cc)------------根据域名获取IP地址信息；
           3. [TcpClientTest](./youth/net/tests/TcpClientTest.cpp)-----------TCP客户端测试；  

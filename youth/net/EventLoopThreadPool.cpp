@@ -9,7 +9,7 @@ namespace youth {
 
 namespace net {
 
-EventLoopThreadPool::EventLoopThreadPool(EventLoop *baseLoop, const std::string &name)
+EventLoopThreadPool::EventLoopThreadPool(EventLoop *baseLoop, std::string_view name)
     : m_baseLoop(baseLoop)
     , m_name(name)
     , m_started(false)

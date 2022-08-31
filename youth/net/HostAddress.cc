@@ -54,14 +54,14 @@ std::string HostAddress::ipAndPort() const
     return SocketFunc::getIpAndPort(sockAddr());
 }
 
-std::vector<HostAddress> HostAddress::resolve(const std::string &hostname)
+std::vector<HostAddress> HostAddress::resolve(std::string_view hostname)
 {
     std::vector<HostAddress> infos;
     addrinfo *res = nullptr;
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
-    int result = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
+    int result = getaddrinfo(hostname.data(), nullptr, &hints, &res);
     if (result == 0) {
         addrinfo *node = res;
         while (node) {

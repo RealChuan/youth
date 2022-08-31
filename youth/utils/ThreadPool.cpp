@@ -9,7 +9,7 @@ namespace youth {
 
 namespace utils {
 
-ThreadPool::ThreadPool(const std::string &name)
+ThreadPool::ThreadPool(std::string_view name)
     : m_name(name)
     , m_maxTaskNum(0)
     , m_running(false)

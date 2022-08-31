@@ -18,7 +18,7 @@ namespace net {
 
 TcpServer::TcpServer(EventLoop *loop,
                      const HostAddress &listenAddr,
-                     const std::string &nameArg,
+                     std::string_view nameArg,
                      Option option)
     : m_eventLoop(CHECK_NOTNULL(loop))
     , m_ipPort(listenAddr.ipAndPort())
