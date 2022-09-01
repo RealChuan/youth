@@ -109,19 +109,19 @@ void RpcChannel::onRpcMessage(const net::TcpConnectionPtr &conn,
         }
     } else if (message.type() == REQUEST) {
         // FIXME: extract to a function
-        ErrorCode error = WRONG_PROTO;
+        auto error = WRONG_PROTO;
         if (m_services) {
             auto it = m_services->find(message.service());
             if (it != m_services->end()) {
-                auto *service = it->second;
+                auto service = it->second;
                 assert(service != NULL);
-                auto *desc = service->GetDescriptor();
-                auto *method = desc->FindMethodByName(message.method());
+                auto desc = service->GetDescriptor();
+                auto method = desc->FindMethodByName(message.method());
                 if (method) {
                     std::unique_ptr<google::protobuf::Message> request(
                         service->GetRequestPrototype(method).New());
                     if (request->ParseFromString(message.request())) {
-                        auto *response = service->GetResponsePrototype(method).New();
+                        auto response = service->GetResponsePrototype(method).New();
                         // response is deleted in doneCallback
                         int64_t id = message.id();
                         service->CallMethod(method,

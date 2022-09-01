@@ -1,9 +1,10 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package youth.rpc;
 
 enum MessageType
 {
+  UNKNOWN = 0;
   REQUEST = 1;
   RESPONSE = 2;
   ERROR = 3; // not used
@@ -22,8 +23,8 @@ enum ErrorCode
 
 message RpcMessage
 {
-  required MessageType type = 1;
-  required fixed64 id = 2;
+  MessageType type = 1;
+  fixed64 id = 2;
 
   optional string service = 3;
   optional string method = 4;

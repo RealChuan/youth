@@ -19,3 +19,5 @@ set(RPC_SRCS
 
 ADD_LIBRARY (youth_net_rpc ${RPC_SRCS} rpc.pb.cc rpc.pb.h)
 target_link_libraries(youth_net_rpc PRIVATE youth_core youth_utils youth_net ZLIB::ZLIB protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+
+ADD_SUBDIRECTORY(tests)

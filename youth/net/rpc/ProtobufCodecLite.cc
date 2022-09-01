@@ -31,13 +31,13 @@ void ProtobufCodecLite::fillEmptyBuffer(net::Buffer *buf, const google::protobuf
     // FIXME: can we move serialization & checksum to other thread?
     buf->append(m_tag);
 
-    int byte_size = serializeToBuffer(message, buf);
+    auto byte_size = serializeToBuffer(message, buf);
 
-    int32_t checkSum = checksum(buf->peek(), static_cast<int>(buf->readableBytes()));
+    auto checkSum = checksum(buf->peek(), static_cast<int>(buf->readableBytes()));
     buf->appendInt32(checkSum);
     assert(buf->readableBytes() == m_tag.size() + byte_size + kChecksumLen);
     (void) byte_size;
-    int32_t len = net::SocketFunc::hostToNetwork32(static_cast<int32_t>(buf->readableBytes()));
+    auto len = net::SocketFunc::hostToNetwork32(static_cast<int32_t>(buf->readableBytes()));
     buf->prepend(&len, sizeof len);
 }
 
@@ -46,7 +46,7 @@ void ProtobufCodecLite::onMessage(const net::TcpConnectionPtr &conn,
                                   DateTime receiveTime)
 {
     while (buf->readableBytes() >= static_cast<uint32_t>(kMinMessageLen + kHeaderLen)) {
-        const int32_t len = buf->peekInt32();
+        const auto len = buf->peekInt32();
         if (len > kMaxMessageLen || len < kMinMessageLen) {
             m_errorCallback(conn, buf, receiveTime, kInvalidLength);
             break;
@@ -58,7 +58,7 @@ void ProtobufCodecLite::onMessage(const net::TcpConnectionPtr &conn,
             }
             MessagePtr message(m_prototype->New());
             // FIXME: can we move deserialization & callback to other thread?
-            ErrorCode errorCode = parse(buf->peek() + kHeaderLen, len, message.get());
+            auto errorCode = parse(buf->peek() + kHeaderLen, len, message.get());
             if (errorCode == kNoError) {
                 // FIXME: try { } catch (...) { }
                 m_messageCallback(conn, message, receiveTime);
@@ -80,11 +80,11 @@ bool ProtobufCodecLite::parseFromBuffer(std::string_view buf, google::protobuf::
 
 int ProtobufCodecLite::serializeToBuffer(const google::protobuf::Message &message, net::Buffer *buf)
 {
-    int byte_size = google::protobuf::internal::ToIntSize(message.ByteSizeLong());
+    auto byte_size = google::protobuf::internal::ToIntSize(message.ByteSizeLong());
     buf->ensureWritableBytes(byte_size + kChecksumLen);
 
-    uint8_t *start = reinterpret_cast<uint8_t *>(buf->beginWrite());
-    uint8_t *end = message.SerializeWithCachedSizesToArray(start);
+    auto start = reinterpret_cast<uint8_t *>(buf->beginWrite());
+    auto end = message.SerializeWithCachedSizesToArray(start);
     if (end - start != byte_size) {
         LOG_WARN << "end - start != byte_siz";
     }
@@ -141,8 +141,8 @@ int32_t ProtobufCodecLite::checksum(const void *buf, int len)
 bool ProtobufCodecLite::validateChecksum(const char *buf, int len)
 {
     // check sum
-    int32_t expectedCheckSum = asInt32(buf + len - kChecksumLen);
-    int32_t checkSum = checksum(buf, len - kChecksumLen);
+    auto expectedCheckSum = asInt32(buf + len - kChecksumLen);
+    auto checkSum = checksum(buf, len - kChecksumLen);
     return checkSum == expectedCheckSum;
 }
 
@@ -150,13 +150,13 @@ ProtobufCodecLite::ErrorCode ProtobufCodecLite::parse(const char *buf,
                                                       int len,
                                                       ::google::protobuf::Message *message)
 {
-    ErrorCode error = kNoError;
+    auto error = kNoError;
 
     if (validateChecksum(buf, len)) {
         if (memcmp(buf, m_tag.data(), m_tag.size()) == 0) {
             // parse from buffer
-            const char *data = buf + m_tag.size();
-            int32_t dataLen = len - kChecksumLen - static_cast<int>(m_tag.size());
+            auto data = buf + m_tag.size();
+            auto dataLen = len - kChecksumLen - static_cast<int>(m_tag.size());
             if (parseFromBuffer(std::string_view(data, dataLen), message)) {
                 error = kNoError;
             } else {

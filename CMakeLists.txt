@@ -11,9 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CURRENT_SOURCE_DIR ON)
 
-#set(CMAKE_CXX_FLAGS_DEBUG "-O0")
-#set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -68,6 +65,8 @@ if(GTest_FOUND)
   message(STATUS "found GTest")
 endif()
 
+enable_testing()
+include(GoogleTest)
 
 include_directories( ${PROJECT_SOURCE_DIR} )
 
