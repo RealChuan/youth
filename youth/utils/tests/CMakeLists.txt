@@ -26,3 +26,6 @@ add_test(NAME LogSpeed_unitest COMMAND LogSpeed_unitest)
 ADD_EXECUTABLE(Log_benchmark Log_benchmark.cc)
 target_link_libraries(Log_benchmark youth_utils benchmark::benchmark benchmark::benchmark_main)
 add_test(NAME Log_benchmark COMMAND Log_benchmark)
+
+ADD_EXECUTABLE(BreakPad_unittest BreakPad_unittest.cc)
+target_link_libraries(BreakPad_unittest youth_utils)

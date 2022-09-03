@@ -18,20 +18,15 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ${{ matrix.config.os }} 
+    runs-on: ${{ matrix.os }} 
     strategy:
-      fail-fast: false
       matrix:
-        config: 
-        - {
-            os: ubuntu-latest,
-            artifact: "ubuntu_gcc.7z",
-            build_type: "Release",
-            cc: "gcc",
-            cxx: "g++",
-            archiver: "7z a",
-            generators: "Ninja"
-          }
+        os:
+        - ubuntu-latest
+        build_type:
+        - "Release"
+        generators:
+        - "Ninja"
 
     steps:
       - name: Install dependencies
@@ -45,20 +40,20 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /usr/local/share/vcpkg/downloads
-          key: ${{ runner.os }}-vcpkg-download-${{ matrix.config.os }}-${{ github.sha }}
+          key: ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-download-${{ matrix.config.os }}-
+            ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-
             ${{ runner.os }}-vcpkg-download-
       - uses: actions/cache@v3
         with:
           path: /usr/local/share/vcpkg/installed
-          key: ${{ runner.os }}-vcpkg-installed-${{ matrix.config.os }}-${{ github.sha }}
+          key: ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-installed-${{ matrix.config.os }}-
+            ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-
             ${{ runner.os }}-vcpkg-installed-
       - name: Install libraries with vcpkg
         run: |
-          vcpkg install curl[ssl,http2,tool] protobuf benchmark gtest glog
+          vcpkg install curl[ssl,http2,tool] protobuf benchmark gtest glog breakpad
           
       - uses: actions/checkout@v3
         with:
@@ -72,12 +67,12 @@ jobs:
           cmake \
             -S . \
             -B ./build \
-            -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
-            -G "${{ matrix.config.generators }}" \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -G "${{ matrix.generators }}" \
             -DCMAKE_INSTALL_PREFIX:PATH=instdir
       - name: Build
         shell: bash
-        run: cmake --build ./build --config ${{ matrix.config.build_type }}
+        run: cmake --build ./build --config ${{ matrix.build_type }}
       - name: Test
         shell: bash
         run: cd build && ctest
