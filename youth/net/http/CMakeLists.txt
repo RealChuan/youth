@@ -6,7 +6,9 @@ set(HTTP_SRCS
         HttpResponse.cpp
         HttpResponse.h
         HttpServer.cpp
-        HttpServer.h)
+        HttpServer.h
+        HttpMethod.cc
+        HttpMethod.hpp)
 
 ADD_LIBRARY (youth_net_http ${HTTP_SRCS})
 target_link_libraries(youth_net_http youth_core youth_utils youth_net)

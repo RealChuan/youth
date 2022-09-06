@@ -1,15 +1,18 @@
 #include <youth/net/EventLoop.h>
 #include <youth/net/HostAddress.hpp>
+#include <youth/net/http/HttpMethod.hpp>
 #include <youth/net/http/HttpRequest.h>
 #include <youth/net/http/HttpResponse.h>
 #include <youth/net/http/HttpServer.h>
 #include <youth/utils/Logging.h>
 #include <youth/utils/ThreadPool.h>
 
-using namespace youth;
+#include <cassert>
+
 using namespace youth::utils;
 using namespace youth::net;
 using namespace youth::http;
+using namespace youth::core;
 
 static const char favicon[555] = {
     '\x89', 'P',    'N',    'G',    '\xD',  '\xA',  '\x1A', '\xA',  '\x0',  '\x0',  '\x0',  '\xD',
@@ -61,16 +64,84 @@ static const char favicon[555] = {
     'B',    '\x60', '\x82',
 };
 
-void onRequest(const HttpRequest &req, HttpResponse *resp)
+class HttpMethodTest : public HttpMethodFactory
 {
-    LOG_INFO << "Headers " << req.methodString() << " " << req.path();
+public:
+    HttpMethodTest()
+        : m_method("GET")
+        , m_paths({"/", "/favicon.ico", "/hello"})
+    {}
 
-    const std::map<std::string, std::string> &headers = req.headers();
-    for (const auto &header : headers) {
-        LOG_INFO << header.first << ": " << header.second;
+    virtual int methodSize() const override { return m_paths.size(); }
+
+    virtual const std::string &method(int index) override { return m_method; }
+    virtual const std::string &path(int index) override
+    {
+        assert(index >= 0 && index < m_paths.size());
+        return m_paths[index];
     }
 
-    if (req.path() == "/") {
+    virtual void call(int index, const HttpRequest &req, HttpResponse *resp) override
+    {
+        LOG_INFO << "Headers " << req.methodString() << " " << req.path();
+
+        const std::map<std::string, std::string> &headers = req.headers();
+        for (const auto &header : headers) {
+            LOG_INFO << header.first << ": " << header.second;
+        }
+
+        assert(index >= 0 && index < m_paths.size());
+        switch (index) {
+        case 0: {
+            resp->setStatusCode(HttpResponse::k200Ok);
+            resp->setStatusMessage("OK");
+            resp->setContentType("text/html");
+            resp->addHeader("Server", "youth");
+            std::string now = DateTime::currentDateTime().toStandardFormat();
+            resp->setBody("<html><head><title>This is title</title></head>"
+                          "<body><h1>Hello</h1>Now is "
+                          + now + "</body></html>");
+        } break;
+        case 1:
+            resp->setStatusCode(HttpResponse::k200Ok);
+            resp->setStatusMessage("OK");
+            resp->setContentType("image/png");
+            resp->setBody(std::string(favicon, sizeof favicon));
+            break;
+        case 2:
+            resp->setStatusCode(HttpResponse::k200Ok);
+            resp->setStatusMessage("OK");
+            resp->setContentType("text/plain");
+            resp->addHeader("Server", "youth");
+            resp->setBody("hello, world!\n");
+            break;
+        default: HttpMethodFactory::defaultCall(req, resp); break;
+        }
+    }
+
+private:
+    std::string m_method;
+    std::vector<std::string> m_paths;
+};
+
+class DeleteMethodTest : public HttpMethodFactory
+{
+public:
+    DeleteMethodTest()
+        : m_method("GET")
+        , m_path("/delete")
+    {}
+
+    virtual int methodSize() const override { return 1; }
+    virtual const std::string &path(int index) override { return m_path; }
+    virtual void call(int index, const HttpRequest &req, HttpResponse *resp) override
+    {
+        LOG_INFO << "Headers " << req.methodString() << " " << req.path();
+
+        const std::map<std::string, std::string> &headers = req.headers();
+        for (const auto &header : headers) {
+            LOG_INFO << header.first << ": " << header.second;
+        }
         resp->setStatusCode(HttpResponse::k200Ok);
         resp->setStatusMessage("OK");
         resp->setContentType("text/html");
@@ -78,30 +149,26 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
         std::string now = DateTime::currentDateTime().toStandardFormat();
         resp->setBody("<html><head><title>This is title</title></head>"
                       "<body><h1>Hello</h1>Now is "
-                      + now + "</body></html>");
-    } else if (req.path() == "/favicon.ico") {
-        resp->setStatusCode(HttpResponse::k200Ok);
-        resp->setStatusMessage("OK");
-        resp->setContentType("image/png");
-        resp->setBody(std::string(favicon, sizeof favicon));
-    } else if (req.path() == "/hello") {
-        resp->setStatusCode(HttpResponse::k200Ok);
-        resp->setStatusMessage("OK");
-        resp->setContentType("text/plain");
-        resp->addHeader("Server", "youth");
-        resp->setBody("hello, world!\n");
-    } else {
-        resp->setStatusCode(HttpResponse::k404NotFound);
-        resp->setStatusMessage("Not Found");
-        resp->setCloseConnection(true);
+                      + now + "\r\n This is Delete Page" + "</body></html>");
     }
-}
+
+private:
+    std::string m_method;
+    std::string m_path;
+};
 
 int main()
 {
     EventLoop loop;
     HttpServer server(&loop, HostAddress(8000), "Test");
-    server.setHttpCallback(onRequest);
+    std::shared_ptr<HttpMethodFactory> impl(new HttpMethodTest);
+    std::shared_ptr<DeleteMethodTest> impl_d(new DeleteMethodTest);
+    server.registerMethod(impl);
+    server.registerMethod(impl_d);
+    loop.runAfter(60, [&] {
+        LOG_INFO << "Delete";
+        impl_d.reset();
+    });
     server.setThreadNum(ThreadPool::cpuCores() * 2);
     server.start();
     loop.loop();

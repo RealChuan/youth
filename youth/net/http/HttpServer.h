@@ -4,6 +4,8 @@
 #include <youth/net/Callbacks.h>
 #include <youth/net/TcpServer.h>
 
+#include <memory>
+
 namespace youth {
 
 namespace net {
@@ -16,22 +18,26 @@ namespace http {
 
 class HttpRequest;
 class HttpResponse;
+class HttpMethodBuilder;
+class HttpMethodFactory;
 
 class HttpServer : core::noncopyable
 {
 public:
-    typedef std::function<void(const HttpRequest &, HttpResponse *)> HttpCallback;
+    using HttpCallback = std::function<void(const HttpRequest &, HttpResponse *)>;
 
     HttpServer(net::EventLoop *loop,
                const net::HostAddress &listenAddr,
                std::string_view name,
                net::TcpServer::Option option = net::TcpServer::kNoReusePort);
 
-    ~HttpServer() {}
+    ~HttpServer();
 
     net::EventLoop *getLoop() const { return m_server.getLoop(); }
 
     void setHttpCallback(const HttpCallback &cb) { m_httpCallback = cb; }
+
+    void registerMethod(std::shared_ptr<HttpMethodFactory> impl);
 
     void setThreadNum(int numThreads) { m_server.setThreadNum(numThreads); }
 
@@ -44,6 +50,7 @@ private:
 
     net::TcpServer m_server;
     HttpCallback m_httpCallback;
+    std::unique_ptr<HttpMethodBuilder> m_methodBuilderPtr;
 };
 
 } // namespace http

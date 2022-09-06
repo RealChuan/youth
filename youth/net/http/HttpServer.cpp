@@ -1,5 +1,6 @@
 #include "HttpServer.h"
 #include "HttpContext.h"
+#include "HttpMethod.hpp"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 
@@ -9,6 +10,7 @@
 #include <youth/utils/Logging.h>
 
 #include <any>
+#include <type_traits>
 
 namespace youth {
 
@@ -16,19 +18,13 @@ using namespace utils;
 
 namespace http {
 
-void defaultHttpCallback(const HttpRequest &, HttpResponse *resp)
-{
-    resp->setStatusCode(HttpResponse::k404NotFound);
-    resp->setStatusMessage("Not Found");
-    resp->setCloseConnection(true);
-}
-
 HttpServer::HttpServer(net::EventLoop *loop,
                        const net::HostAddress &listenAddr,
                        std::string_view name,
                        net::TcpServer::Option option)
     : m_server(loop, listenAddr, name, option)
-    , m_httpCallback(defaultHttpCallback)
+    , m_httpCallback()
+    , m_methodBuilderPtr(new HttpMethodBuilder)
 {
     m_server.setConnectionCallback(
         std::bind(&HttpServer::onConnection, this, std::placeholders::_1));
@@ -37,6 +33,13 @@ HttpServer::HttpServer(net::EventLoop *loop,
                                           std::placeholders::_1,
                                           std::placeholders::_2,
                                           std::placeholders::_3));
+}
+
+HttpServer::~HttpServer() {}
+
+void HttpServer::registerMethod(std::shared_ptr<HttpMethodFactory> impl)
+{
+    m_methodBuilderPtr->registerMethod(impl);
 }
 
 void HttpServer::start()
@@ -73,7 +76,13 @@ void HttpServer::onRequest(const net::TcpConnectionPtr &conn, const HttpRequest 
     bool close = connection == "close"
                  || (req.getVersion() == HttpRequest::Http10 && connection != "Keep-Alive");
     HttpResponse response(close);
-    m_httpCallback(req, &response);
+    if (m_httpCallback) {
+        m_httpCallback(req, &response);
+    } else if (!m_methodBuilderPtr->isEmpty()) {
+        m_methodBuilderPtr->onRequest(req, &response);
+    } else {
+        HttpMethodFactory::defaultCall(req, &response);
+    }
     net::Buffer buf;
     response.appendToBuffer(&buf);
     conn->send(&buf);
@@ -81,6 +90,7 @@ void HttpServer::onRequest(const net::TcpConnectionPtr &conn, const HttpRequest 
         conn->shutdown();
     }
 }
+
 } // namespace http
 
 } // namespace youth
