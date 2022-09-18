@@ -1,5 +1,6 @@
 #include "PostMethod.hpp"
 
+#include <string_view>
 #include <youth/net/http/HttpRequest.h>
 #include <youth/net/http/HttpResponse.h>
 #include <youth/utils/Logging.h>
@@ -22,6 +23,9 @@ void PostMethod::call(int index, const HttpRequest &req, HttpResponse *resp)
     for (const auto &header : headers) {
         LOG_INFO << header.first << ": " << header.second;
     }
+
+    LOG_INFO << "Body: " << std::string(req.m_body.peek(), req.m_body.readableBytes());
+
     assert(index >= 0 && index < m_paths.size());
     switch (index) {
     case 0:
@@ -33,4 +37,5 @@ void PostMethod::call(int index, const HttpRequest &req, HttpResponse *resp)
         break;
     default: HttpMethodFactory::defaultCall(req, resp); break;
     }
+    resp->setCloseConnection(true);
 }

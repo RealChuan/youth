@@ -12,6 +12,7 @@ void HttpRequest::swap(HttpRequest &other)
     m_query.swap(other.m_query);
     m_receiveTime.swap(other.m_receiveTime);
     m_headers.swap(other.m_headers);
+    m_body.swap(other.m_body);
 }
 
 bool HttpRequest::setMethod(const char *start, const char *end)

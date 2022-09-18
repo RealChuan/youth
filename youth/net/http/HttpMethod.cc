@@ -26,6 +26,7 @@ void HttpMethodFactory::call(int index, const HttpRequest &req, HttpResponse *re
     } else {
         defaultCall(req, resp);
     }
+    resp->setCloseConnection(true);
 }
 
 void HttpMethodFactory::defaultCall(const HttpRequest &req, HttpResponse *resp)

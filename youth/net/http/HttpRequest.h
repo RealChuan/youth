@@ -3,6 +3,7 @@
 
 #include <youth/core/DateTime.hpp>
 #include <youth/core/Object.h>
+#include <youth/net/Buffer.h>
 
 #include <assert.h>
 #include <map>
@@ -51,6 +52,8 @@ public:
     std::string getHeader(const std::string &field) const;
 
     const std::map<std::string, std::string> &headers() const { return m_headers; }
+
+    net::Buffer m_body;
 
 private:
     Method m_method;

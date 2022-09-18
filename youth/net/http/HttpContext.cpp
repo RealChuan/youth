@@ -3,6 +3,7 @@
 #include <youth/net/Buffer.h>
 
 #include <algorithm>
+#include <string>
 
 namespace youth {
 
@@ -34,17 +35,33 @@ bool HttpContext::parseRequest(net::Buffer *buf, DateTime receiveTime)
                 if (colon != crlf) {
                     m_request.addHeader(buf->peek(), colon, crlf);
                 } else {
-                    // empty line, end of header
-                    // FIXME:
-                    m_state = GotAll;
-                    hasMore = false;
+                    size_t length = std::stoll(m_request.getHeader("Content-Length"));
+                    if (length <= 0) {
+                        m_state = GotAll;
+                        hasMore = false;
+                    } else {
+                        // empty line, end of header
+                        // FIXME:
+                        m_state = ExpectBody;
+                    }
                 }
                 buf->retrieveUntil(crlf + 2);
             } else {
                 hasMore = false;
             }
         } else if (m_state == ExpectBody) {
-            // FIXME:
+            size_t length = std::stoll(m_request.getHeader("Content-Length"));
+            if (length <= 0) {
+                m_state = GotAll;
+                hasMore = false;
+            } else {
+                m_request.m_body.append(buf->peek(), buf->readableBytes());
+                buf->retrieveAll();
+            }
+            if (m_state != GotAll && m_request.m_body.readableBytes() == length) {
+                m_state = GotAll;
+                hasMore = false;
+            }
         }
     }
     return ok;

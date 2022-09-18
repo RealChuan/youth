@@ -91,4 +91,5 @@ void GetMethod::call(int index, const HttpRequest &req, HttpResponse *resp)
         break;
     default: HttpMethodFactory::defaultCall(req, resp); break;
     }
+    resp->setCloseConnection(true);
 }
