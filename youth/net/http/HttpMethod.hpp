@@ -1,6 +1,8 @@
 #pragma once
 
+#include "youth/net/TcpConnection.h"
 #include <youth/core/Object.h>
+#include <youth/net/Callbacks.h>
 
 #include <functional>
 #include <list>
@@ -9,6 +11,10 @@
 #include <string>
 
 namespace youth {
+
+namespace core {
+class File;
+}
 
 namespace http {
 
@@ -30,6 +36,7 @@ public:
     virtual const std::string &method(int index) { return m_method; }
     virtual const std::string &path(int index) { return m_path; }
 
+    virtual void readyRead(int index, const net::TcpConnectionPtr &, const HttpRequest &);
     virtual void call(int index, const HttpRequest &, HttpResponse *);
 
     static void defaultCall(const HttpRequest &, HttpResponse *);
@@ -42,24 +49,23 @@ private:
 class HttpMethodBuilder final : core::noncopyable
 {
 public:
-    HttpMethodBuilder() {}
+    HttpMethodBuilder();
     ~HttpMethodBuilder();
 
     bool isEmpty() { return m_methodMap.empty(); };
 
     void registerMethod(std::shared_ptr<HttpMethodFactory> impl);
+    void onReadyRead(const net::TcpConnectionPtr &, const HttpRequest &);
     void onRequest(const HttpRequest &, HttpResponse *);
 
 private:
-    struct MethodDetail
-    {
-        ~MethodDetail() {}
+    void putReadyRead(const net::TcpConnectionPtr &conn, const HttpRequest &req);
+    bool putFinish(const HttpRequest &, HttpResponse *);
 
-        std::weak_ptr<HttpMethodFactory> methodImpl;
-        int index;
-    };
+    struct MethodDetail;
     using MethodDetailList = std::list<std::unique_ptr<MethodDetail>>;
     std::map<std::string, MethodDetailList> m_methodMap;
+    std::map<std::string, std::unique_ptr<File>> m_fileMap;
 };
 
 } // namespace http

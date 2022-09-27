@@ -25,6 +25,8 @@ class HttpServer : core::noncopyable
 {
 public:
     using HttpCallback = std::function<void(const HttpRequest &, HttpResponse *)>;
+    using HttpReadyReadCallBack
+        = std::function<void(const net::TcpConnectionPtr &, const HttpRequest &)>;
 
     HttpServer(net::EventLoop *loop,
                const net::HostAddress &listenAddr,
@@ -34,6 +36,11 @@ public:
     ~HttpServer();
 
     net::EventLoop *getLoop() const { return m_server.getLoop(); }
+
+    void setHttpReadyReadCallback(const HttpReadyReadCallBack &callback)
+    {
+        m_readyReadCallBack = callback;
+    }
 
     void setHttpCallback(const HttpCallback &cb) { m_httpCallback = cb; }
 
@@ -46,10 +53,12 @@ public:
 private:
     void onConnection(const net::TcpConnectionPtr &conn);
     void onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, DateTime receiveTime);
+    void onReadyRead(const net::TcpConnectionPtr &, const HttpRequest &);
     void onRequest(const net::TcpConnectionPtr &, const HttpRequest &);
 
     net::TcpServer m_server;
     HttpCallback m_httpCallback;
+    HttpReadyReadCallBack m_readyReadCallBack;
     std::unique_ptr<HttpMethodBuilder> m_methodBuilderPtr;
 };
 

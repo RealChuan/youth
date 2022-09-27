@@ -74,6 +74,27 @@ std::string HttpRequest::getHeader(const std::string &field) const
     return result;
 }
 
+size_t HttpRequest::contentLength()
+{
+    if (m_content_length == 0) {
+        m_content_length = std::stoll(getHeader("Content-Length"));
+    }
+    return m_content_length;
+}
+
+void HttpRequest::appendBody(const char *start, size_t len)
+{
+    m_body.append(start, len);
+}
+
+bool HttpRequest::gotAllBody()
+{
+    if (m_content_length == 0) {
+        m_content_length = std::stoll(getHeader("Content-Length"));
+    }
+    return (m_body.readableBytes() + m_readSize) == m_content_length;
+}
+
 } // namespace http
 
 } // namespace youth

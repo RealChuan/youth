@@ -1,11 +1,14 @@
 #include "HttpContext.h"
 
 #include <youth/net/Buffer.h>
+#include <youth/utils/Logging.h>
 
 #include <algorithm>
 #include <string>
 
 namespace youth {
+
+using namespace utils;
 
 namespace http {
 
@@ -35,33 +38,30 @@ bool HttpContext::parseRequest(net::Buffer *buf, DateTime receiveTime)
                 if (colon != crlf) {
                     m_request.addHeader(buf->peek(), colon, crlf);
                 } else {
-                    size_t length = std::stoll(m_request.getHeader("Content-Length"));
-                    if (length <= 0) {
+                    if (m_request.contentLength() == 0) {
                         m_state = GotAll;
-                        hasMore = false;
                     } else {
                         // empty line, end of header
                         // FIXME:
                         m_state = ExpectBody;
                     }
+                    hasMore = false;
                 }
                 buf->retrieveUntil(crlf + 2);
             } else {
                 hasMore = false;
             }
         } else if (m_state == ExpectBody) {
-            size_t length = std::stoll(m_request.getHeader("Content-Length"));
-            if (length <= 0) {
+            if (m_request.contentLength() == 0) {
                 m_state = GotAll;
-                hasMore = false;
             } else {
-                m_request.m_body.append(buf->peek(), buf->readableBytes());
+                m_request.appendBody(buf->peek(), buf->readableBytes());
                 buf->retrieveAll();
             }
-            if (m_state != GotAll && m_request.m_body.readableBytes() == length) {
+            if (m_state != GotAll && m_request.gotAllBody()) {
                 m_state = GotAll;
-                hasMore = false;
             }
+            hasMore = false;
         }
     }
     return ok;

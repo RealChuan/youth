@@ -29,6 +29,8 @@ public:
 
     bool gotAll() const { return m_state == GotAll; }
 
+    bool gotBody() const { return m_state == ExpectBody; }
+
     void reset()
     {
         m_state = ExpectRequestLine;

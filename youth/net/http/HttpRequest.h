@@ -53,7 +53,16 @@ public:
 
     const std::map<std::string, std::string> &headers() const { return m_headers; }
 
-    net::Buffer m_body;
+    size_t contentLength();
+    void appendBody(const char *start, size_t len);
+    bool gotAllBody();
+    net::Buffer readAll() const
+    {
+        m_readSize += m_body.readableBytes();
+        net::Buffer buf;
+        buf.swap(m_body);
+        return buf;
+    }
 
 private:
     Method m_method;
@@ -62,6 +71,9 @@ private:
     std::string m_query;
     DateTime m_receiveTime;
     std::map<std::string, std::string> m_headers;
+    mutable net::Buffer m_body;
+    size_t m_content_length = 0;
+    mutable size_t m_readSize = 0;
 };
 
 } // namespace http

@@ -27,7 +27,7 @@ public:
     explicit File(const std::filesystem::path &filename)
         : m_filePath(filename)
     {}
-    ~File() { close(); }
+    ~File();
 
     bool open(const std::filesystem::path &filename, OpenMode mode);
     bool open(OpenMode mode) { return open(m_filePath, mode); }

@@ -6,6 +6,11 @@ namespace youth {
 
 namespace core {
 
+File::~File()
+{
+    close();
+}
+
 bool File::open(const std::filesystem::path &filename, OpenMode mode)
 {
     close();

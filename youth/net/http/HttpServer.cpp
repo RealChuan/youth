@@ -64,9 +64,22 @@ void HttpServer::onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, 
         conn->shutdown();
     }
 
-    if (context->gotAll()) {
+    if (context->gotBody()) {
+        onReadyRead(conn, context->request());
+    } else if (context->gotAll()) {
+        onReadyRead(conn, context->request());
         onRequest(conn, context->request());
         context->reset();
+    }
+}
+
+void HttpServer::onReadyRead(const net::TcpConnectionPtr &conn, const HttpRequest &req)
+{
+    //LOG_INFO << "onReadyRead";
+    if (m_readyReadCallBack) {
+        m_readyReadCallBack(conn, req);
+    } else {
+        m_methodBuilderPtr->onReadyRead(conn, req);
     }
 }
 

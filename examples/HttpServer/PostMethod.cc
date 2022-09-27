@@ -24,7 +24,8 @@ void PostMethod::call(int index, const HttpRequest &req, HttpResponse *resp)
         LOG_INFO << header.first << ": " << header.second;
     }
 
-    LOG_INFO << "Body: " << std::string(req.m_body.peek(), req.m_body.readableBytes());
+    auto body = req.readAll();
+    LOG_INFO << "Body: " << std::string(body.peek(), body.readableBytes());
 
     assert(index >= 0 && index < m_paths.size());
     switch (index) {
