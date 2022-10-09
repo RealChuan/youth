@@ -1,4 +1,5 @@
 #include "HttpMethod.hpp"
+#include "HttpContext.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 
@@ -87,8 +88,9 @@ void HttpMethodBuilder::registerMethod(std::shared_ptr<HttpMethodFactory> impl)
     }
 }
 
-void HttpMethodBuilder::onReadyRead(const net::TcpConnectionPtr &conn, const HttpRequest &req)
+void HttpMethodBuilder::onReadyRead(const net::TcpConnectionPtr &conn, HttpContext *context)
 {
+    const auto &req = context->request();
     auto &list = m_methodMap[req.methodString()];
     for (auto iter = list.begin(); iter != list.end();) {
         auto methodDetail = (*iter).get();
@@ -104,11 +106,14 @@ void HttpMethodBuilder::onReadyRead(const net::TcpConnectionPtr &conn, const Htt
         }
     }
 
-    putReadyRead(conn, req);
+    putReadyRead(conn, context);
 }
 
-void HttpMethodBuilder::onRequest(const HttpRequest &req, HttpResponse *resp)
+void HttpMethodBuilder::onRequest(const net::TcpConnectionPtr &conn,
+                                  HttpContext *context,
+                                  HttpResponse *resp)
 {
+    const auto &req = context->request();
     LOG_DEBUG << "Headers " << req.methodString() << " " << req.path();
     const std::map<std::string, std::string> &headers = req.headers();
     for (const auto &header : headers) {
@@ -130,22 +135,23 @@ void HttpMethodBuilder::onRequest(const HttpRequest &req, HttpResponse *resp)
         }
     }
 
-    if (putFinish(req, resp)) {
+    if (putFinish(context, resp)) {
         return;
     }
 
     HttpMethodFactory::defaultCall(req, resp);
 }
 
-void HttpMethodBuilder::putReadyRead(const net::TcpConnectionPtr &conn, const HttpRequest &req)
+void HttpMethodBuilder::putReadyRead(const net::TcpConnectionPtr &conn, HttpContext *context)
 {
+    const auto &req = context->request();
     if (req.method() != HttpRequest::Method::Put) {
         return;
     }
-    auto &file = m_fileMap[req.path()];
+    auto file = std::any_cast<File>(context->getMutableContext());
     if (!file) {
-        auto f = new File("." + req.path());
-        if (!f->open(File::OpenMode::WriteOnly)) {
+        file = new File("." + req.path());
+        if (!file->open(File::OpenMode::WriteOnly)) {
             HttpResponse response(true);
             response.setCloseConnection(true);
             response.setStatusCode(HttpResponse::k400BadRequest);
@@ -154,28 +160,24 @@ void HttpMethodBuilder::putReadyRead(const net::TcpConnectionPtr &conn, const Ht
             conn->shutdown();
             return;
         }
-        //m_fileMap.emplace(req.path(), f);
-        m_fileMap[req.path()] = std::unique_ptr<File>(f);
     }
-    auto &filePtr = m_fileMap[req.path()];
-    if (filePtr) {
-        auto buf = req.readAll();
-        filePtr->write(buf.peek(), buf.readableBytes());
-    }
+    auto buf = req.readAll();
+    file->write(buf.peek(), buf.readableBytes());
 }
 
-bool HttpMethodBuilder::putFinish(const HttpRequest &req, HttpResponse *resp)
+bool HttpMethodBuilder::putFinish(HttpContext *context, HttpResponse *resp)
 {
+    const auto &req = context->request();
     if (req.method() != HttpRequest::Method::Put) {
         return false;
     }
-    auto &file = m_fileMap[req.path()];
+    auto file = std::any_cast<File>(context->getMutableContext());
     if (file) {
         auto buf = req.readAll();
         file->write(buf.peek(), buf.readableBytes());
         file->flush();
         file->close();
-        m_fileMap.erase(req.path());
+        delete file;
     }
 
     resp->setStatusCode(HttpResponse::k200Ok);

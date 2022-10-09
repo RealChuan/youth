@@ -65,6 +65,8 @@ public:
     }
 
 private:
+    void initContentLength();
+
     Method m_method;
     Version m_version;
     std::string m_path;

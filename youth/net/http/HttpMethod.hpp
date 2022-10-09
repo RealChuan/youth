@@ -20,6 +20,7 @@ namespace http {
 
 class HttpRequest;
 class HttpResponse;
+class HttpContext;
 
 class HttpMethodFactory : core::noncopyable
 {
@@ -55,17 +56,16 @@ public:
     bool isEmpty() { return m_methodMap.empty(); };
 
     void registerMethod(std::shared_ptr<HttpMethodFactory> impl);
-    void onReadyRead(const net::TcpConnectionPtr &, const HttpRequest &);
-    void onRequest(const HttpRequest &, HttpResponse *);
+    void onReadyRead(const net::TcpConnectionPtr &, HttpContext *context);
+    void onRequest(const net::TcpConnectionPtr &, HttpContext *context, HttpResponse *);
 
 private:
-    void putReadyRead(const net::TcpConnectionPtr &conn, const HttpRequest &req);
-    bool putFinish(const HttpRequest &, HttpResponse *);
+    void putReadyRead(const net::TcpConnectionPtr &conn, HttpContext *context);
+    bool putFinish(HttpContext *context, HttpResponse *);
 
     struct MethodDetail;
     using MethodDetailList = std::list<std::unique_ptr<MethodDetail>>;
     std::map<std::string, MethodDetailList> m_methodMap;
-    std::map<std::string, std::unique_ptr<File>> m_fileMap;
 };
 
 } // namespace http

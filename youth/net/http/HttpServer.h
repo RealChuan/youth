@@ -20,6 +20,7 @@ class HttpRequest;
 class HttpResponse;
 class HttpMethodBuilder;
 class HttpMethodFactory;
+class HttpContext;
 
 class HttpServer : core::noncopyable
 {
@@ -53,8 +54,8 @@ public:
 private:
     void onConnection(const net::TcpConnectionPtr &conn);
     void onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, DateTime receiveTime);
-    void onReadyRead(const net::TcpConnectionPtr &, const HttpRequest &);
-    void onRequest(const net::TcpConnectionPtr &, const HttpRequest &);
+    void onReadyRead(const net::TcpConnectionPtr &, HttpContext *context);
+    void onRequest(const net::TcpConnectionPtr &, HttpContext *context);
 
     net::TcpServer m_server;
     HttpCallback m_httpCallback;

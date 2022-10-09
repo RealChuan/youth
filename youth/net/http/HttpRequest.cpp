@@ -76,9 +76,7 @@ std::string HttpRequest::getHeader(const std::string &field) const
 
 size_t HttpRequest::contentLength()
 {
-    if (m_content_length == 0) {
-        m_content_length = std::stoll(getHeader("Content-Length"));
-    }
+    initContentLength();
     return m_content_length;
 }
 
@@ -89,10 +87,21 @@ void HttpRequest::appendBody(const char *start, size_t len)
 
 bool HttpRequest::gotAllBody()
 {
-    if (m_content_length == 0) {
-        m_content_length = std::stoll(getHeader("Content-Length"));
-    }
+    initContentLength();
     return (m_body.readableBytes() + m_readSize) == m_content_length;
+}
+
+void HttpRequest::initContentLength()
+{
+    if (m_content_length > 0) {
+        return;
+    }
+
+    auto contentLength = getHeader("Content-Length");
+    if (contentLength.empty()) {
+        return;
+    }
+    m_content_length = std::stoll(contentLength);
 }
 
 } // namespace http

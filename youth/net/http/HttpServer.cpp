@@ -65,26 +65,27 @@ void HttpServer::onMessage(const net::TcpConnectionPtr &conn, net::Buffer *buf, 
     }
 
     if (context->gotBody()) {
-        onReadyRead(conn, context->request());
+        onReadyRead(conn, context);
     } else if (context->gotAll()) {
-        onReadyRead(conn, context->request());
-        onRequest(conn, context->request());
+        onReadyRead(conn, context);
+        onRequest(conn, context);
         context->reset();
     }
 }
 
-void HttpServer::onReadyRead(const net::TcpConnectionPtr &conn, const HttpRequest &req)
+void HttpServer::onReadyRead(const net::TcpConnectionPtr &conn, HttpContext *context)
 {
     //LOG_INFO << "onReadyRead";
     if (m_readyReadCallBack) {
-        m_readyReadCallBack(conn, req);
+        m_readyReadCallBack(conn, context->request());
     } else {
-        m_methodBuilderPtr->onReadyRead(conn, req);
+        m_methodBuilderPtr->onReadyRead(conn, context);
     }
 }
 
-void HttpServer::onRequest(const net::TcpConnectionPtr &conn, const HttpRequest &req)
+void HttpServer::onRequest(const net::TcpConnectionPtr &conn, HttpContext *context)
 {
+    const auto &req = context->request();
     auto connection = req.getHeader("Connection");
     bool close = connection == "close"
                  || (req.getVersion() == HttpRequest::Http10 && connection != "Keep-Alive");
@@ -92,7 +93,7 @@ void HttpServer::onRequest(const net::TcpConnectionPtr &conn, const HttpRequest 
     if (m_httpCallback) {
         m_httpCallback(req, &response);
     } else if (!m_methodBuilderPtr->isEmpty()) {
-        m_methodBuilderPtr->onRequest(req, &response);
+        m_methodBuilderPtr->onRequest(conn, context, &response);
     } else {
         HttpMethodFactory::defaultCall(req, &response);
     }

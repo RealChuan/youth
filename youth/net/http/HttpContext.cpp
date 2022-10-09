@@ -12,6 +12,12 @@ using namespace utils;
 
 namespace http {
 
+HttpContext::HttpContext()
+    : m_state(ExpectRequestLine)
+{}
+
+HttpContext::~HttpContext() {}
+
 bool HttpContext::parseRequest(net::Buffer *buf, DateTime receiveTime)
 {
     bool ok = true;
