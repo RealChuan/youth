@@ -63,9 +63,15 @@ private:
     void putReadyRead(const net::TcpConnectionPtr &conn, HttpContext *context);
     bool putFinish(HttpContext *context, HttpResponse *);
 
+    bool getFile(const net::TcpConnectionPtr &conn, HttpContext *context, HttpResponse *);
+    void writeCompleteCallback(const net::TcpConnectionPtr &conn);
+
+    bool deletePath(HttpContext *context, HttpResponse *);
+
     struct MethodDetail;
     using MethodDetailList = std::list<std::unique_ptr<MethodDetail>>;
     std::map<std::string, MethodDetailList> m_methodMap;
+    const int m_bufSize = 64 * 1024;
 };
 
 } // namespace http

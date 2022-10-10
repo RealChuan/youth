@@ -8,7 +8,7 @@ namespace http {
 
 void HttpResponse::appendToBuffer(net::Buffer *output) const
 {
-    char buf[32];
+    char buf[64];
     snprintf(buf, sizeof buf, "HTTP/1.1 %d ", m_statusCode);
     output->append(buf);
     output->append(m_statusMessage);
@@ -16,6 +16,11 @@ void HttpResponse::appendToBuffer(net::Buffer *output) const
 
     if (m_closeConnection) {
         output->append("Connection: close\r\n");
+    } else if (m_contentLength > 0) {
+        snprintf(buf,
+                 sizeof buf,
+                 "Content-Length: %ld\r\n",m_contentLength);
+        output->append("Connection: Keep-Alive\r\n");
     } else {
         snprintf(buf, sizeof buf, "Content-Length: %zd\r\n", m_body.size());
         output->append(buf);

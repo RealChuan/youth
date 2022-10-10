@@ -102,6 +102,10 @@ public:
     static bool mkdirs(const std::filesystem::path &path, std::filesystem::perms perms);
     static bool rmdirs(const std::filesystem::path &path);
     static bool removeFile(const std::filesystem::path &path, std::string_view filename);
+    static bool remove(const std::filesystem::path &path)
+    {
+        return std::filesystem::remove_all(path);
+    }
 
     static Dir Current() { return Dir(std::filesystem::current_path()); }
     static Dir temp() { return Dir(std::filesystem::temp_directory_path()); }

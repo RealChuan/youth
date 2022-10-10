@@ -45,6 +45,7 @@ public:
 
     bool isOpen() const { return m_fstream.is_open(); }
 
+    std::string readMaxSize(int64_t maxSize);
     std::string readLine();
     std::string readAll();
 

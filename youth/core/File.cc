@@ -35,6 +35,17 @@ void File::flush()
     }
 }
 
+std::string File::readMaxSize(int64_t maxSize)
+{
+    std::string maxBuffer;
+    if (!isOpen() || !checkMode(ReadOnly)) {
+        return std::string();
+    }
+    char buf[maxSize];
+    m_fstream.read(buf, maxSize);
+    return std::string(buf);
+}
+
 std::string File::readLine()
 {
     std::string line;

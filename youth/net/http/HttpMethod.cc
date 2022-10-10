@@ -3,9 +3,12 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 
+#include <youth/core/Dir.h>
 #include <youth/core/File.hpp>
 #include <youth/net/TcpConnection.h>
 #include <youth/utils/Logging.h>
+
+#include <memory>
 
 using namespace youth::utils;
 
@@ -139,6 +142,14 @@ void HttpMethodBuilder::onRequest(const net::TcpConnectionPtr &conn,
         return;
     }
 
+    if (getFile(conn, context, resp)) {
+        return;
+    }
+
+    if (deletePath(context, resp)) {
+        return;
+    }
+
     HttpMethodFactory::defaultCall(req, resp);
 }
 
@@ -148,10 +159,14 @@ void HttpMethodBuilder::putReadyRead(const net::TcpConnectionPtr &conn, HttpCont
     if (req.method() != HttpRequest::Method::Put) {
         return;
     }
-    auto file = std::any_cast<File>(context->getMutableContext());
-    if (!file) {
-        file = new File("." + req.path());
-        if (!file->open(File::OpenMode::WriteOnly)) {
+    auto any = context->getContext();
+    LOG_INFO << "has_value: " << any.has_value();
+    std::shared_ptr<File> filePtr;
+    if (any.has_value()) {
+        filePtr = std::any_cast<const std::shared_ptr<File> &>(any);
+    } else {
+        filePtr.reset(new File("." + req.path()));
+        if (!filePtr->open(File::OpenMode::WriteOnly)) {
             HttpResponse response(true);
             response.setCloseConnection(true);
             response.setStatusCode(HttpResponse::k400BadRequest);
@@ -160,9 +175,11 @@ void HttpMethodBuilder::putReadyRead(const net::TcpConnectionPtr &conn, HttpCont
             conn->shutdown();
             return;
         }
+        context->setContext(filePtr);
     }
+
     auto buf = req.readAll();
-    file->write(buf.peek(), buf.readableBytes());
+    filePtr->write(buf.peek(), buf.readableBytes());
 }
 
 bool HttpMethodBuilder::putFinish(HttpContext *context, HttpResponse *resp)
@@ -171,17 +188,77 @@ bool HttpMethodBuilder::putFinish(HttpContext *context, HttpResponse *resp)
     if (req.method() != HttpRequest::Method::Put) {
         return false;
     }
-    auto file = std::any_cast<File>(context->getMutableContext());
-    if (file) {
+    auto filePtr = std::any_cast<const std::shared_ptr<File> &>(context->getContext());
+    if (filePtr) {
         auto buf = req.readAll();
-        file->write(buf.peek(), buf.readableBytes());
-        file->flush();
-        file->close();
-        delete file;
+        filePtr->write(buf.peek(), buf.readableBytes());
+        filePtr->flush();
+        filePtr->close();
     }
 
     resp->setStatusCode(HttpResponse::k200Ok);
     resp->setStatusMessage("OK");
+    resp->setContentType("text/plain");
+    resp->addHeader("Server", "youth");
+    resp->setCloseConnection(true);
+    return true;
+}
+
+bool HttpMethodBuilder::getFile(const net::TcpConnectionPtr &conn,
+                                HttpContext *context,
+                                HttpResponse *resp)
+{
+    const auto &req = context->request();
+    if (req.method() != HttpRequest::Method::Get) {
+        return false;
+    }
+
+    std::shared_ptr<File> filePtr(new File("." + req.path()));
+    if (!filePtr->open(File::OpenMode::ReadOnly)) {
+        resp->setStatusCode(HttpResponse::k400BadRequest);
+        resp->addHeader("Server", "youth");
+        resp->setCloseConnection(true);
+        return true;
+    }
+
+    context->setContext(filePtr);
+    conn->setWriteCompleteCallback(
+        std::bind(&HttpMethodBuilder::writeCompleteCallback, this, std::placeholders::_1));
+
+    resp->setContentLength(filePtr->size());
+    resp->setStatusCode(HttpResponse::k200Ok);
+    resp->setStatusMessage("OK");
+    resp->setContentType("text/plain");
+    resp->addHeader("Server", "youth");
+    return true;
+}
+
+void HttpMethodBuilder::writeCompleteCallback(const net::TcpConnectionPtr &conn)
+{
+    auto context = std::any_cast<HttpContext>(conn->getMutableContext());
+    auto filePtr = std::any_cast<const std::shared_ptr<File> &>(context->getContext());
+
+    auto buffer = filePtr->readMaxSize(m_bufSize);
+    conn->send(buffer);
+    if (filePtr->atEnd()) {
+        conn->shutdown();
+        LOG_INFO << "File Get - done";
+    }
+}
+
+bool HttpMethodBuilder::deletePath(HttpContext *context, HttpResponse *resp)
+{
+    const auto &req = context->request();
+    if (req.method() != HttpRequest::Method::Delete) {
+        return false;
+    }
+
+    if (Dir::remove("." + req.path())) {
+        resp->setStatusCode(HttpResponse::k200Ok);
+        resp->setStatusMessage("OK");
+    } else {
+        resp->setStatusCode(HttpResponse::k400BadRequest);
+    }
     resp->setContentType("text/plain");
     resp->addHeader("Server", "youth");
     resp->setCloseConnection(true);

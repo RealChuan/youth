@@ -46,6 +46,8 @@ public:
 
     void setBody(std::string_view body) { m_body = body; }
 
+    void setContentLength(int64_t length) { m_contentLength = length; };
+
     void appendToBuffer(net::Buffer *output) const;
 
 private:
@@ -55,6 +57,7 @@ private:
     std::string m_statusMessage;
     bool m_closeConnection;
     std::string m_body;
+    int64_t m_contentLength = -1;
 };
 
 } // namespace http
