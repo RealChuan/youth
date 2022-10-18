@@ -1,7 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-# workflow - цепочка действий
-# Имя процесса Билдится на всех типах 📦 🐍
-name: CMake Build Matrix
+name: CMake Build
 
 on: 
   push:
@@ -29,30 +26,20 @@ jobs:
         - "Ninja"
 
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get install ninja-build
-          ninja --version
-          cmake --version
-          gcc --version
-
       - name: cache vcpkg
         uses: actions/cache@v3
-        with:
-          path: /usr/local/share/vcpkg/downloads
-          key: ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-download-${{ matrix.os }}-
-            ${{ runner.os }}-vcpkg-download-
-      - uses: actions/cache@v3
         with:
           path: /usr/local/share/vcpkg/installed
           key: ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-vcpkg-installed-${{ matrix.os }}-
             ${{ runner.os }}-vcpkg-installed-
-      - name: Install libraries with vcpkg
+      - name: Install dependencies
         run: |
+          sudo apt-get install ninja-build
+          ninja --version
+          cmake --version
+          gcc --version
           vcpkg install curl[ssl,http2,tool] protobuf benchmark gtest glog breakpad
           
       - uses: actions/checkout@v3

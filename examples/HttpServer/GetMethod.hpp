@@ -9,7 +9,7 @@ class GetMethod : public HttpMethodFactory
 public:
     GetMethod()
         : m_method("GET")
-        , m_paths({"/", "/favicon.ico"})
+        , m_paths({"/", "/favicon.ico", "/GET"})
     {}
 
     virtual int methodSize() const override { return m_paths.size(); }

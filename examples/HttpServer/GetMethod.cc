@@ -89,6 +89,13 @@ void GetMethod::call(int index, const HttpRequest &req, HttpResponse *resp)
         resp->setContentType("image/png");
         resp->setBody(std::string(favicon, sizeof favicon));
         break;
+    case 2:
+        resp->setStatusCode(HttpResponse::k200Ok);
+        resp->setStatusMessage("OK");
+        resp->setContentType("text/plain");
+        resp->addHeader("Server", "youth");
+        resp->setBody("This is Http GET Method");
+        break;
     default: HttpMethodFactory::defaultCall(req, resp); break;
     }
     resp->setCloseConnection(true);
